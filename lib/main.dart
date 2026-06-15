@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/app_controller.dart';
+import 'package:selling_project/firebase_options.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/routes/app_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
- Get.put(AppController());
- await Firebase.initializeApp(
-    // options: DefaultFirebaseOptions.currentPlatform,
-  );
-
+  
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+  Get.put(AppController());
   runApp(const MyApp());
 }
-
+ 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
