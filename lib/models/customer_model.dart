@@ -12,7 +12,7 @@ class CustomerModel {
 
   factory CustomerModel.fromJson(
       Map<String,dynamic> json,
-      String id
+      String? id
   ){
     return CustomerModel(
       id: id,

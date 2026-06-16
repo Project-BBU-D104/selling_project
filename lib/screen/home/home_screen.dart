@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:selling_project/controller/home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+    HomeScreen({super.key});
+
+  final controller = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +58,7 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.people),
               title: const Text("Customers"),
               onTap: () {
-                Navigator.pop(context);
+                controller.gotoCustomerScreen();
               },
             ),
 
