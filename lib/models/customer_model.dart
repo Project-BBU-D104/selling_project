@@ -1,15 +1,22 @@
 class CustomerModel {
   String? id;
-  String name;
+  String customerName;
   String phone;
   String email;
-  String? address = '';
+  String? address;
+  bool? status;
+  DateTime? createdAt = DateTime.now();
+  DateTime? updatedAt = DateTime.now();
+
   CustomerModel({
     this.id,
-    required this.name,
+    required this.customerName,
     required this.phone,
     required this.email,
-    this.address = '',
+    this.address,
+    this.status,
+    this.createdAt,
+    this.updatedAt
   });
 
   factory CustomerModel.fromJson(
@@ -18,19 +25,25 @@ class CustomerModel {
   ){
     return CustomerModel(
       id: id,
-      name: json['name'] ?? '',
+      customerName: json['customer_name'] ?? '',
       phone: json['phone'] ?? '',
       email: json['email'] ?? '',
       address: json['address'] ?? '',
+      status: json['status'] ?? false,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
   }
 
   Map<String,dynamic> toJson(){
     return {
-      "name": name,
+      "customer_name": customerName,
       "phone": phone,
       "email": email,
       "address": address,
+      "status": status,
+      "created_at": createdAt,
+      "updated_at": updatedAt
     };
   }
 }

@@ -1,18 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:selling_project/controller/category_controller.dart';
+import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/screen/product/widget/add_product_widget.dart';
 
 class ProductScreen extends StatelessWidget {
-  const ProductScreen({super.key});
+  ProductScreen({super.key});
+
+  final ctr = Get.find<ProductController>();
+  final ctrCategory = Get.find<CategoryController>();
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Product")),
-      body: Text("This is product"),
+      body: Column(
+        children: [
+          Expanded(child: Text("This is product")),
+        ],
+      ),
 
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        showModalBottomSheet(context: context, builder: (context) => AddProductWidget());
-      }),
-    );
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => AddProductWidget(
+            categories: ctrCategory.category,
+          ),
+        );
+      },
+      child: const Icon(Icons.add),
+    ),
+  );
   }
 }

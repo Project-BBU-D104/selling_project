@@ -35,7 +35,7 @@ class CustomerScreen extends StatelessWidget {
                         final customer = ctr.customers[index];
                         return Card(
                           child: ListTile(
-                            title: Text(customer.name),
+                            title: Text(customer.customerName),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

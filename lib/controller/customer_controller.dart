@@ -24,9 +24,13 @@ class CustomerController extends GetxController {
   }
   Future<void> addCustomer() async {
     CustomerModel customer = CustomerModel(
-      name: "Dara",
+      customerName: "Dassra",
       phone: "012345678",
       email: "dara@gmail.com",
+      address: "Jakarta",
+      status: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     await service.addCustomer(customer);

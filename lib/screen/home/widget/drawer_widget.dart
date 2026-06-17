@@ -42,14 +42,14 @@ final ctr = Get.find<HomeController>();
             ),
 
             ListTile(
-              leading: const Icon(Icons.inventory),
+              leading: const Icon(Icons.sell),
               title: const Text("Products"),
               onTap: () {
                 ctr.gotoProductScreen();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.inventory),
+              leading: const Icon(Icons.category),
               title: const Text("Category"),
               onTap: () {
                 ctr.gotoCategoryScreen();
@@ -71,35 +71,35 @@ final ctr = Get.find<HomeController>();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people),
+              leading: const Icon(Icons.local_shipping),
               title: const Text("Suppliers"),
               onTap: () {
                 ctr.gotoSupplierScreen();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people),
+              leading: const Icon(Icons.payment),
               title: const Text("Payment"),
               onTap: () {
                 ctr.gotoPaymentScreen();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people),
+              leading: const Icon(Icons.shopping_bag),
               title: const Text("Purchase"),
               onTap: () {
                 ctr.gotoPurchaseScreen();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people),
+              leading: const Icon(Icons.sync_alt),
               title: const Text("Stock Adjustment"),
               onTap: () {
                 ctr.gotoStockAdjustmentScreen();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people),
+              leading: const Icon(Icons.people_alt_outlined),
               title: const Text("User"),
               onTap: () {
                 ctr.gotoUserScreen();

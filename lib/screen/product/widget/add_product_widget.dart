@@ -1,73 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:selling_project/controller/product_controller.dart';
 import '../../../models/product_model.dart';
 
-/// Example Firestore filter by selected category:
-/// ```dart
-/// FirebaseFirestore.instance
-///   .collection('products')
-///   .where('categoryId', isEqualTo: selectedCategoryId)
-///   .snapshots();
-/// ```
-class AddProductWidget extends StatefulWidget {
+class AddProductWidget extends StatelessWidget {
   final void Function(ProductModel)? onSaved;
-  final List<dynamic>? categories; // list of category objects or maps with `id` and `name`
+  final List<dynamic>? categories;
   final String? initialCategoryId;
+  final String? initialCategoryName;
 
-  const AddProductWidget({Key? key, this.onSaved, this.categories, this.initialCategoryId}) : super(key: key);
+  AddProductWidget({
+    Key? key,
+    this.onSaved,
+    this.categories,
+    this.initialCategoryId,
+    this.initialCategoryName,
+  }) : super(key: key);
 
-  @override
-  State<AddProductWidget> createState() => _AddProductWidgetState();
-}
+  final ProductController controller =
+      Get.find<ProductController>();
 
-class _AddProductWidgetState extends State<AddProductWidget> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
-  final _priceCtrl = TextEditingController();
-  final _categoryCtrl = TextEditingController();
-  String? _selectedCategoryId;
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _priceCtrl.dispose();
-    _categoryCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedCategoryId = widget.initialCategoryId;
-  }
-
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final name = _nameCtrl.text.trim();
-    final price = double.tryParse(_priceCtrl.text.trim()) ?? 0.0;
-    final categoryId = _selectedCategoryId ?? _categoryCtrl.text.trim();
+  Future<void> _submit(BuildContext context) async {
+    if (!controller.formKey.currentState!.validate()) {
+      return;
+    }
 
     final product = ProductModel(
-      id: null,
-      name: name,
-      price: price,
-      categoryId: categoryId,
+      name: controller.nameCtrl.text.trim(),
+      costPrice: double.parse(
+        controller.priceCtrl.text.trim(),
+      ),
+      salePrice: double.parse(
+        controller.priceCtrl.text.trim(),
+      ),
+      quantity: 0,
+      category: {
+        "id": controller.selectedCategoryId.value,
+        "name": controller.selectedCategoryName.value,
+      },
     );
 
-    widget.onSaved?.call(product);
+    print(product.toJson());
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Product saved')),
+    await controller.addProduct(product);
+
+    onSaved?.call(product);
+
+    Get.back();
+
+    Get.snackbar(
+      "Success",
+      "Product Saved",
     );
+
+    controller.nameCtrl.clear();
+    controller.priceCtrl.clear();
+    controller.selectedCategoryId.value = null;
+    controller.selectedCategoryName.value = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // build a safe list of dropdown items from provided categories
-    final dropdownItems = <DropdownMenuItem<String>>[];
-    for (final category in (widget.categories ?? [])) {
+    if (controller.selectedCategoryId.value == null) {
+      controller.selectedCategoryId.value =
+          initialCategoryId;
+    }
+
+    if (controller.selectedCategoryName.value == null) {
+      controller.selectedCategoryName.value =
+          initialCategoryName;
+    }
+
+    final dropdownItems =
+        <DropdownMenuItem<String>>[];
+
+    for (final category in (categories ?? [])) {
       String? id;
       String name = '';
+
       if (category is Map) {
         id = category['id']?.toString();
         name = category['name']?.toString() ?? '';
@@ -77,49 +87,121 @@ class _AddProductWidgetState extends State<AddProductWidget> {
           name = category.name?.toString() ?? '';
         } catch (_) {}
       }
-      if (id != null) dropdownItems.add(DropdownMenuItem<String>(value: id, child: Text(name)));
-    }
 
-    // if initial selected id is not present in items, clear it to avoid mismatches
-    if (_selectedCategoryId != null && !dropdownItems.any((e) => e.value == _selectedCategoryId)) {
-      _selectedCategoryId = null;
+      if (id != null) {
+        dropdownItems.add(
+          DropdownMenuItem<String>(
+            value: id,
+            child: Text(name),
+          ),
+        );
+      }
     }
 
     return Form(
-      key: _formKey,
+      key: controller.formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
         children: [
           TextFormField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(labelText: 'Name'),
-            validator: (v) => v == null || v.trim().isEmpty ? 'Enter name' : null,
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _priceCtrl,
-            decoration: const InputDecoration(labelText: 'Price'),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            controller: controller.nameCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Name',
+            ),
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Enter price';
-              if (double.tryParse(v.trim()) == null) return 'Invalid number';
+              if (v == null || v.trim().isEmpty) {
+                return 'Enter name';
+              }
               return null;
             },
           ),
+
           const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: _selectedCategoryId,
-            decoration: const InputDecoration(labelText: 'Category'),
-            isExpanded: true,
-            hint: const Text('Select category'),
-            items: dropdownItems,
-            onChanged: (value) => setState(() => _selectedCategoryId = value),
-            validator: (v) => v == null || v.isEmpty ? 'Select category' : null,
+
+          TextFormField(
+            controller: controller.priceCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Price',
+            ),
+            keyboardType:
+                const TextInputType.numberWithOptions(
+              decimal: true,
+            ),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return 'Enter price';
+              }
+
+              if (double.tryParse(
+                    v.trim(),
+                  ) ==
+                  null) {
+                return 'Invalid number';
+              }
+
+              return null;
+            },
           ),
+
+          const SizedBox(height: 8),
+
+          Obx(
+            () => DropdownButtonFormField<String>(
+              value:
+                  controller.selectedCategoryId.value,
+              decoration: const InputDecoration(
+                labelText: 'Category',
+              ),
+              isExpanded: true,
+              hint: const Text(
+                'Select category',
+              ),
+              items: dropdownItems,
+              onChanged: (value) {
+                final category =
+                    (categories ?? []).firstWhere(
+                  (e) {
+                    if (e is Map) {
+                      return e['id'].toString() ==
+                          value;
+                    }
+
+                    return e.id.toString() ==
+                        value;
+                  },
+                );
+
+                controller
+                    .selectedCategoryId.value = value;
+
+                if (category is Map) {
+                  controller
+                          .selectedCategoryName.value =
+                      category['name']
+                          .toString();
+                } else {
+                  controller
+                          .selectedCategoryName.value =
+                      category.name.toString();
+                }
+              },
+              validator: (v) {
+                if (v == null || v.isEmpty) {
+                  return 'Select category';
+                }
+                return null;
+              },
+            ),
+          ),
+
           const SizedBox(height: 16),
+
           ElevatedButton(
-            onPressed: _submit,
-            child: const Text('Save Product'),
+            onPressed: () => _submit(context),
+            child: const Text(
+              'Save Product',
+            ),
           ),
         ],
       ),
