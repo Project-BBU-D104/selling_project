@@ -50,6 +50,13 @@ final ctr = Get.find<HomeController>();
             ),
             ListTile(
               leading: const Icon(Icons.inventory),
+              title: const Text("Category"),
+              onTap: () {
+                ctr.gotoCategoryScreen();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory),
               title: const Text("Brand"),
               onTap: () {
                 ctr.gotoBrandScreen();

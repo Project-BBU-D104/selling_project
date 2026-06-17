@@ -6,6 +6,9 @@ class HomeController extends GetxController{
   void gotoBrandScreen() {
     Get.toNamed(AppRoute.brand);
   }
+  void gotoCategoryScreen() {
+    Get.toNamed(AppRoute.category);
+  }
   void gotoStockAdjustmentScreen() {
     Get.toNamed(AppRoute.stockAdjustment);
   }

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:selling_project/binding/category_binding.dart';
 import 'package:selling_project/binding/customer_binding.dart';
 import 'package:selling_project/binding/home_binding.dart';
 import 'package:selling_project/binding/supplier_binding.dart';
@@ -41,6 +42,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.category,
       page: () => CategoryScreen(),
+      binding: CategoryBinding(),
     ),
     GetPage(
       name: AppRoute.customer,
