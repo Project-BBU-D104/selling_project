@@ -1,8 +1,14 @@
 import 'package:get/get.dart';
+import 'package:selling_project/binding/brand_binding.dart';
 import 'package:selling_project/binding/category_binding.dart';
 import 'package:selling_project/binding/customer_binding.dart';
 import 'package:selling_project/binding/home_binding.dart';
+import 'package:selling_project/binding/payment_binding.dart';
+import 'package:selling_project/binding/product_binding.dart';
+import 'package:selling_project/binding/purchase_binding.dart';
+import 'package:selling_project/binding/stock_adjustment_binding.dart';
 import 'package:selling_project/binding/supplier_binding.dart';
+import 'package:selling_project/binding/user_binding.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/screen/auth/login_screen.dart';
 import 'package:selling_project/screen/brand/brand_screen.dart';
@@ -38,6 +44,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.brand,
       page: () => BrandScreen(),
+      binding: BrandBinding(),
     ),
     GetPage(
       name: AppRoute.category,
@@ -52,14 +59,17 @@ class AppScreen {
     GetPage(
       name: AppRoute.payment,
       page: () => PaymentScreen(),
+      binding: PaymentBinding(),
     ),
     GetPage(
       name: AppRoute.product,
       page: () => ProductScreen(),
+      binding: ProductBinding(),
     ),
     GetPage(
       name: AppRoute.purchase,
       page: () => PurchaseScreen(),
+      binding: PurchaseBinding(),
     ),
     GetPage(
       name: AppRoute.sale,
@@ -68,6 +78,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.stockAdjustment,
       page: () => StockAdjustmentScreen(),
+      binding: StockAdjustmentBinding(),
     ),
     GetPage(
       name: AppRoute.supplier,
@@ -77,6 +88,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.user,
       page: () => UserScreen(),
+      binding: UserBinding(),
     ),
   ];
 }

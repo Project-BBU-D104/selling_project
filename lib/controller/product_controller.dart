@@ -1,36 +1,37 @@
 import 'package:get/get.dart';
-import 'package:selling_project/models/category_model.dart';
-import 'package:selling_project/services/category_services.dart';
+import 'package:selling_project/models/product_model.dart';
+import 'package:selling_project/services/product_services.dart';
 
-class CategoryController extends GetxController {
-  final CategoryServices service = CategoryServices();
-  RxList<CategoryModel> category = <CategoryModel>[].obs;
+class ProductController extends GetxController {
+  final ProductServices service = ProductServices();
+  RxList<ProductModel> product = <ProductModel>[].obs;
   RxBool loading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    getCategories();
+    getProducts();
   }
 
-  void getCategories(){
+  void getProducts(){
 
     loading.value = true;
-    service.getCategories().listen((data){
-      category.value = data;
+    service.getProducts().listen((data){
+      product.value = data;
       loading.value = false;
     });
   }
-  Future<void> addCategory() async {
-    CategoryModel category = CategoryModel(
+  Future<void> addProduct() async {
+    ProductModel product = ProductModel(
       name: "Helo Coca",
-      description: "Hell world",
+      price: 1000,
+      categoryId: "1",
     );
 
-    await service.addCategory(category);
+    await service.addProduct(product);
   }
 
-  Future<void> deleteCategory(String id){
-    return service.deleteCategory(id);
+  Future<void> deleteProduct(String id){
+    return service.deleteProduct(id);
   }
 }

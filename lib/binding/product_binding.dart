@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
-import 'package:selling_project/controller/category_controller.dart'; 
+import 'package:selling_project/controller/product_controller.dart'; 
 
-class CategoryBinding extends Bindings {
+class ProductBinding extends Bindings {
 
   @override
   void dependencies() {
-    Get.lazyPut<CategoryController>(() => CategoryController(),
+    Get.lazyPut<ProductController>(() => ProductController(),
     );
   }
 }
