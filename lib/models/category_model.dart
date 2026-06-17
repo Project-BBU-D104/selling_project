@@ -23,9 +23,13 @@ class CategoryModel {
       id: id,
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      status: json['status'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      updatedAt: json['updated_at'] ?? '',
+      status: json['status'] ?? true,
+     createdAt: json['created_at'] != null
+    ? DateTime.parse(json['created_at'])
+    : null,
+      updatedAt: json['updated_at'] != null
+    ? DateTime.parse(json['updated_at'])
+    : null,
     );
   }
 
@@ -34,8 +38,8 @@ class CategoryModel {
       "name": name,
       "description": description,
       "status": status,
-      "created_at": createdAt,
-      "updated_at": updatedAt,
+      "created_at": createdAt?.toIso8601String(),
+      "updated_at": updatedAt?.toIso8601String(),
     };
   }
 }
