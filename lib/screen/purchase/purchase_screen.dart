@@ -6,6 +6,7 @@ class PurchaseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Purchase")),
       body: Text("This is purchase"),
     );
   }

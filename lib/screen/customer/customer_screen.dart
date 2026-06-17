@@ -8,101 +8,60 @@ class CustomerScreen extends StatelessWidget {
   CustomerScreen({super.key});
 
 
-  final CustomerController ctr =
-      Get.put(CustomerController());
-
-
+  final ctr = Get.find<CustomerController>();
+  
   @override
   Widget build(BuildContext context) {
 
-
     return Scaffold(
-
       appBar: AppBar(
         title: Text("Customers"),
       ),
-
-
       body: Obx((){
-
-
         if(ctr.loading.value){
-
           return Center(
             child: CircularProgressIndicator(),
           );
-
         }
-
-
         return ListView.builder(
-
           itemCount: ctr.customers.length,
-
           itemBuilder: (context,index){
-
-
-            final customer =
-                ctr.customers[index];
-
-
+            final customer = ctr.customers[index];
             return Card(
-
               child: ListTile(
-
                 title: Text(customer.name),
-
                 subtitle: Column(
                   crossAxisAlignment:
                     CrossAxisAlignment.start,
-
                   children: [
-
                     Text(customer.phone),
-
                     Text(customer.email),
-
                   ],
                 ),
-
-
                 trailing: IconButton(
-
                   icon: Icon(Icons.delete),
-
                   onPressed: (){
-
                     ctr.deleteCustomer(
                       customer.id!
                     );
-
                   },
-
                 ),
-
               ),
-
             );
-
           },
-
         );
-
-
       }),
+      floatingActionButton: FloatingActionButton(
 
+        child: Icon(Icons.add),
 
-      // floatingActionButton: FloatingActionButton(
+        onPressed: (){
 
-      //   child: Icon(Icons.add),
+          ctr.addCustomer();
 
-      //   onPressed: (){
+        },
 
-      //     ctr.addCustomer();
-
-      //   },
-
-      // ),
+      ),
 
     );
 

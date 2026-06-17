@@ -6,6 +6,7 @@ class UserScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("User")),
       body: Text("This is user screen"),
     );
   }

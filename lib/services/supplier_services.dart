@@ -1,17 +1,17 @@
+import 'package:selling_project/models/supplier_model.dart';
 import 'package:selling_project/services/api_services.dart';
-import 'package:selling_project/models/customer_model.dart';
-class CustomerServices {
+class SupplierServices {
 
   final ApiServices api = ApiServices();
-  final String collection = "customers";
+  final String collection = "suppliers";
 
   // GET
-  Stream<List<CustomerModel>> getCustomers() {
+  Stream<List<SupplierModel>> getSuppliers() {
     return api
         .get(collection)
         .map((data){
           return data.map((item){
-            return CustomerModel.fromJson(
+            return SupplierModel.fromJson(
               item,
               item["id"]
             );
@@ -19,26 +19,26 @@ class CustomerServices {
         });
   }
   // POST
-  Future<String> addCustomer(
-      CustomerModel customer
+  Future<String> addSupplier(
+      SupplierModel supplier
   ) async {
     return await api.post(
       collection,
-      customer.toJson()
+      supplier.toJson()
     );
   }
   // UPDATE
-  Future<void> updateCustomer(
-      CustomerModel customer
+  Future<void> updateSupplier(
+      SupplierModel supplier
   ) async {
     await api.put(
       collection,
-      customer.id!,
-      customer.toJson()
+      supplier.id!,
+      supplier.toJson()
     );
   }
   // DELETE
-  Future<void> deleteCustomer(
+  Future<void> deleteSupplier(
       String id
   ) async {
     await api.delete(

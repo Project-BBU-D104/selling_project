@@ -1,4 +1,7 @@
 import 'package:get/get.dart';
+import 'package:selling_project/binding/customer_binding.dart';
+import 'package:selling_project/binding/home_binding.dart';
+import 'package:selling_project/binding/supplier_binding.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/screen/auth/login_screen.dart';
 import 'package:selling_project/screen/brand/brand_screen.dart';
@@ -29,7 +32,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.home,
       page: () => HomeScreen(),
-      // binding: SplashBinding(),
+      binding: HomeBinding(),
     ),
     GetPage(
       name: AppRoute.brand,
@@ -42,6 +45,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.customer,
       page: () => CustomerScreen(),
+      binding: CustomerBinding(),
     ),
     GetPage(
       name: AppRoute.payment,
@@ -66,6 +70,7 @@ class AppScreen {
     GetPage(
       name: AppRoute.supplier,
       page: () => SupplierScreen(),
+      binding: SupplierBinding(),
     ),
     GetPage(
       name: AppRoute.user,

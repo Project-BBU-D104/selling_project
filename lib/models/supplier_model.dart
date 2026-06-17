@@ -1,10 +1,10 @@
-class CustomerModel {
+class SupplierModel {
   String? id;
   String name;
   String phone;
   String email;
   String? address = '';
-  CustomerModel({
+  SupplierModel({
     this.id,
     required this.name,
     required this.phone,
@@ -12,11 +12,11 @@ class CustomerModel {
     this.address = '',
   });
 
-  factory CustomerModel.fromJson(
+  factory SupplierModel.fromJson(
       Map<String,dynamic> json,
       String? id
   ){
-    return CustomerModel(
+    return SupplierModel(
       id: id,
       name: json['name'] ?? '',
       phone: json['phone'] ?? '',

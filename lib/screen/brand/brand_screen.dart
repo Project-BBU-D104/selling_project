@@ -6,6 +6,7 @@ class BrandScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Brand")),
       body: Text("This is brand"),
     );
   }
