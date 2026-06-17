@@ -1,4 +1,4 @@
-import 'package:selling_project/models/sale_model.dart';
+import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/services/api_services.dart';
 class SaleServices {
 

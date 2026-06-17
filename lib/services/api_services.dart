@@ -54,4 +54,19 @@ class ApiServices {
     .doc(id)
     .delete();
   }
+
+Future<String> postSubCollection(
+  String collection,
+  String docId,
+  String subCollection,
+  Map<String, dynamic> data,
+) async {
+  final ref = await _db
+      .collection(collection)
+      .doc(docId)
+      .collection(subCollection)
+      .add(data);
+
+  return ref.id;
+} 
 }
