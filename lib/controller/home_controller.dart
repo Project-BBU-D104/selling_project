@@ -24,8 +24,8 @@ class HomeController extends GetxController{
   void gotoProductScreen() {
     Get.toNamed(AppRoute.product);
   }
-  void gotoSaleScreen() {
-    Get.toNamed(AppRoute.sale);
+  void gotoSaleListScreen() {
+    Get.toNamed(AppRoute.saleList);
   }
   void gotoCustomerScreen() {
     Get.toNamed(AppRoute.customer);

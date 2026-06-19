@@ -21,6 +21,25 @@ class ApiServices {
     });
   }
 
+// get by id
+Future<Map<String, dynamic>?> getById(
+  String collection,
+  String id,
+) async {
+  final doc = await _db
+      .collection(collection)
+      .doc(id)
+      .get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  return {
+    "id": doc.id,
+    ...doc.data()!,
+  };
+}
   // POST
   Future<String> post(
       String collection,
@@ -54,6 +73,26 @@ class ApiServices {
     .doc(id)
     .delete();
   }
+
+  Stream<List<Map<String, dynamic>>> getSubCollection(
+  String collection,
+  String docId,
+  String subCollection,
+) {
+  return _db
+      .collection(collection)
+      .doc(docId)
+      .collection(subCollection)
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) {
+      return {
+        "id": doc.id,
+        ...doc.data(),
+      };
+    }).toList();
+  });
+}
 
 Future<String> postSubCollection(
   String collection,

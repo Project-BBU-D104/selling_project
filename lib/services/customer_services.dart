@@ -18,6 +18,24 @@ class CustomerServices {
           }).toList();
         });
   }
+Future<CustomerModel?> getCustomerById(
+  String id,
+) async {
+  final data =
+      await api.getById(
+        "customers",
+        id,
+      );
+
+  if (data == null) return null;
+
+  return CustomerModel.fromJson(
+    data,
+    data["id"],
+  );
+}
+
+
   // POST
   Future<String> addCustomer(
       CustomerModel customer

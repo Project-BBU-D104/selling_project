@@ -1,3 +1,4 @@
+import 'package:selling_project/models/sale/sale_items_model.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/services/api_services.dart';
 class SaleServices {
@@ -36,4 +37,34 @@ class SaleServices {
       id
     );
   }
+
+  Future<void> addSaleItem(
+    String saleId,
+    SaleItemModel item,
+  ) async {
+    await api.postSubCollection(
+      collection,
+      saleId,
+      "sale_items",
+      item.toJson(),
+    );
+  }
+   Stream<List<SaleItemModel>> getSaleItems(
+    String saleId,
+  ) {
+    return api
+        .getSubCollection(
+          collection,
+          saleId,
+          "sale_items",
+        )
+        .map((data) {
+      return data.map((item) {
+        return SaleItemModel.fromJson(
+          item,
+          item["id"],
+        );
+      }).toList();
+    });
+}
 }

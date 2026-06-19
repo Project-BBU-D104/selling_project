@@ -37,7 +37,7 @@ final ctr = Get.find<HomeController>();
               leading: const Icon(Icons.shopping_cart),
               title: const Text("Sale"),
               onTap: () {
-                ctr.gotoSaleScreen();
+                ctr.gotoSaleListScreen();
               },
             ),
 

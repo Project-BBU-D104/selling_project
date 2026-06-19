@@ -9,6 +9,7 @@ class AppRoute {
   static const product = '/product';
   static const purchase = '/purchase';
   static const sale = '/sale';
+  static const saleList = '/sale-list';
   static const stockAdjustment = '/stock-adjustment';
   static const supplier = '/supplier';
   static const user = '/user';
