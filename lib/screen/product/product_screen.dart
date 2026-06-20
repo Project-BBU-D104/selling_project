@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:selling_project/controller/brand_controller.dart';
 import 'package:selling_project/controller/category_controller.dart';
 import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/screen/product/widget/add_product_widget.dart';
@@ -9,7 +10,7 @@ class ProductScreen extends StatelessWidget {
 
   final ctr = Get.find<ProductController>();
   final ctrCategory = Get.find<CategoryController>();
-  
+  final ctrBrand = Get.find<BrandController>();
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,7 @@ class ProductScreen extends StatelessWidget {
           isScrollControlled: true,
           builder: (_) => AddProductWidget(
             categories: ctrCategory.category,
+             brands: ctrBrand.brands,
           ),
         );
       },

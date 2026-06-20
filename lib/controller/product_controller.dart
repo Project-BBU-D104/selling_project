@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/models/product_model.dart';
+import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/services/product_services.dart';
 
 class ProductController extends GetxController {
@@ -12,9 +12,14 @@ class ProductController extends GetxController {
 
 final nameCtrl = TextEditingController();
 final priceCtrl = TextEditingController();
+final descriptionCtrl = TextEditingController();
 
-final selectedCategoryId = RxnString();
-final selectedCategoryName = RxnString();
+RxnString selectedCategoryId = RxnString();
+RxnString selectedCategoryName = RxnString();
+
+RxnString selectedBrandId = RxnString();
+RxnString selectedBrandName = RxnString();
+
 
   @override
   void onInit() {
@@ -26,6 +31,7 @@ final selectedCategoryName = RxnString();
 void onClose() {
   nameCtrl.dispose();
   priceCtrl.dispose();
+  descriptionCtrl.dispose();
   super.onClose();
 }
   void getProducts(){

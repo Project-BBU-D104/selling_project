@@ -1,4 +1,4 @@
-import 'package:selling_project/models/product_model.dart';
+import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/services/api_services.dart';
 class ProductServices {
 

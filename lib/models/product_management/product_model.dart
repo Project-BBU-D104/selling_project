@@ -6,7 +6,9 @@ class ProductModel {
   int quantity;
   String? description;
   bool status;
-  Map<String, dynamic> category;
+  String categoryId;
+  String brandId;
+  // Map<String, dynamic> category;
   DateTime? createdAt = DateTime.now();
   DateTime? updatedAt = DateTime.now();
    
@@ -15,7 +17,8 @@ class ProductModel {
     required this.name,
     required this.costPrice,
     required this.salePrice,
-    required this.category,
+    required this.categoryId,
+    required this.brandId,
     required this.quantity,
     this.description,
     this.status = true,
@@ -34,7 +37,8 @@ class ProductModel {
       salePrice: (json['sale_price'] ?? 0).toDouble(),
       quantity: json['quantity'] ?? 0,
       description: json['description'] ?? '',
-      category: json['category'] ?? {},
+      categoryId: json['category_id'] ?? {},
+      brandId: json['brand_id'] ?? {},
       status: json['status'] ?? true,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -48,7 +52,8 @@ class ProductModel {
       "sale_price": salePrice,
       "quantity": quantity,
       "description": description,
-      "category": category,
+      "category_id": categoryId,
+      "brand_id": brandId,
       "status": status,
       "created_at": createdAt,
       "updated_at": updatedAt

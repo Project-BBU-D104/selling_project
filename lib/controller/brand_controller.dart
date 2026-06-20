@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:selling_project/models/brand_model.dart';
+import 'package:selling_project/models/product_management/brand_model.dart';
 import 'package:selling_project/services/brand_services.dart';
 
 class BrandController extends GetxController {

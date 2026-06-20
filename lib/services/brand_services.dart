@@ -1,4 +1,4 @@
-import 'package:selling_project/models/brand_model.dart';
+import 'package:selling_project/models/product_management/brand_model.dart';
 import 'package:selling_project/services/api_services.dart';
 class BrandServices {
 
