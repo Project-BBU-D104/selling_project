@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:selling_project/controller/app_controller.dart';
 import 'package:selling_project/firebase_options.dart';
 import 'package:selling_project/routes/app_route.dart';
@@ -13,10 +17,30 @@ Future<void> main() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+_initStorage();
+      await GetStorage.init();
   Get.put(AppController());
   runApp(const MyApp());
 }
  
+
+/// Init local storage on app startup
+Future<void> _initStorage() async {
+  const boxName = ".appsettings";
+  if (kIsWeb) {
+    await GetStorage.init(boxName);
+  } else if (Platform.isWindows) {
+    final dir = "${Directory.current.path}\\.config";
+    final directory = Directory(dir);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+    await GetStorage(".appsettings", dir).initStorage;
+  } else {
+    await GetStorage.init(boxName);
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

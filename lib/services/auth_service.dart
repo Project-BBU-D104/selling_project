@@ -34,7 +34,7 @@ class AuthService {
         'username': username,
         'email': email,
       });
-      print("✓ Registration successful");
+      
     } on FirebaseAuthException catch (e) {
       print("❌ Firebase Auth Error: ${e.code} - ${e.message}");
       rethrow;
@@ -45,24 +45,19 @@ class AuthService {
   }
 
   /// Login With Username
-  Future<void> login({
+  Future<User?> login({
   required String username,
   required String password,
 }) async {
   _logDebugInfo();
   await _checkNetworkConnectivity();
-  
+
   try {
     final snapshot = await firestore
         .collection('users')
-        .where(
-          'username',
-          isEqualTo: username,
-        )
+        .where('username', isEqualTo: username)
         .limit(1)
         .get();
-
-    print("Found docs: ${snapshot.docs.length}");
 
     if (snapshot.docs.isEmpty) {
       throw Exception('Username not found');
@@ -70,20 +65,16 @@ class AuthService {
 
     final email = snapshot.docs.first['email'];
 
-    print("Email: $email");
-
-    await auth.signInWithEmailAndPassword(
+    final credential =
+        await auth.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
-    print("✓ Login successful for email: $email");
-  } on FirebaseAuthException catch (e) {
-    print("❌ Firebase Auth Code: ${e.code}");
-    print("❌ Firebase Auth Message: ${e.message}");
-    print("❌ Firebase StackTrace: ${e.stackTrace}");
+
+    return credential.user;
+  } on FirebaseAuthException {
     rethrow;
   } catch (e) {
-    print("❌ Unexpected error: $e");
     rethrow;
   }
 }
@@ -94,25 +85,22 @@ class AuthService {
 
   /// Diagnostic: Check Firebase initialization and device info
   void _logDebugInfo() {
-    print("\n═══════ Firebase Debug Info ═══════");
-    print("Firebase App Initialized: ${Firebase.apps.isNotEmpty}");
+   
     if (Firebase.apps.isNotEmpty) {
       print("App Name: ${Firebase.apps[0].name}");
     }
-    print("Auth User: ${auth.currentUser?.email ?? 'None (Not signed in)'}");
-    print("════════════════════════════════════\n");
+     
   }
 
   /// Diagnostic: Check network connectivity
   Future<void> _checkNetworkConnectivity() async {
     try {
-      print("\nChecking network connectivity...");
+       
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         print("✓ Network connectivity: OK");
       }
     } on SocketException catch (_) {
-      print("❌ Network connectivity: FAILED");
       print("   Please check your internet connection!");
       rethrow;
     }
