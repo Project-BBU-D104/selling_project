@@ -1,39 +1,65 @@
-import 'package:selling_project/models/user_model.dart';
-import 'package:selling_project/services/api_services.dart';
-class UserServices {
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-  final ApiServices api = ApiServices();
-  final String collection = "users";
+class AuthService {
+  final FirebaseAuth auth =
+      FirebaseAuth.instance;
 
-  // GET
-  Stream<List<UserModel>> getUser() {
-    return api
-        .get(collection)
-        .map((data){
-          return data.map((item){
-            return UserModel.fromJson(
-              item,
-              item["id"]
-            );
-          }).toList();
-        });
+  final FirebaseFirestore firestore =
+      FirebaseFirestore.instance;
+
+  /// Register
+  Future<void> register({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
+    final credential =
+        await auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    await firestore
+        .collection('users')
+        .doc(credential.user!.uid)
+        .set({
+      'uid': credential.user!.uid,
+      'username': username,
+      'email': email,
+    });
   }
-  // POST
-  Future<String> addUser(
-      UserModel user
-  ) async {
-    return await api.post(
-      collection,
-      user.toJson()
+
+  /// Login With Username
+  Future<void> login({
+    required String username,
+    required String password,
+  }) async {
+    final snapshot = await firestore
+        .collection('users')
+        .where(
+          'username',
+          isEqualTo: username,
+        )
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      throw Exception(
+        'Username not found',
+      );
+    }
+
+    final email =
+        snapshot.docs.first['email'];
+
+    await auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
     );
   }
-  // DELETE
-  Future<void> deleteUser(
-      String id
-  ) async {
-    await api.delete(
-      collection,
-      id
-    );
+
+  Future<void> logout() async {
+    await auth.signOut();
   }
 }
