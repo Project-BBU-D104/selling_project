@@ -1,49 +1,41 @@
-class SaleItemModel {
+class PurchaseItemsModel {
   String? id;
+  String purchaseId;
   String productId;
-  String productName;
-  String categoryId;
-  String categoryName;
   int quantity;
   double unitPrice;
   double totalPrice;
-
-  SaleItemModel({
+  
+  PurchaseItemsModel({
     this.id,
+    required this.purchaseId,
     required this.productId,
-    required this.productName,
-    required this.categoryId,
-    required this.categoryName,
     required this.quantity,
     required this.unitPrice,
-    required this.totalPrice,
+    required this.totalPrice
   });
 
-  factory SaleItemModel.fromJson(
+  factory PurchaseItemsModel.fromJson(
     Map<String, dynamic> json,
     String id,
   ) {
-    return SaleItemModel(
+    return PurchaseItemsModel(
       id: id,
+      purchaseId: json["purchase_id"] ?? "",
       productId: json["product_id"] ?? "",
-      productName: json["product_name"] ?? "",
-      categoryId: json["category_id"] ?? "",
-      categoryName: json["category_name"] ?? "",
       quantity: json["quantity"] ?? 0,
-      unitPrice: (json["unit_price"] ?? 0).toDouble(),
-      totalPrice: (json["total_price"] ?? 0).toDouble(),
+      unitPrice: json["unit_price"] ?? 0.0,
+      totalPrice: json["total_price"] ?? 0.0
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      "purchase_id": purchaseId,
       "product_id": productId,
-      "product_name": productName,
-      "category_id": categoryId,
-      "category_name": categoryName,
       "quantity": quantity,
       "unit_price": unitPrice,
-      "total_price": totalPrice,
+      "total_price": totalPrice
     };
   }
 }
