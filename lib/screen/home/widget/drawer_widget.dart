@@ -1,129 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/constants/constant.dart';
 import 'package:selling_project/controller/home_controller.dart';
 
 class DrawerWidget extends StatelessWidget {
-    DrawerWidget({super.key});
-final ctr = Get.find<HomeController>();
+  DrawerWidget({super.key});
+
+  final ctr = Get.find<HomeController>();
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+      child: Column(
+        children: [
+          UserAccountsDrawerHeader(
+            decoration: const BoxDecoration(
+              color: Color(0xFF003B6D),
+            ),
+            accountName: const Text(
+              "HardwarePro Enterprise",
+            ),
+            accountEmail: const Text(
+              "Inventory Management System",
+            ),
+            currentAccountPicture: const CircleAvatar(
+              child: Icon(
+                Icons.business,
+                size: 40,
               ),
-              child: Text(
-                "Selling Project",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                ),
-              ),
             ),
+          ),
+          _menu(
+            Icons.home,
+            "Home",
+            () => Get.back(),
+          ),
+          _menu(
+            Icons.shopping_cart,
+            "Sales",
+            () => ctr.gotoSaleListScreen(),
+          ),
+          _menu(
+            Icons.sell,
+            "Products",
+            () => ctr.gotoProductScreen(),
+          ),
+          _menu(
+            Icons.category,
+            "Category",
+            () => ctr.gotoCategoryScreen(),
+          ),
+          _menu(
+            Icons.inventory,
+            "Brand",
+            () => ctr.gotoBrandScreen(),
+          ),
+          _menu(
+            Icons.people,
+            "Customers",
+            () => ctr.gotoCustomerScreen(),
+          ),
+          _menu(
+            Icons.local_shipping,
+            "Suppliers",
+            () => ctr.gotoSupplierScreen(),
+          ),
+          const Spacer(),
+          const Divider(),
+          _menu(
+            Icons.logout,
+            "Logout",
+            () => ctr.onLogout(),
+            color: Colors.red,
+          ),
+        ],
+      ),
+    );
+  }
 
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text("Home"),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.shopping_cart),
-              title: const Text("Sale"),
-              onTap: () {
-                ctr.gotoSaleListScreen();
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.sell),
-              title: const Text("Products"),
-              onTap: () {
-                ctr.gotoProductScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.category),
-              title: const Text("Category"),
-              onTap: () {
-                ctr.gotoCategoryScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text("Brand"),
-              onTap: () {
-                ctr.gotoBrandScreen();
-              },
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.people),
-              title: const Text("Customers"),
-              onTap: () {
-                ctr.gotoCustomerScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.local_shipping),
-              title: const Text("Suppliers"),
-              onTap: () {
-                ctr.gotoSupplierScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.payment),
-              title: const Text("Payment"),
-              onTap: () {
-                ctr.gotoPaymentScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.shopping_bag),
-              title: const Text("Purchase"),
-              onTap: () {
-                ctr.gotoPurchaseScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.sync_alt),
-              title: const Text("Stock Adjustment"),
-              onTap: () {
-                ctr.gotoStockAdjustmentScreen();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.people_alt_outlined),
-              title: const Text("User"),
-              onTap: () {
-                ctr.gotoUserScreen();
-              },
-            ),
-
-            const Divider(),
-
-            ListTile(
-              leading:  Icon(Icons.logout,
-                color: dangerColor,
-              ),
-              title: Text("Logout"
-                ,style: TextStyle(
-                  color: dangerColor,
-                ),
-              ),
-              onTap: () {
-                ctr.onLogout();
-                // logout
-              },
-            ),
-          ],
+  Widget _menu(
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    Color color = Colors.black,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: color,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: color,
         ),
-      );
+      ),
+      onTap: onTap,
+    );
   }
 }

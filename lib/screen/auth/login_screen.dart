@@ -1,164 +1,77 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:selling_project/controller/login_controller.dart';
-
-// class LoginScreen extends StatelessWidget {
-//   LoginScreen({super.key});
-
-//   final ctr = Get.put(LoginController());
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Center(
-//         child: Column(
-//           children: [
-//             Text('Login Screen'),
-//             ElevatedButton(onPressed: () {
-//               ctr.onLoginPressed();
-//             }, child: const Text('Login'))
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/auth_controller.dart';
+import 'widget/login_header.dart';
+import 'widget/email_field.dart';
+import 'widget/password_field.dart';
+import 'widget/login_button.dart';
+import 'widget/status_badge.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final AuthController authCtr =
-      Get.put(AuthController());
+  final authCtr = Get.put(AuthController());
 
-  final TextEditingController usernameCtr =
-      TextEditingController();
-
-  final TextEditingController passwordCtr =
-      TextEditingController();
+  final emailCtr = TextEditingController();
+  final passwordCtr = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 400,
-              ),
-              child: Card(
-                elevation: 5,
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+      backgroundColor: const Color(0xfff5f7fa),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Container(
+            width: 420,
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 15,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const LoginHeader(),
+                const SizedBox(height: 35),
+                EmailField(controller: emailCtr),
+                const SizedBox(height: 20),
+                PasswordField(controller: passwordCtr),
+                const SizedBox(height: 30),
+                LoginButton(
+                  authCtr: authCtr,
+                  emailCtr: emailCtr,
+                  passwordCtr: passwordCtr,
+                ),
+                const SizedBox(height: 30),
+                const Divider(),
+                const SizedBox(height: 20),
+                RichText(
+                  text: const TextSpan(
+                    style: TextStyle(color: Colors.black87),
                     children: [
-                      const Icon(
-                        Icons.store,
-                        size: 80,
+                      TextSpan(
+                        text: "New to HardwarePro? ",
                       ),
-
-                      const SizedBox(height: 16),
-
-                      const Text(
-                        "Computer Shop",
+                      TextSpan(
+                        text: "Create Account",
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      const Text(
-                        "Login to continue",
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      TextField(
-                        controller: usernameCtr,
-                        decoration:
-                            const InputDecoration(
-                          labelText: "Username",
-                          prefixIcon:
-                              Icon(Icons.person),
-                          border:
-                              OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      TextField(
-                        controller: passwordCtr,
-                        obscureText: true,
-                        decoration:
-                            const InputDecoration(
-                          labelText: "Password",
-                          prefixIcon:
-                              Icon(Icons.lock),
-                          border:
-                              OutlineInputBorder(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      Obx(
-                        () => SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed:
-                                authCtr.loading.value
-                                    ? null
-                                    : () {
-                                        authCtr.login(
-                                          username:
-                                              usernameCtr
-                                                  .text
-                                                  .trim(),
-                                          password:
-                                              passwordCtr
-                                                  .text
-                                                  .trim(),
-                                        );
-                                      },
-                            child:
-                                authCtr.loading.value
-                                    ? const CircularProgressIndicator()
-                                    : const Text(
-                                        "LOGIN",
-                                      ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      TextButton(
-                        onPressed: () {
-                          // Go Register Screen
-                        },
-                        child: const Text(
-                          "Create Account",
+                          color: Color(0xFF003B6D),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+                const SizedBox(height: 25),
+                const StatusBadge(),
+              ],
             ),
           ),
         ),
