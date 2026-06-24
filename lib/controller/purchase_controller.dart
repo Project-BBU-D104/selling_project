@@ -1,7 +1,7 @@
 // import 'package:get/get.dart';
 
 // class PurchaseController extends GetxController{
-  
+
 // }
 
 import 'package:get/get.dart';
@@ -10,7 +10,6 @@ import 'package:selling_project/models/purchase/purchase_model.dart';
 import 'package:selling_project/services/purchase_services.dart';
 
 class PurchaseController extends GetxController {
-
   final PurchaseServices service = PurchaseServices();
 
   RxList<PurchaseModel> purchases = <PurchaseModel>[].obs;
@@ -37,14 +36,13 @@ class PurchaseController extends GetxController {
     });
   }
 
-Future<String> addPurchase(
-  PurchaseModel purchase,
-) async {
-  return await service.addPurchase(purchase);
-}
+  Future<String> addPurchase(
+    PurchaseModel purchase,
+  ) async {
+    return await service.addPurchase(purchase);
+  }
 
-Future<void> addTestPurchase() async {
-
+  Future<void> addTestPurchase() async {
     final purchase = PurchaseModel(
       name: "Test Purchase",
       supplierId: "SUP001",
@@ -107,5 +105,4 @@ Future<void> addTestPurchase() async {
       item,
     );
   }
-
 }

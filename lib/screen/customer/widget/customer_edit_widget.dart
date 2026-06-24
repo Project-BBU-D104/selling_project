@@ -43,7 +43,7 @@ class CustomerEditWidget extends StatelessWidget {
                   const Text('ACTIVE\nACCOUNT', style: TextStyle(fontSize: 11, color: Color(0xFF2E7D32), fontWeight: FontWeight.bold, height: 1.1)),
                   const Spacer(),
                   Text(
-                    'Last updated:\n$formattedDate', // បង្ហាញថ្ងៃខែពិតប្រាកដ និងស្វ័យប្រវត្ត
+                    'Last updated:\n$formattedDate',
                     textAlign: TextAlign.end, 
                     style: TextStyle(fontSize: 12, color: Colors.grey[600], fontStyle: FontStyle.italic, height: 1.2),
                   ),

@@ -27,10 +27,6 @@ class CustomerScreen extends StatelessWidget {
           'Customer',
           style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.search, color: Color(0xFF003366)), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.notifications_none, color: Color(0xFF003366)), onPressed: () {}),
-        ],
       ),
       body: Obx(() {
         if (ctr.loading.value) {
