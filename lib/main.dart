@@ -24,7 +24,6 @@ _initStorage();
 }
  
 
-/// Init local storage on app startup
 Future<void> _initStorage() async {
   const boxName = ".appsettings";
   if (kIsWeb) {
