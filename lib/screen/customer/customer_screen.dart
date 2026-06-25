@@ -24,7 +24,7 @@ class CustomerScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         title: const Text(
-          'Customer',
+          'Customer Management',
           style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
