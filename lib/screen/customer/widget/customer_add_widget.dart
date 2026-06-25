@@ -8,7 +8,9 @@ class CustomerAddWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ctr = Get.find<CustomerController>();
-    ctr.selectedCategory.value = 'Standard';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ctr.clearForm();
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -29,15 +31,13 @@ class CustomerAddWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildField('Customer Name', 'Enter full name', Icons.person_outline, ctr.customerNameController),
+              _buildField('Customer Name *', 'Enter full name', Icons.person_outline, ctr.customerNameController),
               const SizedBox(height: 16),
-              _buildField('Company Name', 'Enter company name', Icons.domain_outlined, TextEditingController()),
-              const SizedBox(height: 16),
-              _buildField('Phone Number', '+1 555-0000', Icons.phone_outlined, ctr.phoneController),
+              _buildField('Phone Number *', '+1 555-0000', Icons.phone_outlined, ctr.phoneController),
               const SizedBox(height: 16),
               _buildField('Email Address', 'name@company.com', Icons.mail_outline, ctr.emailController),
               const SizedBox(height: 16),
-              _buildField('Address', 'Street, City, State,', Icons.location_on_outlined, ctr.addressController, maxLines: 3),
+              _buildField('Address', 'Street, City, State', Icons.location_on_outlined, ctr.addressController, maxLines: 3),
               const SizedBox(height: 20),
               
               const Text('Customer Category', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
@@ -58,18 +58,28 @@ class CustomerAddWidget extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 48,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    await ctr.addCustomer();
-                    Get.back();
-                  },
-                  icon: const Icon(Icons.save_as_outlined, color: Colors.white, size: 18),
-                  label: const Text('Save Customer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Obx(() => ElevatedButton.icon(
+                  onPressed: ctr.loading.value 
+                      ? null 
+                      : () async {
+                          if (ctr.customerNameController.text.trim().isEmpty) {
+                            Get.snackbar("Warning", "Customer Name is required", 
+                              backgroundColor: Colors.orange.withValues(alpha: 0.2));
+                            return;
+                          }
+                          await ctr.addCustomer();
+                          
+                        },
+                  icon: ctr.loading.value 
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.save_as_outlined, color: Colors.white, size: 18),
+                  label: Text(ctr.loading.value ? 'Saving...' : 'Save Customer', 
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF003E6B), 
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                ),
+                )),
               ),
               const SizedBox(height: 12),
               SizedBox(

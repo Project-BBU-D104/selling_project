@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart'; // Import ត្រឹមត្រូវ (ដោះស្រាយ Error របស់អ្នក)
+import 'package:intl/intl.dart';
 import 'package:selling_project/controller/customer_controller.dart';
 import 'package:selling_project/models/customer_model.dart';
 
@@ -57,11 +57,9 @@ class CustomerEditWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildField('Customer Name', Icons.person_outline, ctr.customerNameController),
+                  _buildField('Customer Name *', Icons.person_outline, ctr.customerNameController),
                   const SizedBox(height: 16),
-                  _buildField('Company Name', Icons.domain_outlined, ctr.addressController), 
-                  const SizedBox(height: 16),
-                  _buildField('Phone Number', Icons.phone_outlined, ctr.phoneController),
+                  _buildField('Phone Number *', Icons.phone_outlined, ctr.phoneController),
                   const SizedBox(height: 16),
                   _buildField('Email Address', Icons.mail_outline, ctr.emailController),
                   const SizedBox(height: 16),
@@ -86,18 +84,30 @@ class CustomerEditWidget extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 48,
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        await ctr.updateCustomer(customer.id!);
-                        Get.back();
-                      },
-                      icon: const Icon(Icons.save_outlined, color: Colors.white, size: 18),
-                      label: const Text('Update Customer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: Obx(() => ElevatedButton.icon(
+                      onPressed: ctr.loading.value
+                          ? null
+                          : () async {
+                              if (ctr.customerNameController.text.trim().isEmpty) {
+                                Get.snackbar("Warning", "Customer Name is required",
+                                  backgroundColor: Colors.orange.withValues(alpha: 0.2));
+                                return;
+                              }
+                              if (customer.id != null) {
+                                await ctr.updateCustomer(customer.id!);
+                                
+                              }
+                            },
+                      icon: ctr.loading.value
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.save_outlined, color: Colors.white, size: 18),
+                      label: Text(ctr.loading.value ? 'Updating...' : 'Update Customer', 
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF005293), 
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                    ),
+                    )),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(

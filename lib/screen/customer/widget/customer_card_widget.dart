@@ -78,36 +78,53 @@ class CustomerCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      constraints: const BoxConstraints(), 
-                      padding: const EdgeInsets.all(8),
-                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF005293), size: 20),
-                      onPressed: () {
-                        ctr.setCustomer(customer);
-                        Get.to(() => CustomerEditWidget(customer: customer));
-                      },
-                    ),
-                    IconButton(
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(8),
-                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                      onPressed: () {
-                        Get.defaultDialog(
-                          title: "Delete Customer",
-                          middleText: "Are you sure you want to delete ${customer.customerName} permanently?",
-                          textConfirm: "Delete",
-                          textCancel: "Cancel",
-                          confirmTextColor: Colors.white,
-                          buttonColor: Colors.red,
-                          onConfirm: () async {
-                            Get.back();
+                
+                // ==================== THREE DOTS POPUP MENU ====================
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Color(0xFF4B5563)),
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      ctr.setCustomer(customer);
+                      Get.to(() => CustomerEditWidget(customer: customer));
+                    } else if (value == 'delete') {
+                      Get.defaultDialog(
+                        title: "Delete Customer",
+                        middleText: "Are you sure you want to delete ${customer.customerName} permanently?",
+                        textConfirm: "Delete",
+                        textCancel: "Cancel",
+                        confirmTextColor: Colors.white,
+                        buttonColor: Colors.red,
+                        onConfirm: () async {
+                          Get.back();
+                          if (customer.id != null) {
                             await ctr.deleteCustomer(customer.id!);
-                          },
-                        );
-                      },
+                          }
+                        },
+                      );
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem<String>(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, color: Color(0xFF005293), size: 20),
+                          SizedBox(width: 8),
+                          Text('Edit', style: TextStyle(color: Color(0xFF111827))),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                          SizedBox(width: 8),
+                          Text('Delete', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
