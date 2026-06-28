@@ -50,6 +50,7 @@ app.*.map.json
 # Environment variables (use .env.example as template)
 /assets/.env
 
+/.config/
 .config/.appsettings.bak
 .config/.appsettings.gs
 
