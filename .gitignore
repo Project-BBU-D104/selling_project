@@ -49,3 +49,7 @@ app.*.map.json
 
 # Environment variables (use .env.example as template)
 /assets/.env
+
+.config/.appsettings.bak
+.config/.appsettings.gs
+
