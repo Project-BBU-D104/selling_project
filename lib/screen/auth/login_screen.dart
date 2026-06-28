@@ -5,7 +5,6 @@ import 'widget/login_header.dart';
 import 'widget/email_field.dart';
 import 'widget/password_field.dart';
 import 'widget/login_button.dart';
-import 'widget/status_badge.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -52,25 +51,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 const Divider(),
                 const SizedBox(height: 20),
-                RichText(
-                  text: const TextSpan(
-                    style: TextStyle(color: Colors.black87),
-                    children: [
-                      TextSpan(
-                        text: "New to HardwarePro? ",
-                      ),
-                      TextSpan(
-                        text: "Create Account",
-                        style: TextStyle(
-                          color: Color(0xFF003B6D),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 25),
-                const StatusBadge(),
               ],
             ),
           ),

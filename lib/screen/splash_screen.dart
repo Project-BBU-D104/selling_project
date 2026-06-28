@@ -52,13 +52,6 @@ class SplashScreen extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Status Text
-              const Text(
-                'Verifying credentials...',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.grey,
-                ),
-              ),
             ],
           ),
         ),
