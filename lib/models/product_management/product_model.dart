@@ -45,6 +45,12 @@ class ProductModel {
     );
   }
 
+  String? get categoryName => null;
+
+  String? get brandName => null;
+
+  String? get sku => null;
+
   Map<String,dynamic> toJson(){
     return {
       "name": name,

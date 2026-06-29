@@ -20,6 +20,10 @@ RxnString selectedCategoryName = RxnString();
 RxnString selectedBrandId = RxnString();
 RxnString selectedBrandName = RxnString();
 
+  TextEditingController get stockCtrl => TextEditingController();
+
+  TextEditingController get skuCtrl => TextEditingController();
+
 
   @override
   void onInit() {
@@ -52,4 +56,6 @@ Future<void> addProduct(
   Future<void> deleteProduct(String id){
     return service.deleteProduct(id);
   }
+
+  Future<void> updateProduct(ProductModel product) async {}
 }
