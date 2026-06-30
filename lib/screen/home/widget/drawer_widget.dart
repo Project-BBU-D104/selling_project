@@ -64,6 +64,16 @@ class DrawerWidget extends StatelessWidget {
             "Suppliers",
             () => ctr.gotoSupplierScreen(),
           ),
+          _menu(
+            Icons.person,
+            "User",
+            () => ctr.gotoUserScreen(),
+          ),
+          _menu(
+            Icons.settings,
+            "Setting",
+            () => (),
+          ),
           const Spacer(),
           const Divider(),
           _menu(

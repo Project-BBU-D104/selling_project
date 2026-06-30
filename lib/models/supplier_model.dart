@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class SupplierModel {
   String? id;
   String name;
@@ -5,8 +7,8 @@ class SupplierModel {
   String phone;
   String email;
   String? companyName;
-  bool status = true;
-  String? address = '';
+  bool status;
+  String? address;
   DateTime? createdAt;
   DateTime? updatedAt;
 
@@ -23,10 +25,7 @@ class SupplierModel {
     this.updatedAt
   });
 
-  factory SupplierModel.fromJson(
-      Map<String,dynamic> json,
-      String? id
-  ){
+  factory SupplierModel.fromJson(Map<String, dynamic> json, String? id) {
     return SupplierModel(
       id: id,
       name: json['name'] ?? '',
@@ -36,12 +35,12 @@ class SupplierModel {
       contactPerson: json['contact_person'] ?? '',
       companyName: json['company_name'] ?? '',
       status: json['status'] ?? true,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
     );
   }
 
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
       "name": name,
       "phone": phone,
@@ -50,8 +49,22 @@ class SupplierModel {
       "contact_person": contactPerson,
       "company_name": companyName,
       "status": status,
-      "created_at": createdAt,
-      "updated_at": updatedAt
+      "created_at": createdAt != null ? Timestamp.fromDate(createdAt!) : null,
+      "updated_at": updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+    
+    if (value is String) {
+      return DateTime.tryParse(value);
+    }
+    
+    return null;
   }
 }
