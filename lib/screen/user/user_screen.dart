@@ -1,104 +1,154 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/user_controller.dart';
-import 'widget/user_card_widget.dart';
-import 'widget/user_add_widget.dart';
+import 'package:selling_project/screen/user/widget/user_card_widget.dart';
+import 'package:selling_project/screen/user/widget/user_add_widget.dart';
 
 class UserScreen extends StatelessWidget {
-  const UserScreen({super.key});
+  final UserController controller = Get.put(UserController());
+
+  UserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ctr = Get.find<UserController>();
+    const Color primaryColor = Color(0xFF003354); 
+    const Color tabUnselectedBg = Color(0xFFE2ECF7); 
+    const Color tabUnselectedText = Color(0xFF4A5568);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Color(0xFF111827)),
-        title: const Text('User Management', style: TextStyle(color: Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 18)),
+        centerTitle: false,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: primaryColor),
+            onPressed: () => Get.back(),
+          ),
+        ),
+        title: const Text(
+          'User Management',
+          style: TextStyle(
+            color: Color(0xFF0D233A),
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none, color: primaryColor),
+            onPressed: () {},
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: Colors.grey.shade200,
+            height: 1,
+          ),
+        ),
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // របារស្វែងរក (Search Bar)
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 12.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFE5E7EB))),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: TextField(
-                onChanged: (val) {
-                  ctr.searchKeyword.value = val;
-                  ctr.applyFilter();
+                onChanged: (value) {
+                  controller.searchKeyword.value = value;
+                  controller.applyFilter();
                 },
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.search, color: Colors.grey),
+                decoration: InputDecoration(
                   hintText: 'Search system users...',
-                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey.shade500, size: 22),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: primaryColor, width: 1.5),
+                  ),
                 ),
               ),
             ),
           ),
-          
-          // ប្រព័ន្ធ Filter Tabs (Horizontal Scroll)
           SizedBox(
             height: 38,
-            child: ListView(
+            child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: ['All Users', 'Admins', 'Managers', 'Staff'].map((tab) {
-                return Obx(() {
-                  final isSelected = ctr.currentTab.value == tab;
-                  return GestureDetector(
-                    onTap: () => ctr.changeTab(tab),
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF004B87) : const Color(0xFFE5E7EB).withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(20),
+              child: Obx(() => Row(
+                  children: ['All Users', 'Admins', 'Managers', 'Staff'].map((tab) {
+                    bool isSelected = controller.currentTab.value == tab;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () => controller.changeTab(tab),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? primaryColor : tabUnselectedBg,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            tab,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : tabUnselectedText,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        tab,
-                        style: TextStyle(color: isSelected ? Colors.white : const Color(0xFF4B5563), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 13),
-                      ),
-                    ),
-                  );
-                });
-              }).toList(),
+                    );
+                  }).toList(),
+                )),
             ),
           ),
-          const SizedBox(height: 16),
-          
-          // បញ្ជីរាយនាម (Core Directory List View)
+          const SizedBox(height: 12),
           Expanded(
             child: Obx(() {
-              if (ctr.loading.value) {
+              if (controller.loading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (ctr.filteredUsers.isEmpty) {
-                return const Center(child: Text('No internal users found.'));
+              if (controller.filteredUsers.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.person_search, size: 48, color: Colors.grey.shade400),
+                      const SizedBox(height: 8),
+                      Text('No users found.', style: TextStyle(color: Colors.grey.shade500)),
+                    ],
+                  ),
+                );
               }
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: ctr.filteredUsers.length,
+                padding: const EdgeInsets.only(bottom: 80),
+                itemCount: controller.filteredUsers.length,
                 itemBuilder: (context, index) {
-                  return UserCard(user: ctr.filteredUsers[index]);
+                  final user = controller.filteredUsers[index];
+                  return UserCard(user: user);
                 },
               );
             }),
-          )
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF0064B0),
-        onPressed: () {
-          ctr.clearForm();
-          Get.to(() => const UserAddWidget());
-        },
-        child: const Icon(Icons.person_add_alt_1, color: Colors.white),
+        elevation: 4,
+        backgroundColor: primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onPressed: () => Get.to(() => UserAddWidget()),
+        child: const Icon(Icons.person_add_alt_1, color: Colors.white, size: 24),
       ),
     );
   }

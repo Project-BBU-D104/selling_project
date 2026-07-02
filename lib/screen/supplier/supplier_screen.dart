@@ -18,7 +18,7 @@ class SupplierScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF0064B0)),
+          icon: const Icon(Icons.menu, color: Color(0xFF0064B0)),
           onPressed: () => Get.back(),
         ),
         title: const Text(
@@ -36,7 +36,8 @@ class SupplierScreen extends StatelessWidget {
           children: [
             Obx(() {
               final total = ctr.suppliers.length;
-              final active = ctr.suppliers.where((s) => s.status == true).length;
+              final active =
+                  ctr.suppliers.where((s) => s.status == true).length;
               final inactive = total - active;
 
               return Row(
@@ -83,17 +84,28 @@ class SupplierScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFE5E7EB)),
+                                border:
+                                    Border.all(color: const Color(0xFFE5E7EB)),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('Active', style: TextStyle(color: Color(0xFF4B5563), fontSize: 14, fontWeight: FontWeight.w500)),
-                                  Text('$active', style: const TextStyle(color: Color(0xFF0064B0), fontSize: 20, fontWeight: FontWeight.bold)),
+                                  const Text('Active',
+                                      style: TextStyle(
+                                          color: Color(0xFF4B5563),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500)),
+                                  Text('$active',
+                                      style: const TextStyle(
+                                          color: Color(0xFF0064B0),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -101,17 +113,28 @@ class SupplierScreen extends StatelessWidget {
                           const SizedBox(height: 8),
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFE5E7EB)),
+                                border:
+                                    Border.all(color: const Color(0xFFE5E7EB)),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('Inactive', style: TextStyle(color: Color(0xFF4B5563), fontSize: 14, fontWeight: FontWeight.w500)),
-                                  Text('$inactive', style: const TextStyle(color: Color(0xFF0064B0), fontSize: 20, fontWeight: FontWeight.bold)),
+                                  const Text('Inactive',
+                                      style: TextStyle(
+                                          color: Color(0xFF4B5563),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500)),
+                                  Text('$inactive',
+                                      style: const TextStyle(
+                                          color: Color(0xFF0064B0),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -132,7 +155,6 @@ class SupplierScreen extends StatelessWidget {
                   color: Color(0xFF111827)),
             ),
             const SizedBox(height: 12),
-            
             Obx(() {
               if (ctr.loading.value) {
                 return const Center(

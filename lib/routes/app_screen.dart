@@ -26,6 +26,7 @@ import 'package:selling_project/screen/stock_adjustment/stock_adjustment_screen.
 import 'package:selling_project/screen/supplier/supplier_screen.dart';
 import 'package:selling_project/screen/user/user_screen.dart';
 
+
 class AppScreen {
   static final pages = [
     GetPage(

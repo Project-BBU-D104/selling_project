@@ -10,14 +10,16 @@ class UserController extends GetxController {
   RxList<UserModel> filteredUsers = <UserModel>[].obs;
   RxBool loading = false.obs;
 
-  // Form State
+  // Form Controllers
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
-  final departmentController = TextEditingController();
+  final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
+
   var selectedRole = 'Staff'.obs;
   var isUserActive = true.obs;
-  
-  // Filter Tabs State
+
+  // Tabs Filter State
   var currentTab = 'All Users'.obs;
   var searchKeyword = ''.obs;
 
@@ -38,20 +40,21 @@ class UserController extends GetxController {
 
   void applyFilter() {
     List<UserModel> temp = users;
-    
-    // ស្វែងរកតាមឈ្មោះ ឬអ៊ីមែល
+
     if (searchKeyword.value.isNotEmpty) {
-      temp = temp.where((u) => 
-        u.username!.toLowerCase().contains(searchKeyword.value.toLowerCase()) ||
-        u.email!.toLowerCase().contains(searchKeyword.value.toLowerCase())
-      ).toList();
+      temp = temp
+          .where((u) =>
+              u.fullName.toLowerCase().contains(searchKeyword.value.toLowerCase()) ||
+              (u.email ?? '').toLowerCase().contains(searchKeyword.value.toLowerCase()))
+          .toList();
     }
 
-    // ត្រងតាមប្រភេទ Tab
     if (currentTab.value == 'Admins') {
       temp = temp.where((u) => u.role == 'System Admin' || u.role == 'Chief Admin').toList();
     } else if (currentTab.value == 'Managers') {
-      temp = temp.where((u) => u.role!.contains('Manager')).toList();
+      temp = temp.where((u) => u.role.contains('Manager')).toList();
+    } else if (currentTab.value == 'Staff') {
+      temp = temp.where((u) => u.role == 'Staff').toList();
     }
 
     filteredUsers.value = temp;
@@ -63,43 +66,74 @@ class UserController extends GetxController {
   }
 
   void setEditUser(UserModel user) {
-    fullNameController.text = user.username ?? '';
+    fullNameController.text = user.fullName;
     emailController.text = user.email ?? '';
-    departmentController.text = user.department ?? '';
-    selectedRole.value = user.role ?? 'Staff';
+    phoneController.text = user.phone ?? '';
+    passwordController.text = user.password;
+    selectedRole.value = user.role;
     isUserActive.value = user.status;
   }
 
   void clearForm() {
     fullNameController.clear();
     emailController.clear();
-    departmentController.clear();
+    phoneController.clear();
+    passwordController.clear();
     selectedRole.value = 'Staff';
     isUserActive.value = true;
   }
 
-  Future<void> saveUpdatedUser(String uid) async {
+  Future<void> createUser() async {
     try {
-      UserModel updated = UserModel(
-        uid: uid,
-        username: fullNameController.text.trim(),
-        email: emailController.text.trim(),
-        department: departmentController.text.trim(),
+      loading.value = true;
+      UserModel newUser = UserModel(
+        fullName: fullNameController.text.trim(),
+        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        password: passwordController.text.trim(),
         role: selectedRole.value,
         status: isUserActive.value,
       );
-      await _service.updateUser(updated);
+
+      await _service.addUser(newUser);
+      clearForm();
       Get.back();
-      Get.snackbar("Success", "User credentials modified", backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar("Success", "User created successfully", backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      loading.value = false;
     }
   }
 
-  Future<void> removeUser(String uid) async {
+  Future<void> saveUpdatedUser(UserModel user) async {
     try {
-      await _service.deleteUser(uid);
-      Get.snackbar("Deleted", "User removed from global directory", backgroundColor: Colors.black87, colorText: Colors.white);
+      loading.value = true;
+      UserModel updated = UserModel(
+        id: user.id,
+        fullName: fullNameController.text.trim(),
+        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        password: passwordController.text.trim().isEmpty ? user.password : passwordController.text.trim(),
+        role: selectedRole.value,
+        status: isUserActive.value,
+      );
+
+      await _service.updateUser(updated);
+      clearForm();
+      Get.back();
+      Get.snackbar("Success", "User updated successfully", backgroundColor: Colors.green, colorText: Colors.white);
+    } catch (e) {
+      Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  Future<void> removeUser(String id) async {
+    try {
+      await _service.deleteUser(id);
+      Get.snackbar("Success", "Deleted user successfully", backgroundColor: Colors.black87, colorText: Colors.white);
     } catch (e) {
       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
     }

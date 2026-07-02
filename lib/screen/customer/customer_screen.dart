@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/customer_controller.dart';
 import 'package:selling_project/screen/customer/widget/customer_add_widget.dart';
-import 'package:selling_project/screen/customer/widget/customer_search_widget.dart';
 import 'package:selling_project/screen/customer/widget/customer_card_widget.dart';
 import 'package:selling_project/screen/customer/widget/customer_summary_widget.dart';
+import 'package:selling_project/screen/home/widget/drawer_widget.dart';
 
 class CustomerScreen extends StatelessWidget {
   CustomerScreen({super.key});
@@ -16,6 +16,7 @@ class CustomerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      drawer: DrawerWidget(),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -25,7 +26,10 @@ class CustomerScreen extends StatelessWidget {
         ),
         title: const Text(
           'Customer Management',
-          style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+              color: Color(0xFF003366),
+              fontWeight: FontWeight.bold,
+              fontSize: 18),
         ),
       ),
       body: Obx(() {
@@ -47,12 +51,16 @@ class CustomerScreen extends StatelessWidget {
                       children: [
                         const Text(
                           'Customer Management',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF111827)),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Manage your high-value accounts.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -67,10 +75,12 @@ class CustomerScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Search by name, phone, or ID...',
                   hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
+                  prefixIcon:
+                      const Icon(Icons.search, color: Colors.grey, size: 20),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   suffixIcon: Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Container(
@@ -80,31 +90,41 @@ class CustomerScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: PopupMenuButton<String>(
-                        icon: const Icon(Icons.tune, color: Color(0xFF4B5563), size: 18),
+                        icon: const Icon(Icons.tune,
+                            color: Color(0xFF4B5563), size: 18),
                         tooltip: 'Filter Categories',
                         offset: const Offset(0, 40),
                         onSelected: (String category) {
                           ctr.selectSingleFilter(category);
                         },
                         itemBuilder: (BuildContext context) {
-                          List<String> categories = ['All', 'Standard', 'VIP', 'Wholesale', 'Internal']; 
+                          List<String> categories = [
+                            'All',
+                            'Standard',
+                            'VIP',
+                            'Wholesale',
+                            'Internal'
+                          ];
                           return categories.map((String category) {
                             return PopupMenuItem<String>(
                               value: category,
-                              child: Text(category, style: const TextStyle(fontSize: 14)),
+                              child: Text(category,
+                                  style: const TextStyle(fontSize: 14)),
                             );
                           }).toList();
                         },
                       ),
                     ),
                   ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300)),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200)),
                 ),
               ),
-              
               const SizedBox(height: 16),
-              
               CustomerSummaryWidget(totalCustomers: ctr.customers.length),
               const SizedBox(height: 24),
               Row(
@@ -112,24 +132,30 @@ class CustomerScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'Recent Directory',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827)),
                   ),
                   TextButton(
                     onPressed: () {
                       searchTxtController.clear();
                       ctr.selectSingleFilter('All');
                     },
-                    child: const Text('View All', style: TextStyle(color: Color(0xFF0066B2), fontWeight: FontWeight.bold)),
+                    child: const Text('View All',
+                        style: TextStyle(
+                            color: Color(0xFF0066B2),
+                            fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-
               if (ctr.filteredCustomers.isEmpty)
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.only(top: 40.0),
-                    child: Text("No Customers Found", style: TextStyle(fontSize: 15, color: Colors.grey)),
+                    child: Text("No Customers Found",
+                        style: TextStyle(fontSize: 15, color: Colors.grey)),
                   ),
                 )
               else

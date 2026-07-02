@@ -1,43 +1,49 @@
 class UserModel {
-  String? uid;
-  String? username;
-  String? email;
-  String? role;
-  String? department;
-  bool status;
-  String? photoUrl;
+  final String? id;
+  final String fullName;
+  final String? email;
+  final String? phone;
+  final String password;
+  final String? department;
+  final String role;
+  final bool status;
 
   UserModel({
-    this.uid,
-    this.username,
+    this.id,
+    required this.fullName,
     this.email,
-    this.role,
+    this.phone,
     this.department,
+    required this.password,
+    required this.role,
     this.status = true,
-    this.photoUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      uid: json['id'] ?? json['uid'],
-      username: json['username'],
+      id: json['id'],
+      fullName: json['full_name'] ?? '',
       email: json['email'],
+      phone: json['phone'],
+      password: json['password'] ?? '',
       role: json['role'] ?? 'Staff',
-      department: json['department'] ?? '',
-      status: json['status'] ?? true,
-      photoUrl: json['photoUrl'],
+      department: json['department'],
+      status: json['status'] is bool
+          ? json['status']
+          : (json['status'] == 1 || json['status'] == 'true'),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'uid': uid,
-      'username': username,
+      if (id != null) 'id': id,
+      'full_name': fullName,
       'email': email,
+      'phone': phone,
+      'password': password,
       'role': role,
-      'department': department,
+      'department': department ?? 'Operations',
       'status': status,
-      'photoUrl': photoUrl,
     };
   }
 }
