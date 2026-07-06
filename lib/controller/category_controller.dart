@@ -13,24 +13,23 @@ class CategoryController extends GetxController {
     getCategories();
   }
 
-  void getCategories(){
-
+  void getCategories() {
     loading.value = true;
-    service.getCategories().listen((data){
+    service.getCategories().listen((data) {
       category.value = data;
       loading.value = false;
     });
   }
-  Future<void> addCategory() async {
-    CategoryModel category = CategoryModel(
-      name: "Helo Coca",
-      description: "Hell world",
-    );
 
-    await service.addCategory(category);
+  Future<void> addCategory(CategoryModel newCategory) async {
+    await service.addCategory(newCategory);
   }
 
-  Future<void> deleteCategory(String id){
+  Future<void> updateCategory(CategoryModel updatedCategory) async {
+    await service.updateCategory(updatedCategory);
+  }
+
+  Future<void> deleteCategory(String id) {
     return service.deleteCategory(id);
   }
 }
