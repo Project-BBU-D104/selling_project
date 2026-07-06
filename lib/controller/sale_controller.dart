@@ -7,24 +7,22 @@ import 'package:selling_project/services/sale_services.dart';
 import 'package:selling_project/services/customer_services.dart';
 
 class SaleController extends GetxController {
-
   final SaleServices service = SaleServices();
-final CustomerServices customerService =
-    CustomerServices();
+  final CustomerServices customerService = CustomerServices();
   RxBool loading = false.obs;
 
-   RxList<SaleModel> sales =
-      <SaleModel>[].obs;
+  RxList<SaleModel> sales = <SaleModel>[].obs;
 
-  RxList<SaleItemModel> saleItems =
-      <SaleItemModel>[].obs;
+  RxList<SaleItemModel> saleItems = <SaleItemModel>[].obs;
 
-      final customer =
-    Rxn<CustomerModel>();
+  final customer = Rxn<CustomerModel>();
 
-    RxBool loadingItems = false.obs;
+  RxBool loadingItems = false.obs;
 
-   @override
+  RxBool loadingCustomer = false.obs;
+  Rxn<CustomerModel> selectedCustomer = Rxn<CustomerModel>();
+
+  @override
   void onInit() {
     super.onInit();
 
@@ -33,104 +31,87 @@ final CustomerServices customerService =
     });
   }
 
-Future<void> loadCustomer(
-  String customerId,
-) async {
+  Future<void> loadCustomer(String customerId) async {
+    try {
+      loadingCustomer.value = true;
+      customer.value = null;
 
-  customer.value =
-  await customerService
-      .getCustomerById(
-        customerId,
-      );
-}
+      print("🔍 កំពុងស្វែងរក Customer ID: $customerId");
 
+      final result = await customerService.getCustomerById(customerId);
+
+      if (result != null) {
+        customer.value = result;
+        print("រកឃើញ Customer ឈ្មោះ: ${result.customerName}");
+      } else {
+        customer.value = null;
+        print(
+            "រកមិនឃើញទិន្នន័យ Customer នៅក្នុង Database ទេ! (Result is Null)");
+      }
+    } catch (e) {
+      print("មាន Error ពេលទាញទិន្នន័យ Customer: $e");
+      customer.value = null;
+    } finally {
+      loadingCustomer.value = false;
+    }
+  }
 
   void gotoSaleScreen() {
     Get.toNamed(AppRoute.sale);
   }
 
   Future<void> createSale() async {
+    if (selectedCustomer.value == null) {
+      Get.snackbar("Warning", "សូមជ្រើសរើសអតិថិជនជាមុនសិន!");
+      return;
+    }
 
     loading.value = true;
 
     try {
-
-      // Create sale document
       SaleModel sale = SaleModel(
-        invoiceNo: "INV002",
-        customerId: "UNqPzjSqpMTWTcUs1jLN",
+        invoiceNo:
+            "INV${DateTime.now().millisecondsSinceEpoch}",
+        customerId:
+            selectedCustomer.value!.id,
         userId: "USER002",
-        subtotal: 20,
-        totalAmount: 20,
+        subtotal: 1050,
+        totalAmount: 1050,
         paymentStatus: "paid",
         saleDate: DateTime.now(),
       );
 
-      String saleId =
-          await service.addSale(sale);
-
-      // Create sale item
+      String saleId = await service.addSale(sale);
       final item = [
-  SaleItemModel(
-    productId: "P001",
-    productName: "iPhone",
-    categoryId: "CAT001",
-    categoryName: "Phone",
-    quantity: 2,
-    unitPrice: 500,
-    totalPrice: 1000,
-  ),
-  SaleItemModel(
-    productId: "P002",
-    productName: "Mouse",
-    categoryId: "CAT002",
-    categoryName: "Accessories",
-    quantity: 3,
-    unitPrice: 10,
-    totalPrice: 30,
-  ),
-  SaleItemModel(
-    productId: "P003",
-    productName: "Keyboard",
-    categoryId: "CAT002",
-    categoryName: "Accessories",
-    quantity: 1,
-    unitPrice: 20,
-    totalPrice: 20,
-  ),
-];
+        SaleItemModel(
+          productId: "P001",
+          productName: "iPhone",
+          categoryId: "CAT001",
+          categoryName: "Phone",
+          quantity: 2,
+          unitPrice: 500,
+          totalPrice: 1000,
+        ),
+      ];
 
-for (final items in item) {
-  await service.addSaleItem(
-    saleId,
-    items,
-  );
-}
-      Get.snackbar(
-        "Success",
-        "Sale saved",
-      );
+      for (final items in item) {
+        await service.addSaleItem(saleId, items);
+      }
+      selectedCustomer.value = null;
 
+      Get.back();
+      Get.snackbar("Success", "Sale saved successfully");
     } catch (e) {
-
-      Get.snackbar(
-        "Error",
-        e.toString(),
-      );
-
+      Get.snackbar("Error", e.toString());
     } finally {
-
       loading.value = false;
-
     }
   }
 
   void loadSaleItems(
     String saleId,
   ) {
-    service
-        .getSaleItems(saleId)
-        .listen((data) {
+    service.getSaleItems(saleId).listen((data) {
       saleItems.value = data;
     });
   }
