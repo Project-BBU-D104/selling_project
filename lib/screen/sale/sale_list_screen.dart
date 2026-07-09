@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/sale_controller.dart';
-import 'package:selling_project/screen/sale/widget/sale_card_widget.dart';
 import 'sale_detail_screen.dart';
 
 class SaleListScreen extends StatelessWidget {
@@ -13,7 +12,9 @@ class SaleListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sales History"),
+        title: const Text("Sales History", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF004C87),
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -25,41 +26,89 @@ class SaleListScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: ctr.createSale,
                     icon: const Icon(Icons.save),
-                    label: const Text("Save Test Sale"),
+                    label: const Text("Test Save Sale"),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade200, foregroundColor: Colors.black87),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: ctr.gotoSaleScreen,
-                    icon: const Icon(Icons.add),
-                    label: const Text("New Sale Screen"),
+                    icon: const Icon(Icons.add_shopping_cart),
+                    label: const Text("POS Screen"),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004C87), foregroundColor: Colors.white),
                   ),
                 ),
               ],
             ),
           ),
+          const Divider(),
           Expanded(
             child: Obx(() {
               if (ctr.sales.isEmpty) {
-                return const Center(child: Text("No Sales Records Found"));
+                return const Center(child: Text("No Sales Recorded"));
               }
 
               return ListView.builder(
-                physics: const BouncingScrollPhysics(),
                 itemCount: ctr.sales.length,
                 itemBuilder: (context, index) {
                   final sale = ctr.sales[index];
 
-                  return SaleCardWidget(
-                    sale: sale,
-                    onTap: () async {
-                      if (sale.customerId != null) {
-                        await ctr.loadCustomer(sale.customerId!);
-                      }
-                      ctr.loadSaleItems(sale.id!);
-                      Get.to(() => SaleDetailScreen(saleId: sale.id!));
-                    },
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: sale.paymentStatus == "paid" ? Colors.green.shade50 : Colors.orange.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.receipt_long,
+                          color: sale.paymentStatus == "paid" ? Colors.green : Colors.orange,
+                        ),
+                      ),
+                      title: Text(
+                        "Invoice: ${sale.invoiceNo}",
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text("Customer ID: ${sale.customerId ?? 'N/A'}", style: TextStyle(color: Colors.grey.shade600)),
+                          Text("Date: ${sale.saleDate.toString().substring(0, 16)}", style: const TextStyle(fontSize: 12)),
+                        ],
+                      ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "\$${sale.totalAmount.toStringAsFixed(2)}",
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF004C87)),
+                          ),
+                          const SizedBox(height: 4),
+                          const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                        ],
+                      ),
+                      onTap: () async {
+                        // បើក Loading State រួចទាញទិន្នន័យមកបង្ហាញ
+                        ctr.loadingItems.value = true;
+                        if (sale.customerId != null) {
+                          await ctr.loadCustomer(sale.customerId!);
+                        } else {
+                          ctr.customer.value = null;
+                        }
+                        ctr.loadSaleItems(sale.id!);
+
+                        // រត់ទៅកាន់ផ្ទាំងលម្អិត (Review Order)
+                        Get.to(() => SaleDetailScreen(saleId: sale.id!, invoiceNo: sale.invoiceNo, totalAmount: sale.totalAmount, subtotal: sale.subtotal));
+                      },
+                    ),
                   );
                 },
               );

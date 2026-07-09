@@ -1,8 +1,8 @@
 import 'package:selling_project/models/sale/sale_items_model.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/services/api_services.dart';
-class SaleServices {
 
+class SaleServices {
   final ApiServices api = ApiServices();
   final String collection = "sale";
 

@@ -9,23 +9,17 @@ import 'package:selling_project/services/customer_services.dart';
 class SaleController extends GetxController {
   final SaleServices service = SaleServices();
   final CustomerServices customerService = CustomerServices();
+  
   RxBool loading = false.obs;
-
-  RxList<SaleModel> sales = <SaleModel>[].obs;
-
-  RxList<SaleItemModel> saleItems = <SaleItemModel>[].obs;
-
-  final customer = Rxn<CustomerModel>();
-
   RxBool loadingItems = false.obs;
 
-  RxBool loadingCustomer = false.obs;
-  Rxn<CustomerModel> selectedCustomer = Rxn<CustomerModel>();
+  RxList<SaleModel> sales = <SaleModel>[].obs;
+  RxList<SaleItemModel> saleItems = <SaleItemModel>[].obs;
+  final customer = Rxn<CustomerModel>();
 
   @override
   void onInit() {
     super.onInit();
-
     service.getSale().listen((data) {
       sales.value = data;
     });
@@ -33,26 +27,9 @@ class SaleController extends GetxController {
 
   Future<void> loadCustomer(String customerId) async {
     try {
-      loadingCustomer.value = true;
-      customer.value = null;
-
-      print("🔍 កំពុងស្វែងរក Customer ID: $customerId");
-
-      final result = await customerService.getCustomerById(customerId);
-
-      if (result != null) {
-        customer.value = result;
-        print("រកឃើញ Customer ឈ្មោះ: ${result.customerName}");
-      } else {
-        customer.value = null;
-        print(
-            "រកមិនឃើញទិន្នន័យ Customer នៅក្នុង Database ទេ! (Result is Null)");
-      }
+      customer.value = await customerService.getCustomerById(customerId);
     } catch (e) {
-      print("មាន Error ពេលទាញទិន្នន័យ Customer: $e");
       customer.value = null;
-    } finally {
-      loadingCustomer.value = false;
     }
   }
 
@@ -61,27 +38,20 @@ class SaleController extends GetxController {
   }
 
   Future<void> createSale() async {
-    if (selectedCustomer.value == null) {
-      Get.snackbar("Warning", "សូមជ្រើសរើសអតិថិជនជាមុនសិន!");
-      return;
-    }
-
     loading.value = true;
-
     try {
       SaleModel sale = SaleModel(
-        invoiceNo:
-            "INV${DateTime.now().millisecondsSinceEpoch}",
-        customerId:
-            selectedCustomer.value!.id,
+        invoiceNo: "INV002",
+        customerId: "UNqPzjSqpMTWTcUs1jLN",
         userId: "USER002",
-        subtotal: 1050,
-        totalAmount: 1050,
+        subtotal: 20,
+        totalAmount: 20,
         paymentStatus: "paid",
         saleDate: DateTime.now(),
       );
 
       String saleId = await service.addSale(sale);
+
       final item = [
         SaleItemModel(
           productId: "P001",
@@ -97,10 +67,7 @@ class SaleController extends GetxController {
       for (final items in item) {
         await service.addSaleItem(saleId, items);
       }
-      selectedCustomer.value = null;
-
-      Get.back();
-      Get.snackbar("Success", "Sale saved successfully");
+      Get.snackbar("Success", "Sale saved");
     } catch (e) {
       Get.snackbar("Error", e.toString());
     } finally {
@@ -108,11 +75,13 @@ class SaleController extends GetxController {
     }
   }
 
-  void loadSaleItems(
-    String saleId,
-  ) {
+  void loadSaleItems(String saleId) {
+    loadingItems.value = true;
     service.getSaleItems(saleId).listen((data) {
       saleItems.value = data;
+      loadingItems.value = false;
+    }, onError: (err) {
+      loadingItems.value = false;
     });
   }
 }
