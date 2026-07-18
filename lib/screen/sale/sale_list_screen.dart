@@ -96,7 +96,6 @@ class SaleListScreen extends StatelessWidget {
                         ],
                       ),
                       onTap: () async {
-                        // បើក Loading State រួចទាញទិន្នន័យមកបង្ហាញ
                         ctr.loadingItems.value = true;
                         if (sale.customerId != null) {
                           await ctr.loadCustomer(sale.customerId!);
@@ -104,8 +103,6 @@ class SaleListScreen extends StatelessWidget {
                           ctr.customer.value = null;
                         }
                         ctr.loadSaleItems(sale.id!);
-
-                        // រត់ទៅកាន់ផ្ទាំងលម្អិត (Review Order)
                         Get.to(() => SaleDetailScreen(saleId: sale.id!, invoiceNo: sale.invoiceNo, totalAmount: sale.totalAmount, subtotal: sale.subtotal));
                       },
                     ),

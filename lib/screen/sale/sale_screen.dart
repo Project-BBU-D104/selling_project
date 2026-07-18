@@ -27,43 +27,30 @@ class SaleScreen extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
       body: Stack(
         children: [
-          // ផ្នែកខាងលើ៖ បញ្ជីផលិតផល (កូដចាស់របស់អ្នក)
           Column(
             children: [
-              /* អ្នកអាចដាក់ Search Bar, Categories tabs 
-                និង GridView បង្ហាញផលិតផលរបស់អ្នកនៅត្រង់នេះ...
-              */
               const Expanded(
                 child: Center(
                   child: Text("Product Grid List View Here"),
                 ),
               ),
-              
-              // បន្ថែម Space នៅខាងក្រោមដើម្បីកុំឱ្យផលិតផលបាំងជាមួយ Bottom Bar
               const SizedBox(height: 100), 
             ],
           ),
-
-          // ផ្នែកខាងក្រោម៖ Floating Order Review Bar (តាមរូបភាពទី១ និងទី២)
           Positioned(
             bottom: 20,
             left: 16,
             right: 16,
             child: InkWell(
               onTap: () async {
-                // នៅពេលចុច៖ វានឹងដំណើរការរត់ទៅកាន់ផ្ទាំង Review Order (រូបភាពទី៣)
-                // ឧទាហរណ៍៖ ចាប់យកទិន្នន័យ customer និង items រួចរត់ទៅផ្ទាំងបន្ទាប់
                 await ctr.loadCustomer("UNqPzjSqpMTWTcUs1jLN");
-                ctr.loadSaleItems("INV002"); 
-                
-                // ប្តូរទៅកាន់ Route ឬ Screen Detail (Review Order) របស់អ្នក
-                // Get.toNamed(AppRoute.saleDetail);
+                ctr.loadSaleItems("INV002");
               },
               child: Container(
                 height: 70,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00A86B), // ពណ៌បៃតងស្អាតដូចក្នុងរូបភាពទី២
-                  borderRadius: BorderRadius.circular(35), // ធ្វើឱ្យរាងមូលទ្រវែង
+                  color: const Color(0xFF00A86B),
+                  borderRadius: BorderRadius.circular(35),
                   boxShadow: [
                     BoxShadow(
                       color: const Color(0xFF00A86B).withOpacity(0.3),
@@ -75,7 +62,6 @@ class SaleScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
-                    // Icon កន្ត្រកទិញអីវ៉ាន់ និងរង្វង់លេខសម្គាល់ចំនួនទំនិញ
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -94,7 +80,7 @@ class SaleScreen extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             child: const Text(
-                              "3", // អាចជំនួសដោយ៖ ${ctr.saleItems.length}
+                              "3",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 10,
@@ -106,8 +92,6 @@ class SaleScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(width: 20),
-                    
-                    // អត្ថបទបង្ហាញព័ត៌មានកុម្ម៉ង់បច្ចុប្បន្ន
                     const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +104,7 @@ class SaleScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "3 Items", // អាចជំនួសដោយចំនួនប្រែប្រួលតាមជាក់ស្តែង
+                          "3 Items",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -130,10 +114,8 @@ class SaleScreen extends StatelessWidget {
                       ],
                     ),
                     const Spacer(),
-                    
-                    // ផ្នែកបង្ហាញតម្លៃសរុបទឹកប្រាក់ និងប៊ូតុងព្រួញទៅមុខ
                     const Text(
-                      "\$45.00", // អាចជំនួសដោយ៖ \$${ctr.totalAmount}
+                      "\$45.00",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,

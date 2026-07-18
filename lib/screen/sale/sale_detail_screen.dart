@@ -44,7 +44,6 @@ class SaleDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ផ្នែក CUSTOMER SECTION (រូបភាពទី៣)
               const Text("CUSTOMER", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
               const SizedBox(height: 8),
               Card(
@@ -64,8 +63,6 @@ class SaleDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // ផ្នែក ITEMS LIST SECTION
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -119,20 +116,16 @@ class SaleDetailScreen extends StatelessWidget {
                   },
                 ),
               const SizedBox(height: 20),
-
-              // ផ្នែក PAYMENT METHOD (រូបភាពទី៣)
               const Text("PAYMENT METHOD", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
               const SizedBox(height: 10),
               Row(
                 children: [
                   _buildPaymentTypeCard(Icons.money, "Cash", false),
-                  _buildPaymentTypeCard(Icons.credit_card, "Card", true), // សន្មតថាជ្រើសរើសយកកាតជម្រើសពិត
+                  _buildPaymentTypeCard(Icons.credit_card, "Card", true),
                   _buildPaymentTypeCard(Icons.qr_code, "Digital", false),
                 ],
               ),
               const SizedBox(height: 20),
-
-              // ផ្នែកតម្លៃលម្អិត ORDER SUMMARY BOX
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(16)),
@@ -148,7 +141,6 @@ class SaleDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // ប៊ូតុងចុងក្រោយ CONFIRM & PAY BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -172,8 +164,6 @@ class SaleDetailScreen extends StatelessWidget {
       }),
     );
   }
-
-  // Widget ជំនួយសម្រាប់បង្កើតប៊ូតុង Payment Method
   Widget _buildPaymentTypeCard(IconData icon, String label, bool isSelected) {
     return Expanded(
       child: Container(
@@ -195,7 +185,6 @@ class SaleDetailScreen extends StatelessWidget {
     );
   }
 
-  // Widget ជំនួយសម្រាប់បង្ហាញតម្លៃជួរនីមួយៗ
   Widget _buildSummaryRow(String title, String value, {required bool isBold, double fontSize = 14, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
