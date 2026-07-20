@@ -29,7 +29,7 @@ class LoginButton extends StatelessWidget {
               ? null
               : () {
                   authCtr.login(
-                    username: emailCtr.text.trim(),
+                    email: emailCtr.text.trim(),
                     password: passwordCtr.text.trim(),
                   );
                 },

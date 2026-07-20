@@ -3,11 +3,10 @@ import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/services/auth_service.dart';
 import 'package:selling_project/services/storage_service.dart';
 
-class AuthController
-    extends GetxController {
+class AuthController extends GetxController {
   final AuthService service = AuthService();
 
-  final StorageService storage = StorageService(); 
+  final StorageService storage = StorageService();
 
   RxBool loading = false.obs;
 
@@ -39,47 +38,46 @@ class AuthController
     }
   }
 
- Future<void> login({
-  required String username,
-  required String password,
-}) async {
-  try {
-    loading.value = true;
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      loading.value = true;
 
-    final user = await service.login(
-      username: username,
-      password: password,
-    );
+      final user = await service.login(
+        email: email,
+        password: password,
+      );
 
-    if (user == null) {
-      throw Exception("User not found");
+      if (user == null) {
+        throw Exception("User not found");
+      }
+
+      await storage.lastUserLoginWrite(
+        data: {
+          "uid": user.uid,
+          "email": user.email ?? "",
+        },
+      );
+
+      await storage.appStartUpWrite(
+        route: AppRoute.home,
+      );
+
+      Get.offAllNamed(AppRoute.home);
+
+      Get.snackbar(
+        "Success",
+        "Login Success",
+      );
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        e.toString(),
+      );
+    } finally {
+      loading.value = false;
     }
-
-    await storage.lastUserLoginWrite(
-      data: {
-        "uid": user.uid,
-        "email": user.email ?? "",
-        "username": username,
-      },
-    );
-
-    await storage.appStartUpWrite(
-      route: AppRoute.home,
-    );
-
-    Get.offAllNamed(AppRoute.home);
-
-    Get.snackbar(
-      "Success",
-      "Login Success",
-    );
-  } catch (e) {
-    Get.snackbar(
-      "Error",
-      e.toString(),
-    );
-  } finally {
-    loading.value = false;
   }
-}
 }

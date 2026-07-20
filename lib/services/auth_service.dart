@@ -154,7 +154,7 @@ class AuthService {
 
   /// Login With Username
   Future<User?> login({
-    required String username,
+    required String email,
     required String password,
   }) async {
     _logDebugInfo();
@@ -163,7 +163,7 @@ class AuthService {
     try {
       final snapshot = await firestore
           .collection('users')
-          .where('username', isEqualTo: username)
+          .where('email', isEqualTo: email.trim())
           .limit(1)
           .get();
 
@@ -171,12 +171,10 @@ class AuthService {
         throw Exception("Username not found");
       }
 
-      final email =
-          snapshot.docs.first['email'];
+      final String fetchedEmail = snapshot.docs.first['email'];
 
-      final credential =
-          await auth.signInWithEmailAndPassword(
-        email: email,
+      final credential = await auth.signInWithEmailAndPassword(
+        email: fetchedEmail,
         password: password,
       );
 
