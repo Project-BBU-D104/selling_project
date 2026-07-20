@@ -1,29 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/models/user_model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:selling_project/controller/user_controller.dart';
+import 'package:selling_project/models/user_model.dart';
 
 class UserEditWidget extends StatelessWidget {
-  final UserModel user;
   final UserController controller = Get.find<UserController>();
-  final _formKey = GlobalKey<FormState>();
-
-  final List<String> roleOptions = [
-    'Staff',
-    'Logistics Manager',
-    'Sales Associate',
-    'Support Tech',
-    'System Admin',
-    'Chief Admin'
-  ];
-
-  final List<String> departmentOptions = [
-    'Operations',
-    'Logistics',
-    'Sales',
-    'Technical Support',
-    'Management'
-  ];
+  final UserModel user;
 
   UserEditWidget({super.key, required this.user});
 
@@ -32,196 +16,150 @@ class UserEditWidget extends StatelessWidget {
     const Color primaryColor = Color(0xFF003354);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        title: const Text('Edit User Details', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: primaryColor),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Edit User Profile',
-          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 18),
-        ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Full Name Input
-                    _buildInputLabel('Full Name'),
-                    TextFormField(
-                      controller: controller.fullNameController,
-                      decoration: _buildInputDecoration('Full Name', Icons.person_outline),
-                      validator: (value) => value!.trim().isEmpty ? 'Full name cannot be empty' : null,
-                    ),
-                    const SizedBox(height: 18),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Edit User Profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Center(
+              child: Column(
+                children: [
+                  Obx(() {
+                    ImageProvider? imageProvider;
 
-                    // Email Address Input
-                    _buildInputLabel('Email Address'),
-                    TextFormField(
-                      controller: controller.emailController,
-                      decoration: _buildInputDecoration('Email Address', Icons.mail_outline),
-                      validator: (value) => value!.trim().isEmpty ? 'Email cannot be empty' : null,
-                    ),
-                    const SizedBox(height: 18),
-                    _buildInputLabel('Role'),
-                    Obx(() => DropdownButtonFormField<String>(
-                          initialValue: roleOptions.contains(controller.selectedRole.value)
-                              ? controller.selectedRole.value
-                              : 'Staff',
-                          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 20),
-                          decoration: _buildInputDecoration('', Icons.shield_outlined),
-                          items: roleOptions.map((role) {
-                            return DropdownMenuItem(value: role, child: Text(role, style: const TextStyle(fontSize: 15)));
-                          }).toList(),
-                          onChanged: (val) => controller.selectedRole.value = val!,
-                        )),
-                    const SizedBox(height: 18),
-                    _buildInputLabel('Department'),
-                    DropdownButtonFormField<String>(
-                      initialValue: departmentOptions.first,
-                      icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 20),
-                      decoration: _buildInputDecoration('', Icons.business_outlined),
-                      items: departmentOptions.map((dept) {
-                        return DropdownMenuItem(value: dept, child: Text(dept, style: const TextStyle(fontSize: 15)));
-                      }).toList(),
-                      onChanged: (val) {},
-                    ),
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF4F6F8),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.info, color: Color(0xFF0066A6), size: 22),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Administrative Privileges',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1A202C)),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Changing the role to a non-admin level will immediately revoke access to global system settings and user management panels.',
-                                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.3),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                    if (controller.selectedImage.value != null) {
+                      imageProvider = FileImage(controller.selectedImage.value!);
+                    } else if (controller.existingImageUrl.value != null && controller.existingImageUrl.value!.isNotEmpty) {
+                      imageProvider = NetworkImage(controller.existingImageUrl.value!);
+                    }
+
+                    return CircleAvatar(
+                      radius: 45,
+                      backgroundColor: const Color(0xFFE2ECF7),
+                      backgroundImage: imageProvider,
+                      child: imageProvider == null
+                          ? Text(
+                              user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : 'U',
+                              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: primaryColor),
+                            )
+                          : null,
+                    );
+                  }),
+                  const SizedBox(height: 8),
+                  const Text('Profile Photo', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton(onPressed: () => _showPickerModal(context), child: const Text('Upload New')),
+                      const SizedBox(width: 8),
+                      TextButton(onPressed: () => controller.removeImage(), child: const Text('Remove', style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 24.0, top: 8.0),
-            child: Column(
+            const SizedBox(height: 20),
+
+            _buildTextField('Full Name', controller.fullNameController, Icons.person_outline),
+            const SizedBox(height: 12),
+            _buildTextField('Email Address', controller.emailController, Icons.email_outlined),
+            const SizedBox(height: 12),
+            _buildTextField('Phone Number', controller.phoneController, Icons.phone_outlined),
+            const SizedBox(height: 12),
+            _buildTextField('Password (Leave blank to keep same)', controller.passwordController, Icons.lock_outline, isPassword: true),
+            const SizedBox(height: 12),
+
+            const Text('Role', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 6),
+            Obx(() => DropdownButtonFormField<String>(
+                  initialValue: controller.selectedRole.value,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.badge_outlined, size: 20),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  items: controller.roleOptions.map((role) {
+                    return DropdownMenuItem(value: role, child: Text(role));
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) controller.selectedRole.value = val;
+                  },
+                )),
+            const SizedBox(height: 12),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // 1. ប៊ូតុង Update User
-                SizedBox(
+                const Text('System Status (Active)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Obx(() => Switch(
+                      value: controller.isUserActive.value,
+                      activeThumbColor: primaryColor,
+                      onChanged: (val) => controller.isUserActive.value = val,
+                    )),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            Obx(() => SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        controller.saveUpdatedUser(user);
-                      }
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.save_outlined, color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Text(
-                          'Update User',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                      ],
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+                    onPressed: controller.loading.value ? null : () => controller.saveUpdatedUser(user),
+                    child: controller.loading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Update User', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey.shade300),
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () => Get.back(),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Color(0xFF4A5568), fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController textController, IconData icon, {bool isPassword = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: textController,
+          obscureText: isPassword,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, size: 20),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildInputLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6.0),
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF4A5568)),
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-      prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 20),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      filled: true,
-      fillColor: Colors.white,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF003354), width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+  void _showPickerModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(leading: const Icon(Icons.photo_library), title: const Text('Gallery'), onTap: () { controller.pickImage(ImageSource.gallery); Navigator.pop(context); }),
+            ListTile(leading: const Icon(Icons.photo_camera), title: const Text('Camera'), onTap: () { controller.pickImage(ImageSource.camera); Navigator.pop(context); }),
+          ],
+        ),
       ),
     );
   }

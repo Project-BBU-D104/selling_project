@@ -1,8 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class ApiServices {
   final FirebaseFirestore _db =
       FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+Future<String> uploadImage(File file, String path) async {
+    String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+    Reference ref = _storage.ref().child('$path/$fileName');
+    
+    UploadTask uploadTask = ref.putFile(file);
+    TaskSnapshot snapshot = await uploadTask;
+
+    return await snapshot.ref.getDownloadURL();
+  }
+
   // GET
   Stream<List<Map<String,dynamic>>> get(
       String collection
@@ -107,5 +121,5 @@ Future<String> postSubCollection(
       .add(data);
 
   return ref.id;
-} 
+}
 }

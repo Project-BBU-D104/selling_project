@@ -4,19 +4,23 @@ class UserModel {
   final String? email;
   final String? phone;
   final String password;
-  final String? department;
   final String role;
   final bool status;
+  final String? imageUrl;
+  final String? createdAt;
+  final String? updatedAt;
 
   UserModel({
     this.id,
     required this.fullName,
     this.email,
     this.phone,
-    this.department,
     required this.password,
     required this.role,
     this.status = true,
+    this.imageUrl,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -27,10 +31,12 @@ class UserModel {
       phone: json['phone'],
       password: json['password'] ?? '',
       role: json['role'] ?? 'Staff',
-      department: json['department'],
       status: json['status'] is bool
           ? json['status']
           : (json['status'] == 1 || json['status'] == 'true'),
+      imageUrl: json['image_url'],
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
     );
   }
 
@@ -42,8 +48,10 @@ class UserModel {
       'phone': phone,
       'password': password,
       'role': role,
-      'department': department ?? 'Operations',
       'status': status,
+      'image_url': imageUrl,
+      'created_at': createdAt ?? DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
     };
   }
 }

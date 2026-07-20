@@ -1,5 +1,6 @@
 import 'package:selling_project/services/api_services.dart';
 import 'package:selling_project/models/user_model.dart';
+import 'dart:io';
 
 class UserService {
   final ApiServices _api = ApiServices();
@@ -9,6 +10,10 @@ class UserService {
     return _api.get(collection).map((snapshot) {
       return snapshot.map((json) => UserModel.fromJson(json)).toList();
     });
+  }
+
+  Future<String?> uploadImage(File file) async {
+    return await _api.uploadImage(file, 'user_profiles');
   }
 
   Future<void> addUser(UserModel user) async {

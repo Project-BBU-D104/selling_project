@@ -1,16 +1,21 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:selling_project/models/user_model.dart';
 import 'package:selling_project/services/user_services.dart';
 
 class UserController extends GetxController {
   final UserService _service = UserService();
+  final ImagePicker _picker = ImagePicker();
 
   RxList<UserModel> users = <UserModel>[].obs;
   RxList<UserModel> filteredUsers = <UserModel>[].obs;
   RxBool loading = false.obs;
 
-  // Form Controllers
+  var selectedImage = Rxn<File>();
+  var existingImageUrl = Rxn<String>();
+
   final fullNameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
@@ -18,15 +23,34 @@ class UserController extends GetxController {
 
   var selectedRole = 'Staff'.obs;
   var isUserActive = true.obs;
-
-  // Tabs Filter State
   var currentTab = 'All Users'.obs;
   var searchKeyword = ''.obs;
+
+  final List<String> roleOptions = [
+    'System Admin',
+    'Chief Admin',
+    'Logistics Manager',
+    'Sales Associate',
+    'Support Tech',
+    'Staff',
+  ];
 
   @override
   void onInit() {
     super.onInit();
     fetchUsers();
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source, imageQuality: 80);
+    if (image != null) {
+      selectedImage.value = File(image.path);
+    }
+  }
+
+  void removeImage() {
+    selectedImage.value = null;
+    existingImageUrl.value = null;
   }
 
   void fetchUsers() {
@@ -50,11 +74,11 @@ class UserController extends GetxController {
     }
 
     if (currentTab.value == 'Admins') {
-      temp = temp.where((u) => u.role == 'System Admin' || u.role == 'Chief Admin').toList();
+      temp = temp.where((u) => u.role.contains('Admin')).toList();
     } else if (currentTab.value == 'Managers') {
       temp = temp.where((u) => u.role.contains('Manager')).toList();
     } else if (currentTab.value == 'Staff') {
-      temp = temp.where((u) => u.role == 'Staff').toList();
+      temp = temp.where((u) => u.role == 'Staff' || u.role.contains('Associate') || u.role.contains('Tech')).toList();
     }
 
     filteredUsers.value = temp;
@@ -70,8 +94,10 @@ class UserController extends GetxController {
     emailController.text = user.email ?? '';
     phoneController.text = user.phone ?? '';
     passwordController.text = user.password;
-    selectedRole.value = user.role;
+    selectedRole.value = roleOptions.contains(user.role) ? user.role : 'Staff';
     isUserActive.value = user.status;
+    existingImageUrl.value = user.imageUrl;
+    selectedImage.value = null;
   }
 
   void clearForm() {
@@ -81,18 +107,32 @@ class UserController extends GetxController {
     passwordController.clear();
     selectedRole.value = 'Staff';
     isUserActive.value = true;
+    selectedImage.value = null;
+    existingImageUrl.value = null;
   }
 
   Future<void> createUser() async {
+    if (fullNameController.text.trim().isEmpty) {
+      Get.snackbar("Error", "Full name is required", backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
     try {
       loading.value = true;
+      String? uploadedUrl;
+
+      if (selectedImage.value != null) {
+        uploadedUrl = await _service.uploadImage(selectedImage.value!);
+      }
+
       UserModel newUser = UserModel(
         fullName: fullNameController.text.trim(),
         email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
         phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-        password: passwordController.text.trim(),
+        password: passwordController.text.trim().isEmpty ? '123456' : passwordController.text.trim(),
         role: selectedRole.value,
         status: isUserActive.value,
+        imageUrl: uploadedUrl,
       );
 
       await _service.addUser(newUser);
@@ -109,6 +149,12 @@ class UserController extends GetxController {
   Future<void> saveUpdatedUser(UserModel user) async {
     try {
       loading.value = true;
+      String? imageUrl = existingImageUrl.value;
+
+      if (selectedImage.value != null) {
+        imageUrl = await _service.uploadImage(selectedImage.value!);
+      }
+
       UserModel updated = UserModel(
         id: user.id,
         fullName: fullNameController.text.trim(),
@@ -117,6 +163,8 @@ class UserController extends GetxController {
         password: passwordController.text.trim().isEmpty ? user.password : passwordController.text.trim(),
         role: selectedRole.value,
         status: isUserActive.value,
+        imageUrl: imageUrl,
+        createdAt: user.createdAt,
       );
 
       await _service.updateUser(updated);
@@ -133,7 +181,7 @@ class UserController extends GetxController {
   Future<void> removeUser(String id) async {
     try {
       await _service.deleteUser(id);
-      Get.snackbar("Success", "Deleted user successfully", backgroundColor: Colors.black87, colorText: Colors.white);
+      Get.snackbar("Success", "User deleted successfully", backgroundColor: Colors.black87, colorText: Colors.white);
     } catch (e) {
       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
     }
