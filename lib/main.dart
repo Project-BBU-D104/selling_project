@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -10,19 +9,26 @@ import 'package:selling_project/firebase_options.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/routes/app_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-_initStorage();
-      await GetStorage.init();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  _initStorage();
+  await GetStorage.init();
   Get.put(AppController());
+
+  await dotenv.load(fileName: ".env");
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
   runApp(const MyApp());
 }
- 
 
 Future<void> _initStorage() async {
   const boxName = ".appsettings";
@@ -54,7 +60,6 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.blue,
         ),
       ),
-
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.mouse,
@@ -62,11 +67,8 @@ class MyApp extends StatelessWidget {
           PointerDeviceKind.trackpad,
         },
       ),
-
       initialRoute: AppRoute.splash,
       getPages: AppScreen.pages,
-      
     );
   }
 }
-  

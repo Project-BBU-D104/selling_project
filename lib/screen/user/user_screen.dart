@@ -23,7 +23,7 @@ class UserScreen extends StatelessWidget {
         centerTitle: false,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: primaryColor),
+            icon: const Icon(Icons.arrow_back, color: primaryColor),
             onPressed: () => Get.back(),
           ),
         ),

@@ -18,7 +18,7 @@ class SupplierScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Color(0xFF0064B0)),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF0064B0)),
           onPressed: () => Get.back(),
         ),
         title: const Text(

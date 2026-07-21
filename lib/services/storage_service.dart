@@ -1,9 +1,9 @@
-import 'package:selling_project/constants/enum.dart';
-import 'package:get_storage/get_storage.dart';
 import 'dart:convert';
-
+import 'dart:io'; // ថែម import នេះសម្រាប់ File
+import 'package:get_storage/get_storage.dart';
+import 'package:selling_project/constants/enum.dart';
 import 'package:selling_project/utils/helper.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _box = GetStorage(".appsettings");
 final _helper = Helper();
@@ -13,21 +13,25 @@ abstract class IStorageService {
   Future<void> writeStorage(StorageKey key, dynamic value);
   Future<void> removeStorage(StorageKey key);
   Future<void> removeStorageMultiple(List<StorageKey> keys);
-  //startup route
+
+  // startup route
   Future<void> appStartUpWrite({required String route});
   String get appStartUpRead;
 
-
-  //current POS Profile
+  // current POS Profile
   Future<void> lastUserLoginWrite({required Map<String, dynamic> data});
   Future<void> lastUserLoginRemove();
   Map<String, dynamic> get lastUserLoginRead;
 
-
+  // 🔹 បន្ថែម method សម្រាប់ Supabase Storage
+  Future<String?> uploadImage(File file, {String bucketName});
 }
 
 class StorageService implements IStorageService {
-  ///method get storage value
+  // Supabase Client Reference
+  final SupabaseClient _supabase = Supabase.instance.client;
+
+  /// method get storage value
   @override
   T? readStorage<T>(StorageKey key) {
     final vkey = key.toString().split('.').last; // Output: active
@@ -37,28 +41,28 @@ class StorageService implements IStorageService {
     return null;
   }
 
-  ///method write storage value
+  /// method write storage value
   @override
   Future<void> writeStorage(StorageKey key, dynamic value) async {
     final vkey = key.toString().split('.').last; // Output: active
     _box.write(vkey, value);
   }
 
-  ///method remove storage key
+  /// method remove storage key
   @override
   Future<void> removeStorage(StorageKey key) async {
     _removeStorage(key);
   }
 
-  ///method remove multiple storage keys
+  /// method remove multiple storage keys
   @override
   Future<void> removeStorageMultiple(List<StorageKey> keys) async {
     for (var k in keys) {
       await _removeStorage(k);
     }
   }
-  
-  ///method remove storage key
+
+  /// method remove storage key
   Future<void> _removeStorage(StorageKey key) async {
     final vkey = key.toString().split('.').last; // Output: active
     _box.remove(vkey);
@@ -75,15 +79,13 @@ class StorageService implements IStorageService {
     return route ?? "";
   }
 
-  //Last user login
+  // Last user login
   @override
   Future<void> lastUserLoginWrite({
     required Map<String, dynamic> data,
   }) async {
     var encryptData = _helper.onEncrypted(jsonEncode(data));
-
     await writeStorage(StorageKey.lastUserLogin, encryptData);
-   
   }
 
   @override
@@ -100,5 +102,22 @@ class StorageService implements IStorageService {
     }
     return {};
   }
-  
+
+  // 🔹 Implementation សម្រាប់ Upload រូបភាពទៅ Supabase
+  @override
+  Future<String?> uploadImage(File file, {String bucketName = 'user-images'}) async {
+    try {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      // Upload ទៅ Supabase
+      await _supabase.storage.from(bucketName).upload(fileName, file);
+
+      // ទាញយក Public URL
+      final String publicUrl = _supabase.storage.from(bucketName).getPublicUrl(fileName);
+      return publicUrl;
+    } catch (e) {
+      print("❌ Error uploading image to Supabase: $e");
+      rethrow;
+    }
+  }
 }
