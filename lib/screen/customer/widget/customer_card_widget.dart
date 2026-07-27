@@ -12,21 +12,6 @@ class CustomerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctr = Get.find<CustomerController>();
 
-    Color tagBgColor = const Color(0xFFF3F4F6);
-    Color tagTextColor = const Color(0xFF4B5563);
-    String labelTag = customer.category ?? 'Standard';
-
-    if (labelTag == 'VIP') {
-      tagBgColor = const Color(0xFFF3E8FF);
-      tagTextColor = const Color(0xFF7E22CE);
-    } else if (labelTag == 'Wholesale') {
-      tagBgColor = const Color(0xFFE0F2FE);
-      tagTextColor = const Color(0xFF0369A1);
-    } else if (labelTag == 'Internal') {
-      tagBgColor = const Color(0xFFFEF3C7);
-      tagTextColor = const Color(0xFFD97706);
-    }
-
     return Card(
       color: Colors.white,
       margin: const EdgeInsets.only(bottom: 12),
@@ -58,40 +43,52 @@ class CustomerCard extends StatelessWidget {
                         customer.customerName,
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        customer.phone,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-                      ),
+                      if (customer.phone != null && customer.phone!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          customer.phone!,
+                          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        ),
+                      ],
+                      if (customer.email != null && customer.email!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          customer.email!,
+                          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: tagBgColor,
+                    color: customer.status ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    labelTag,
-                    style: TextStyle(color: tagTextColor, fontSize: 11, fontWeight: FontWeight.bold),
+                    customer.status ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      color: customer.status ? const Color(0xFF2E7D32) : Colors.red,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 4),
                 
-                // ==================== THREE DOTS POPUP MENU ====================
+                // Action Menu
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, color: Color(0xFF4B5563)),
                   color: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   onSelected: (value) {
                     if (value == 'edit') {
-                      ctr.setCustomer(customer);
                       Get.to(() => CustomerEditWidget(customer: customer));
                     } else if (value == 'delete') {
                       Get.defaultDialog(
                         title: "Delete Customer",
-                        middleText: "Are you sure you want to delete ${customer.customerName} permanently?",
+                        middleText: "Are you sure you want to delete ${customer.customerName}?",
                         textConfirm: "Delete",
                         textCancel: "Cancel",
                         confirmTextColor: Colors.white,
@@ -130,42 +127,26 @@ class CustomerCard extends StatelessWidget {
                 ),
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1, color: Color(0xFFF3F4F6)),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Total Purchases', style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 4),
-                      Text(
-                        '\$${customer.totalPurchases?.toStringAsFixed(2) ?? "0.00"}',
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
-                      ),
-                    ],
+            if (customer.address != null && customer.address!.isNotEmpty) ...[
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Divider(height: 1, color: Color(0xFFF3F4F6)),
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      customer.address!,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                Container(width: 1, height: 32, color: const Color(0xFFE5E7EB)),
-                const SizedBox(width: 24),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Balance', style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 4),
-                      Text(
-                        '\$${customer.balance?.toStringAsFixed(2) ?? "0.00"}',
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

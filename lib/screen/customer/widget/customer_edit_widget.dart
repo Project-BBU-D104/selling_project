@@ -11,11 +11,13 @@ class CustomerEditWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ctr = Get.find<CustomerController>();
-    ctr.setCustomer(customer);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ctr.setCustomer(customer);
+    });
 
     String formattedDate = 'Not updated yet';
     if (customer.updatedAt != null) {
-      formattedDate = DateFormat('MMM dd, yyyy').format(customer.updatedAt!);
+      formattedDate = DateFormat('MMM dd, yyyy HH:mm').format(customer.updatedAt!);
     }
 
     return Scaffold(
@@ -33,14 +35,25 @@ class CustomerEditWidget extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Container(
+            Obx(() => Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(color: const Color(0xFFE8F5E9), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: ctr.customerStatus.value ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE), 
+                borderRadius: BorderRadius.circular(12)
+              ),
               child: Row(
                 children: [
-                  const Icon(Icons.circle, size: 10, color: Color(0xFF2E7D32)),
+                  Icon(Icons.circle, size: 10, color: ctr.customerStatus.value ? const Color(0xFF2E7D32) : Colors.red),
                   const SizedBox(width: 8),
-                  const Text('ACTIVE\nACCOUNT', style: TextStyle(fontSize: 11, color: Color(0xFF2E7D32), fontWeight: FontWeight.bold, height: 1.1)),
+                  Text(
+                    ctr.customerStatus.value ? 'ACTIVE\nACCOUNT' : 'INACTIVE\nACCOUNT', 
+                    style: TextStyle(
+                      fontSize: 11, 
+                      color: ctr.customerStatus.value ? const Color(0xFF2E7D32) : Colors.red, 
+                      fontWeight: FontWeight.bold, 
+                      height: 1.1
+                    )
+                  ),
                   const Spacer(),
                   Text(
                     'Last updated:\n$formattedDate',
@@ -49,8 +62,10 @@ class CustomerEditWidget extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+            )),
             const SizedBox(height: 16),
+
+            // Form Inputs
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
@@ -59,26 +74,23 @@ class CustomerEditWidget extends StatelessWidget {
                 children: [
                   _buildField('Customer Name *', Icons.person_outline, ctr.customerNameController),
                   const SizedBox(height: 16),
-                  _buildField('Phone Number *', Icons.phone_outlined, ctr.phoneController),
+                  _buildField('Phone Number', Icons.phone_outlined, ctr.phoneController),
                   const SizedBox(height: 16),
                   _buildField('Email Address', Icons.mail_outline, ctr.emailController),
                   const SizedBox(height: 16),
-                  _buildField('Shipping Address', Icons.location_on_outlined, ctr.addressController, maxLines: 3),
+                  _buildField('Address', Icons.location_on_outlined, ctr.addressController, maxLines: 3),
                   const SizedBox(height: 20),
-                  
-                  const Text('Customer Category', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
-                  const SizedBox(height: 8),
-                  
-                  Obx(() => Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildChip(ctr, 'Standard'),
-                      _buildChip(ctr, 'VIP', hasStar: true),
-                      _buildChip(ctr, 'Wholesale'),
-                      _buildChip(ctr, 'Internal'),
+                      const Text('Account Status', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
+                      Obx(() => Switch(
+                        value: ctr.customerStatus.value,
+                        activeColor: const Color(0xFF003366),
+                        onChanged: (val) => ctr.customerStatus.value = val,
+                      )),
                     ],
-                  )),
+                  ),
                   
                   const SizedBox(height: 32),
                   SizedBox(
@@ -90,12 +102,11 @@ class CustomerEditWidget extends StatelessWidget {
                           : () async {
                               if (ctr.customerNameController.text.trim().isEmpty) {
                                 Get.snackbar("Warning", "Customer Name is required",
-                                  backgroundColor: Colors.orange.withValues(alpha: 0.2));
+                                  backgroundColor: Colors.orange.withOpacity(0.2));
                                 return;
                               }
                               if (customer.id != null) {
                                 await ctr.updateCustomer(customer.id!);
-                                
                               }
                             },
                       icon: ctr.loading.value
@@ -148,26 +159,6 @@ class CustomerEditWidget extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildChip(CustomerController ctr, String label, {bool hasStar = false}) {
-    final isSelected = ctr.selectedCategory.value == label;
-    return ChoiceChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hasStar) Icon(Icons.star, size: 14, color: isSelected ? Colors.white : Colors.grey),
-          if (hasStar) const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
-      selected: isSelected,
-      selectedColor: const Color(0xFF004B87),
-      backgroundColor: Colors.white,
-      labelStyle: TextStyle(color: isSelected ? Colors.white : const Color(0xFF4B5563), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isSelected ? Colors.transparent : Colors.grey.shade300)),
-      onSelected: (selected) { if (selected) ctr.selectedCategory.value = label; },
     );
   }
 }

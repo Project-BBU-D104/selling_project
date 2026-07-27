@@ -10,14 +10,19 @@ class CustomerController extends GetxController {
   RxList<CustomerModel> filteredCustomers = <CustomerModel>[].obs;
   RxBool loading = false.obs;
 
-  var selectedCategory = 'Standard'.obs;
-  var currentSingleFilter = 'All'.obs;
   var lastSearchKeyword = ''.obs;
+  var statusFilter = 'All'.obs;
 
+  // Form Controllers
   final customerNameController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
+  final searchTxtController = TextEditingController();
+
+  TextEditingController get searchController => searchTxtController;
+
+  RxBool customerStatus = true.obs;
 
   @override
   void onInit() {
@@ -31,21 +36,30 @@ class CustomerController extends GetxController {
       customers.value = data;
       _applySearchAndFilter();
       loading.value = false;
+    }, onError: (e) {
+      loading.value = false;
+      Get.snackbar(
+        "Error Loading Data",
+        e.toString(),
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
+        colorText: Colors.red[800],
+      );
     });
   }
-  
+
   Future<void> addCustomer() async {
     loading.value = true;
     try {
+      final now = DateTime.now();
       CustomerModel customer = CustomerModel(
         customerName: customerNameController.text.trim(),
-        phone: phoneController.text.trim(),
-        email: emailController.text.trim(),
-        address: addressController.text.trim(),
-        status: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        category: selectedCategory.value,
+        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        address: addressController.text.trim().isEmpty ? null : addressController.text.trim(),
+        status: customerStatus.value,
+        createdAt: now,
+        updatedAt: now,
       );
 
       await service.addCustomer(customer);
@@ -77,12 +91,11 @@ class CustomerController extends GetxController {
       CustomerModel customer = CustomerModel(
         id: id,
         customerName: customerNameController.text.trim(),
-        phone: phoneController.text.trim(),
-        email: emailController.text.trim(),
-        address: addressController.text.trim(),
-        status: true,
+        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        address: addressController.text.trim().isEmpty ? null : addressController.text.trim(),
+        status: customerStatus.value,
         updatedAt: DateTime.now(),
-        category: selectedCategory.value,
       );
 
       await service.updateCustomer(customer);
@@ -131,10 +144,10 @@ class CustomerController extends GetxController {
 
   void setCustomer(CustomerModel customer) {
     customerNameController.text = customer.customerName;
-    phoneController.text = customer.phone;
-    emailController.text = customer.email;
+    phoneController.text = customer.phone ?? '';
+    emailController.text = customer.email ?? '';
     addressController.text = customer.address ?? '';
-    selectedCategory.value = customer.category ?? 'Standard';
+    customerStatus.value = customer.status;
   }
 
   void clearForm() {
@@ -142,15 +155,7 @@ class CustomerController extends GetxController {
     phoneController.clear();
     emailController.clear();
     addressController.clear();
-    selectedCategory.value = 'Standard';
-  }
-
-  void selectSingleFilter(String category) {
-    currentSingleFilter.value = category;
-    if (category == 'All') {
-      lastSearchKeyword.value = '';
-    }
-    _applySearchAndFilter();
+    customerStatus.value = true;
   }
 
   void searchCustomer(String keyword) {
@@ -158,18 +163,27 @@ class CustomerController extends GetxController {
     _applySearchAndFilter();
   }
 
+  void filterByStatus(String status) {
+    statusFilter.value = status;
+    _applySearchAndFilter();
+  }
+
   void _applySearchAndFilter() {
-    List<CustomerModel> tempResults = customers;
+    List<CustomerModel> tempResults = List.from(customers);
+
     if (lastSearchKeyword.value.isNotEmpty) {
+      String query = lastSearchKeyword.value.toLowerCase();
       tempResults = tempResults.where((customer) {
-        return customer.customerName.toLowerCase().contains(lastSearchKeyword.value.toLowerCase()) ||
-            customer.phone.contains(lastSearchKeyword.value);
+        final matchesName = customer.customerName.toLowerCase().contains(query);
+        final matchesPhone = customer.phone?.contains(query) ?? false;
+        final matchesEmail = customer.email?.toLowerCase().contains(query) ?? false;
+        return matchesName || matchesPhone || matchesEmail;
       }).toList();
     }
-    if (currentSingleFilter.value != 'All') {
-      tempResults = tempResults.where((customer) {
-        return customer.category == currentSingleFilter.value;
-      }).toList();
+    if (statusFilter.value == 'Active') {
+      tempResults = tempResults.where((c) => c.status == true).toList();
+    } else if (statusFilter.value == 'Inactive') {
+      tempResults = tempResults.where((c) => c.status == false).toList();
     }
 
     filteredCustomers.value = tempResults;
@@ -181,6 +195,7 @@ class CustomerController extends GetxController {
     phoneController.dispose();
     emailController.dispose();
     addressController.dispose();
+    searchTxtController.dispose();
     super.onClose();
   }
 }

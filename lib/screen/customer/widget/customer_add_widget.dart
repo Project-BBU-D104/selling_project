@@ -21,62 +21,65 @@ class CustomerAddWidget extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF003366)),
           onPressed: () => Get.back(),
         ),
-        title: const Text('Add Customer', style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Add New Customer',
+          style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.bold),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildField('Customer Name *', 'Enter full name', Icons.person_outline, ctr.customerNameController),
+              _buildField('Customer Name *', Icons.person_outline, ctr.customerNameController),
               const SizedBox(height: 16),
-              _buildField('Phone Number *', '+1 555-0000', Icons.phone_outlined, ctr.phoneController),
+              _buildField('Phone Number', Icons.phone_outlined, ctr.phoneController, keyboardType: TextInputType.phone),
               const SizedBox(height: 16),
-              _buildField('Email Address', 'name@company.com', Icons.mail_outline, ctr.emailController),
+              _buildField('Email Address', Icons.mail_outline, ctr.emailController, keyboardType: TextInputType.emailAddress),
               const SizedBox(height: 16),
-              _buildField('Address', 'Street, City, State', Icons.location_on_outlined, ctr.addressController, maxLines: 3),
+              _buildField('Address', Icons.location_on_outlined, ctr.addressController, maxLines: 3),
               const SizedBox(height: 20),
-              
-              const Text('Customer Category', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
-              const SizedBox(height: 8),
-              
-              Obx(() => Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildChip(ctr, 'Standard', hasStar: true),
-                  _buildChip(ctr, 'VIP'),
-                  _buildChip(ctr, 'Wholesale'),
-                  _buildChip(ctr, 'Internal'),
+                  const Text('Account Status', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF4B5563))),
+                  Obx(() => Switch(
+                    value: ctr.customerStatus.value,
+                    activeColor: const Color(0xFF003366),
+                    onChanged: (val) => ctr.customerStatus.value = val,
+                  )),
                 ],
-              )),
-              
+              ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: Obx(() => ElevatedButton.icon(
-                  onPressed: ctr.loading.value 
-                      ? null 
+                  onPressed: ctr.loading.value
+                      ? null
                       : () async {
                           if (ctr.customerNameController.text.trim().isEmpty) {
-                            Get.snackbar("Warning", "Customer Name is required", 
-                              backgroundColor: Colors.orange.withValues(alpha: 0.2));
+                            Get.snackbar("Warning", "Customer Name is required",
+                                backgroundColor: Colors.orange.withOpacity(0.2));
                             return;
                           }
                           await ctr.addCustomer();
-                          
                         },
-                  icon: ctr.loading.value 
+                  icon: ctr.loading.value
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Icon(Icons.save_as_outlined, color: Colors.white, size: 18),
-                  label: Text(ctr.loading.value ? 'Saving...' : 'Save Customer', 
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      : const Icon(Icons.add, color: Colors.white, size: 20),
+                  label: Text(
+                    ctr.loading.value ? 'Saving...' : 'Save Customer',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF003E6B), 
+                    backgroundColor: const Color(0xFF005293),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                 )),
@@ -88,10 +91,10 @@ class CustomerAddWidget extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => Get.back(),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey.shade300), 
+                    side: BorderSide(color: Colors.grey.shade300),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('Discard', style: TextStyle(color: Color(0xFF4B5563), fontWeight: FontWeight.w500)),
+                  child: const Text('Cancel', style: TextStyle(color: Color(0xFF4B5563), fontWeight: FontWeight.w500)),
                 ),
               ),
             ],
@@ -101,7 +104,13 @@ class CustomerAddWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildField(String label, String hint, IconData icon, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildField(
+    String label, 
+    IconData icon, 
+    TextEditingController controller, {
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -110,9 +119,8 @@ class CustomerAddWidget extends StatelessWidget {
         TextField(
           controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
             prefixIcon: Icon(icon, color: Colors.grey),
             contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
@@ -120,26 +128,6 @@ class CustomerAddWidget extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildChip(CustomerController ctr, String label, {bool hasStar = false}) {
-    final isSelected = ctr.selectedCategory.value == label;
-    return ChoiceChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (hasStar) Icon(Icons.star, size: 14, color: isSelected ? Colors.white : Colors.grey),
-          if (hasStar) const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
-      selected: isSelected,
-      selectedColor: const Color(0xFF004B87),
-      backgroundColor: Colors.white,
-      labelStyle: TextStyle(color: isSelected ? Colors.white : const Color(0xFF4B5563), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isSelected ? Colors.transparent : Colors.grey.shade300)),
-      onSelected: (selected) { if (selected) ctr.selectedCategory.value = label; },
     );
   }
 }
