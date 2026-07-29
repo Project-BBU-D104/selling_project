@@ -22,7 +22,7 @@ class SaleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Review Order", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("Invoice #$invoiceNo", style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0.5,
@@ -44,6 +44,7 @@ class SaleDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Customer Section
               const Text("CUSTOMER", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
               const SizedBox(height: 8),
               Card(
@@ -59,17 +60,20 @@ class SaleDetailScreen extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(customer != null ? "Phone: ${customer.phone}" : "No Account ID"),
-                  trailing: const Icon(Icons.edit, size: 20, color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Items Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text("ITEMS (${ctr.saleItems.length})", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
-                  TextButton(onPressed: () {}, child: const Text("+ Add Items", style: TextStyle(fontSize: 12))),
                 ],
               ),
+              const SizedBox(height: 8),
+
+              // Items List
               if (ctr.saleItems.isEmpty)
                 const Card(
                   child: Padding(
@@ -92,23 +96,35 @@ class SaleDetailScreen extends StatelessWidget {
                         child: Row(
                           children: [
                             Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                              child: const Icon(Icons.image, color: Colors.grey),
+                              width: 45,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF004C87)),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.productName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                  Text(
+                                    item.productName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
                                   const SizedBox(height: 4),
-                                  Text("${item.quantity} Unit • \$${item.unitPrice.toStringAsFixed(2)}", style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                                  Text(
+                                    "${item.quantity} x \$${item.unitPrice.toStringAsFixed(2)}",
+                                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                                  ),
                                 ],
                               ),
                             ),
-                            Text("\$${item.totalPrice.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            Text(
+                              "\$${item.totalPrice.toStringAsFixed(2)}",
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
                           ],
                         ),
                       ),
@@ -116,54 +132,61 @@ class SaleDetailScreen extends StatelessWidget {
                   },
                 ),
               const SizedBox(height: 20),
+
+              // Payment Method
               const Text("PAYMENT METHOD", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
               const SizedBox(height: 10),
               Row(
                 children: [
-                  _buildPaymentTypeCard(Icons.money, "Cash", false),
-                  _buildPaymentTypeCard(Icons.credit_card, "Card", true),
+                  _buildPaymentTypeCard(Icons.money, "Cash", true),
+                  _buildPaymentTypeCard(Icons.credit_card, "Card", false),
                   _buildPaymentTypeCard(Icons.qr_code, "Digital", false),
                 ],
               ),
               const SizedBox(height: 20),
+
+              // Summary
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
                 child: Column(
                   children: [
                     _buildSummaryRow("Subtotal", "\$${subtotal.toStringAsFixed(2)}", isBold: false),
-                    _buildSummaryRow("Tax (8.25%)", "\$${(subtotal * 0.0825).toStringAsFixed(2)}", isBold: false),
                     _buildSummaryRow("Discount", "-\$0.00", isBold: false, color: Colors.red),
                     const Divider(height: 24),
-                    _buildSummaryRow("Total Amount", "\$${totalAmount.toStringAsFixed(2)}", isBold: true, fontSize: 22, color: const Color(0xFF004C87)),
+                    _buildSummaryRow("Total Amount", "\$${totalAmount.toStringAsFixed(2)}", isBold: true, fontSize: 18, color: const Color(0xFF004C87)),
                   ],
                 ),
               ),
               const SizedBox(height: 25),
 
+              // Confirm Button
               SizedBox(
                 width: double.infinity,
-                height: 55,
+                height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Get.snackbar("Invoice Status", "This order is successfully processed.");
+                    Get.snackbar("Invoice Status", "This order is recorded successfully.");
                   },
-                  icon: const Icon(Icons.verified_user, color: Colors.white),
-                  label: const Text("Confirm & Pay", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                  label: const Text("Completed Order", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF004C87),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              const Center(child: Text("Processing through Secure Gateway V2.1", style: TextStyle(color: Colors.grey, fontSize: 11))),
             ],
           ),
         );
       }),
     );
   }
+
   Widget _buildPaymentTypeCard(IconData icon, String label, bool isSelected) {
     return Expanded(
       child: Container(
@@ -172,13 +195,22 @@ class SaleDetailScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.shade50 : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF004C87) : Colors.grey.shade300, width: isSelected ? 2 : 1),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF004C87) : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
         ),
         child: Column(
           children: [
             Icon(icon, color: isSelected ? const Color(0xFF004C87) : Colors.black54),
             const SizedBox(height: 6),
-            Text(label, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: isSelected ? const Color(0xFF004C87) : Colors.black87)),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF004C87) : Colors.black87,
+              ),
+            ),
           ],
         ),
       ),
@@ -191,7 +223,7 @@ class SaleDetailScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: color != Colors.red ? Colors.black54 : Colors.red)),
+          Text(title, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: Colors.grey.shade700)),
           Text(value, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: color ?? Colors.black87)),
         ],
       ),

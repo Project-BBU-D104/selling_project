@@ -1,422 +1,254 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:selling_project/controller/product_controller.dart';
-// import '../../../../models/product_management/brand_model.dart';
-// import '../../../../models/product_management/category_model.dart';
-// import '../../../../models/product_management/product_model.dart';
-// import 'product_tokens.dart';
-
-// /// "Edit Product" form — same layout as ProductAddWidget but pre-filled
-// /// with an existing product's values, and updates instead of creating.
-// class ProductEditWidget extends StatelessWidget {
-//   final ProductModel product;
-//   final void Function(ProductModel)? onSaved;
-//   final List<CategoryModel>? categories;
-//   final List<BrandModel>? brands;
-
-//   ProductEditWidget({
-//     Key? key,
-//     required this.product,
-//     this.onSaved,
-//     this.categories,
-//     this.brands,
-//   }) : super(key: key);
-
-//   final ProductController controller = Get.find<ProductController>();
-
-//   void _prefill() {
-//     controller.nameCtrl.text = product.name;
-//     controller.priceCtrl.text = product.salePrice.toString();
-//     controller.skuCtrl.text = product.sku ?? '';
-//     controller.stockCtrl.text = product.quantity.toString();
-//     controller.descriptionCtrl.text = product.description ?? '';
-//     controller.selectedCategoryId.value = product.categoryId;
-//     controller.selectedBrandId.value = product.brandId;
-//   }
-
-//   Future<void> _submit(BuildContext context) async {
-//     if (!controller.formKey.currentState!.validate()) return;
-
-//     final price = double.parse(controller.priceCtrl.text.trim());
-//     final stock = int.tryParse(controller.stockCtrl.text.trim()) ?? 0;
-
-//     product.name = controller.nameCtrl.text.trim();
-//     product.costPrice = price;
-//     product.salePrice = price;
-//     product.quantity = stock;
-//     product.categoryId = controller.selectedCategoryId.value!;
-//     product.brandId = controller.selectedBrandId.value!;
-//     product.description = controller.descriptionCtrl.text.trim();
-
-//     final updated = product;
-
-//     await controller.updateProduct(updated);
-//     onSaved?.call(updated);
-//     Get.back();
-//     Get.snackbar('Success', 'Product Updated');
-//   }
-
-//   InputDecoration _decoration(String hint) {
-//     return InputDecoration(
-//       hintText: hint,
-//       hintStyle: const TextStyle(color: ProductTokens.hintGrey),
-//       filled: true,
-//       fillColor: ProductTokens.fieldFill,
-//       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-//       border: OutlineInputBorder(
-//         borderRadius: BorderRadius.circular(10),
-//         borderSide: BorderSide.none,
-//       ),
-//       enabledBorder: OutlineInputBorder(
-//         borderRadius: BorderRadius.circular(10),
-//         borderSide: BorderSide.none,
-//       ),
-//     );
-//   }
-
-//   Widget _label(String text) {
-//     return Padding(
-//       padding: const EdgeInsets.only(bottom: 6),
-//       child: Text(
-//         text,
-//         style: const TextStyle(
-//           color: ProductTokens.labelGrey,
-//           fontWeight: FontWeight.w600,
-//           fontSize: 13,
-//         ),
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     _prefill();
-
-//     final categoryDropdownItems = (categories ?? []).map((category) {
-//       return DropdownMenuItem<String>(
-//         value: category.id,
-//         child: Text(category.name),
-//       );
-//     }).toList();
-
-//     return Form(
-//       key: controller.formKey,
-//       child: ListView(
-//         padding: EdgeInsets.only(
-//           left: 20,
-//           right: 20,
-//           top: 8,
-//           bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-//         ),
-//         children: [
-//           _label('Product Name'),
-//           TextFormField(
-//             controller: controller.nameCtrl,
-//             decoration: _decoration('e.g. Industrial Drill Press'),
-//             validator: (v) =>
-//                 (v == null || v.trim().isEmpty) ? 'Enter product name' : null,
-//           ),
-//           const SizedBox(height: 16),
-
-//           _label('Category'),
-//           Obx(
-//             () => DropdownButtonFormField<String>(
-//               value: controller.selectedCategoryId.value,
-//               decoration: _decoration('Select Category'),
-//               isExpanded: true,
-//               icon: const Icon(Icons.keyboard_arrow_down,
-//                   color: ProductTokens.navy),
-//               items: categoryDropdownItems,
-//               onChanged: (value) {
-//                 controller.selectedCategoryId.value = value;
-//                 final category =
-//                     categories?.firstWhere((c) => c.id == value);
-//                 controller.selectedCategoryName.value = category?.name;
-//               },
-//               validator: (v) =>
-//                   (v == null || v.isEmpty) ? 'Select category' : null,
-//             ),
-//           ),
-//           const SizedBox(height: 16),
-
-//           _label('SKU'),
-//           TextFormField(
-//             controller: controller.skuCtrl,
-//             decoration: _decoration('HP-XXXX-XXXX'),
-//             validator: (v) =>
-//                 (v == null || v.trim().isEmpty) ? 'Enter SKU' : null,
-//           ),
-//           const SizedBox(height: 16),
-
-//           _label('Price (USD)'),
-//           TextFormField(
-//             controller: controller.priceCtrl,
-//             decoration: _decoration('0.00').copyWith(
-//               prefixText: '\$ ',
-//               prefixStyle: const TextStyle(color: ProductTokens.navy),
-//             ),
-//             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-//             validator: (v) {
-//               if (v == null || v.trim().isEmpty) return 'Enter price';
-//               if (double.tryParse(v.trim()) == null) return 'Invalid number';
-//               return null;
-//             },
-//           ),
-//           const SizedBox(height: 16),
-
-//           _label('Stock Level'),
-//           TextFormField(
-//             controller: controller.stockCtrl,
-//             decoration: _decoration('0'),
-//             keyboardType: TextInputType.number,
-//             validator: (v) {
-//               if (v == null || v.trim().isEmpty) return 'Enter stock level';
-//               if (int.tryParse(v.trim()) == null) return 'Invalid number';
-//               return null;
-//             },
-//           ),
-//           const SizedBox(height: 16),
-
-//           _label('Description'),
-//           TextFormField(
-//             controller: controller.descriptionCtrl,
-//             decoration:
-//                 _decoration('Enter product specifications and details...'),
-//             maxLines: 4,
-//           ),
-//           const SizedBox(height: 18),
-
-//           Row(
-//             children: [
-//               Expanded(
-//                 child: OutlinedButton(
-//                   onPressed: () => Get.back(),
-//                   style: OutlinedButton.styleFrom(
-//                     padding: const EdgeInsets.symmetric(vertical: 14),
-//                     side: const BorderSide(color: Color(0xFFD7DCE3)),
-//                     shape: RoundedRectangleBorder(
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                   ),
-//                   child: const Text(
-//                     'Cancel',
-//                     style: TextStyle(
-//                         color: ProductTokens.navy, fontWeight: FontWeight.w600),
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(width: 14),
-//               Expanded(
-//                 child: ElevatedButton.icon(
-//                   onPressed: () => _submit(context),
-//                   style: ElevatedButton.styleFrom(
-//                     backgroundColor: ProductTokens.navy,
-//                     padding: const EdgeInsets.symmetric(vertical: 14),
-//                     shape: RoundedRectangleBorder(
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                   ),
-//                   icon: const Icon(Icons.save, size: 18, color: Colors.white),
-//                   label: const Text(
-//                     'Update Product',
-//                     style: TextStyle(
-//                         color: Colors.white, fontWeight: FontWeight.w600),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// extension ProductControllerUpdateExtensions on ProductController {
-//   Future<void> updateProduct(ProductModel product) async {
-//     final dynamic dynamicController = this;
-
-//     try {
-//       await dynamicController.updateProduct(product);
-//       return;
-//     } catch (_) {}
-
-//     try {
-//       await dynamicController.editProduct(product);
-//       return;
-//     } catch (_) {}
-
-//     try {
-//       await dynamicController.saveProduct(product);
-//       return;
-//     } catch (_) {}
-
-//     throw UnsupportedError(
-//       'ProductController does not expose a product update method.',
-//     );
-//   }
-// }
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:selling_project/controller/product_controller.dart';
-import '../../../../models/product_management/brand_model.dart';
-import '../../../../models/product_management/category_model.dart';
-import '../../../../models/product_management/product_model.dart';
-import 'product_add_widget.dart' show ProductFormShell, ProductFormField;
-import 'product_tokens.dart';
 
-/// "Edit Product" form — same visual shell as ProductAddWidget
-/// (header, fields, status row, buttons), pre-filled with the
-/// existing product's values, updates instead of creating.
 class ProductEditWidget extends StatelessWidget {
-  final ProductModel product;
-  final void Function(ProductModel)? onSaved;
-  final List<CategoryModel>? categories;
-  final List<BrandModel>? brands;
+  ProductEditWidget({super.key});
 
-  ProductEditWidget({
-    Key? key,
-    required this.product,
-    this.onSaved,
-    this.categories,
-    this.brands,
-  }) : super(key: key);
+  final ProductController productCtrl = Get.find<ProductController>();
 
-  final ProductController controller = Get.find<ProductController>();
-
-  void _prefill() {
-    controller.nameCtrl.text = product.name;
-    controller.priceCtrl.text = product.salePrice.toString();
-    controller.skuCtrl.text = product.sku ?? '';
-    controller.stockCtrl.text = product.quantity.toString();
-    controller.descriptionCtrl.text = product.description ?? '';
-    controller.selectedCategoryId.value = product.categoryId;
-    controller.selectedBrandId.value = product.brandId;
-  }
-
-  Future<void> _submit(BuildContext context) async {
-    if (!controller.formKey.currentState!.validate()) return;
-
-    final categoryId = controller.selectedCategoryId.value;
-    if (categoryId == null || categoryId.isEmpty) {
-      Get.snackbar('Missing Category', 'Please select a category');
-      return;
-    }
-    final brandId = controller.selectedBrandId.value ?? '';
-
-    final price = double.parse(controller.priceCtrl.text.trim());
-    final stock = int.tryParse(controller.stockCtrl.text.trim()) ?? 0;
-
-    // Mutate the existing model directly (matches your project's
-    // ProductModel, which doesn't have copyWith).
-    product.name = controller.nameCtrl.text.trim();
-    product.costPrice = price;
-    product.salePrice = price;
-    product.quantity = stock;
-    product.categoryId = categoryId;
-    product.brandId = brandId;
-    product.description = controller.descriptionCtrl.text.trim();
-
-    await controller.updateProduct(product);
-    onSaved?.call(product);
-    Get.back();
-    Get.snackbar('Success', 'Product Updated');
+  void _showImagePickerModal(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        color: Colors.white,
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Get.back();
+                productCtrl.pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a Photo'),
+              onTap: () {
+                Get.back();
+                productCtrl.pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    _prefill();
+    return Container(
+      padding: EdgeInsets.only(
+        top: 20,
+        left: 20,
+        right: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: productCtrl.formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Edit Product',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      productCtrl.clearForm();
+                      Get.back();
+                    },
+                  )
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () => _showImagePickerModal(context),
+                child: Obx(() {
+                  final file = productCtrl.pickedImageFile.value;
+                  final imageUrl = productCtrl.imageCtrl.text.trim();
 
-    final categoryDropdownItems = (categories ?? []).map((category) {
-      return DropdownMenuItem<String>(
-        value: category.id,
-        child: Text(category.name),
-      );
-    }).toList();
+                  return Container(
+                    height: 140,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Builder(
+                        builder: (context) {
+                          if (file != null) {
+                            return Image.file(file, fit: BoxFit.cover);
+                          }
+                          if (imageUrl.isNotEmpty && Uri.tryParse(imageUrl)?.hasAbsolutePath == true) {
+                            return Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.broken_image_outlined, size: 40, color: Colors.grey),
+                                    SizedBox(height: 4),
+                                    Text('Image load failed. Tap to replace.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.add_a_photo_outlined, size: 40, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text('Tap to select product image', style: TextStyle(color: Colors.grey)),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 12),
 
-    return ProductFormShell(
-      title: 'Edit Product',
-      formKey: controller.formKey,
-      fields: [
-        ProductFormField.label('Product Name'),
-        TextFormField(
-          controller: controller.nameCtrl,
-          decoration: ProductFormField.decoration('e.g. Industrial Drill Press'),
-          validator: (v) =>
-              (v == null || v.trim().isEmpty) ? 'Enter product name' : null,
-        ),
-        const SizedBox(height: 16),
+              TextFormField(
+                controller: productCtrl.productNameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Product Name *',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: productCtrl.costPriceCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Cost Price (\$)*',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: productCtrl.salePriceCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Sale Price (\$)*',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
 
-        ProductFormField.label('Category'),
-        Obx(
-          () => DropdownButtonFormField<String>(
-            value: controller.selectedCategoryId.value,
-            decoration: ProductFormField.decoration('Select Category'),
-            isExpanded: true,
-            icon: const Icon(Icons.keyboard_arrow_down, color: ProductTokens.navy),
-            items: categoryDropdownItems,
-            onChanged: (value) {
-              controller.selectedCategoryId.value = value;
-              final category = categories?.firstWhere((c) => c.id == value);
-              controller.selectedCategoryName.value = category?.name;
-            },
-            validator: (v) => (v == null || v.isEmpty) ? 'Select category' : null,
+              TextFormField(
+                controller: productCtrl.quantityCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Stock Quantity',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Obx(() => DropdownButtonFormField<String>(
+                    initialValue: productCtrl.selectedCategoryId.value,
+                    hint: const Text('Select Category'),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    items: productCtrl.categoryCtrl.category.map((cat) {
+                      return DropdownMenuItem(value: cat.id, child: Text(cat.name));
+                    }).toList(),
+                    onChanged: (val) => productCtrl.selectedCategoryId.value = val,
+                  )),
+              const SizedBox(height: 12),
+
+              Obx(() => DropdownButtonFormField<String>(
+                    initialValue: productCtrl.selectedBrandId.value,
+                    hint: const Text('Select Brand'),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    items: productCtrl.brandCtrl.brands.map((b) {
+                      return DropdownMenuItem(value: b.id, child: Text(b.name));
+                    }).toList(),
+                    onChanged: (val) => productCtrl.selectedBrandId.value = val,
+                  )),
+              const SizedBox(height: 12),
+
+              Obx(() => DropdownButtonFormField<String>(
+                    initialValue: productCtrl.selectedSupplierId.value,
+                    hint: const Text('Select Supplier'),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    items: productCtrl.supplierCtrl.suppliers.map((sup) {
+                      return DropdownMenuItem(value: sup.id, child: Text(sup.name));
+                    }).toList(),
+                    onChanged: (val) => productCtrl.selectedSupplierId.value = val,
+                  )),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: productCtrl.descriptionCtrl,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: Obx(() => ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade800,
+                      ),
+                      onPressed: productCtrl.loading.value ? null : () => productCtrl.submitUpdate(),
+                      child: productCtrl.loading.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text('Update Product', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    )),
+              )
+            ],
           ),
         ),
-        const SizedBox(height: 16),
-
-        ProductFormField.label('SKU'),
-        TextFormField(
-          controller: controller.skuCtrl,
-          decoration: ProductFormField.decoration('HP-XXXX-XXXX'),
-          validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter SKU' : null,
-        ),
-        const SizedBox(height: 16),
-
-        ProductFormField.label('Price (USD)'),
-        TextFormField(
-          controller: controller.priceCtrl,
-          decoration: ProductFormField.decoration('0.00').copyWith(
-            prefixText: '\$ ',
-            prefixStyle: const TextStyle(color: ProductTokens.navy),
-          ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Enter price';
-            if (double.tryParse(v.trim()) == null) return 'Invalid number';
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-
-        ProductFormField.label('Stock Level'),
-        TextFormField(
-          controller: controller.stockCtrl,
-          decoration: ProductFormField.decoration('0'),
-          keyboardType: TextInputType.number,
-          validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Enter stock level';
-            if (int.tryParse(v.trim()) == null) return 'Invalid number';
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-
-        ProductFormField.label('Description'),
-        TextFormField(
-          controller: controller.descriptionCtrl,
-          decoration:
-              ProductFormField.decoration('Enter product specifications and details...'),
-          maxLines: 4,
-        ),
-      ],
-      leftButtonLabel: 'Cancel',
-      onLeftButton: () => Get.back(),
-      rightButtonLabel: 'Update Product',
-      rightButtonIcon: Icons.save,
-      onRightButton: () => _submit(context),
+      ),
     );
   }
 }

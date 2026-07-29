@@ -1,68 +1,119 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ProductModel {
   String? id;
-  String name;
+  String productName;
+  String? categoryId;
+  String? brandId;
+  String? supplierId;
   double costPrice;
   double salePrice;
   int quantity;
+  String? image;
   String? description;
   bool status;
-  String categoryId;
-  String brandId;
-  // Map<String, dynamic> category;
-  DateTime? createdAt = DateTime.now();
-  DateTime? updatedAt = DateTime.now();
-   
+  DateTime? createdAt;
+  DateTime? updatedAt;
+
   ProductModel({
     this.id,
-    required this.name,
+    required this.productName,
+    this.categoryId,
+    this.brandId,
+    this.supplierId,
     required this.costPrice,
     required this.salePrice,
-    required this.categoryId,
-    required this.brandId,
-    required this.quantity,
+    this.quantity = 0,
+    this.image,
     this.description,
     this.status = true,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory ProductModel.fromJson(
-      Map<String,dynamic> json,
-      String? id
-  ){
+  String get name => productName;
+  double get price => salePrice;
+  String? get imageUrl => image;
+
+  ProductModel copyWith({
+    String? id,
+    String? productName,
+    String? categoryId,
+    String? brandId,
+    String? supplierId,
+    double? costPrice,
+    double? salePrice,
+    int? quantity,
+    String? image,
+    String? description,
+    bool? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
     return ProductModel(
-      id: id,
-      name: json['name'] ?? '',
-      costPrice: (json['cost_price'] ?? 0).toDouble(),
-      salePrice: (json['sale_price'] ?? 0).toDouble(),
-      quantity: json['quantity'] ?? 0,
-      description: json['description'] ?? '',
-      categoryId: json['category_id'] ?? {},
-      brandId: json['brand_id'] ?? {},
-      status: json['status'] ?? true,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      id: id ?? this.id,
+      productName: productName ?? this.productName,
+      categoryId: categoryId ?? this.categoryId,
+      brandId: brandId ?? this.brandId,
+      supplierId: supplierId ?? this.supplierId,
+      costPrice: costPrice ?? this.costPrice,
+      salePrice: salePrice ?? this.salePrice,
+      quantity: quantity ?? this.quantity,
+      image: image ?? this.image,
+      description: description ?? this.description,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
-  String? get categoryName => null;
+  factory ProductModel.fromJson(
+    Map<String, dynamic> json,
+    String? id,
+  ) {
+    return ProductModel(
+      id: id ?? json['id']?.toString(),
+      productName: json['product_name'] ?? json['name'] ?? '',
+      categoryId: json['category_id']?.toString(),
+      brandId: json['brand_id']?.toString(),
+      supplierId: json['supplier_id']?.toString(),
+      costPrice: (json['cost_price'] ?? 0).toDouble(),
+      salePrice: (json['sale_price'] ?? 0).toDouble(),
+      quantity: (json['quantity'] ?? 0) is int 
+          ? json['quantity'] 
+          : int.tryParse(json['quantity']?.toString() ?? '0') ?? 0,
+      image: json['image'] ?? json['image_url'],
+      description: json['description'],
+      status: json['status'] ?? true,
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
+    );
+  }
 
-  String? get brandName => null;
-
-  String? get sku => null;
-
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
-      "name": name,
+      if (id != null) "id": id,
+      "product_name": productName,
+      "category_id": categoryId,
+      "brand_id": brandId,
+      "supplier_id": supplierId,
       "cost_price": costPrice,
       "sale_price": salePrice,
       "quantity": quantity,
+      "image": image,
       "description": description,
-      "category_id": categoryId,
-      "brand_id": brandId,
       "status": status,
-      "created_at": createdAt,
-      "updated_at": updatedAt
+      "created_at": createdAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      "updated_at": DateTime.now().toIso8601String(),
     };
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.tryParse(value);
+    }
+    return null;
   }
 }

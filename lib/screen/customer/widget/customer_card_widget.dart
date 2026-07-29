@@ -44,22 +44,39 @@ class CustomerCard extends StatelessWidget {
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
                       ),
                       if (customer.phone != null && customer.phone!.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          customer.phone!,
-                          style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.phone_outlined, size: 14, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              customer.phone!,
+                              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                            ),
+                          ],
                         ),
                       ],
                       if (customer.email != null && customer.email!.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          customer.email!,
-                          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.email_outlined, size: 14, color: Colors.grey[500]),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                customer.email!,
+                                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],
                   ),
                 ),
+                
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -76,8 +93,6 @@ class CustomerCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                
-                // Action Menu
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, color: Color(0xFF4B5563)),
                   color: Colors.white,

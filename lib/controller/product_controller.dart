@@ -1,61 +1,197 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:selling_project/controller/brand_controller.dart';
+import 'package:selling_project/controller/category_controller.dart';
+import 'package:selling_project/controller/supplier_controller.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/services/product_services.dart';
 
 class ProductController extends GetxController {
   final ProductServices service = ProductServices();
+
+  final categoryCtrl = Get.isRegistered<CategoryController>()
+      ? Get.find<CategoryController>()
+      : Get.put(CategoryController());
+      
+  final brandCtrl = Get.isRegistered<BrandController>()
+      ? Get.find<BrandController>()
+      : Get.put(BrandController());
+
+  final supplierCtrl = Get.isRegistered<SupplierController>()
+      ? Get.find<SupplierController>()
+      : Get.put(SupplierController());
+
   RxList<ProductModel> product = <ProductModel>[].obs;
   RxBool loading = false.obs;
 
   final formKey = GlobalKey<FormState>();
+  final productNameCtrl = TextEditingController();
+  final costPriceCtrl = TextEditingController();
+  final salePriceCtrl = TextEditingController();
+  final quantityCtrl = TextEditingController(text: '0');
+  final imageCtrl = TextEditingController();
+  final descriptionCtrl = TextEditingController();
 
-final nameCtrl = TextEditingController();
-final priceCtrl = TextEditingController();
-final descriptionCtrl = TextEditingController();
+  Rxn<File> pickedImageFile = Rxn<File>();
+  final ImagePicker _picker = ImagePicker();
 
-RxnString selectedCategoryId = RxnString();
-RxnString selectedCategoryName = RxnString();
+  RxnString selectedCategoryId = RxnString();
+  RxnString selectedBrandId = RxnString();
+  RxnString selectedSupplierId = RxnString();
+  RxBool status = true.obs;
 
-RxnString selectedBrandId = RxnString();
-RxnString selectedBrandName = RxnString();
-
-  TextEditingController get stockCtrl => TextEditingController();
-
-  TextEditingController get skuCtrl => TextEditingController();
-
+  String? _editingId;
+  DateTime? _editingCreatedAt;
 
   @override
   void onInit() {
     super.onInit();
     getProducts();
   }
-  
-@override
-void onClose() {
-  nameCtrl.dispose();
-  priceCtrl.dispose();
-  descriptionCtrl.dispose();
-  super.onClose();
-}
-  void getProducts(){
 
+  @override
+  void onClose() {
+    productNameCtrl.dispose();
+    costPriceCtrl.dispose();
+    salePriceCtrl.dispose();
+    quantityCtrl.dispose();
+    imageCtrl.dispose();
+    descriptionCtrl.dispose();
+    super.onClose();
+  }
+
+  // 🔹 Method ជ្រើសរើសរូបភាព
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (image != null) {
+        pickedImageFile.value = File(image.path);
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Failed to pick image: $e");
+    }
+  }
+
+  void initAddForm() {
+    clearForm();
+  }
+
+  void initEditForm(ProductModel item) {
+    _editingId = item.id;
+    _editingCreatedAt = item.createdAt;
+
+    productNameCtrl.text = item.productName;
+    costPriceCtrl.text = item.costPrice.toString();
+    salePriceCtrl.text = item.salePrice.toString();
+    quantityCtrl.text = item.quantity.toString();
+    imageCtrl.text = item.image ?? '';
+    descriptionCtrl.text = item.description ?? '';
+
+    selectedCategoryId.value = item.categoryId;
+    selectedBrandId.value = item.brandId;
+    selectedSupplierId.value = item.supplierId;
+    status.value = item.status;
+    pickedImageFile.value = null;
+  }
+
+  void clearForm() {
+    _editingId = null;
+    _editingCreatedAt = null;
+
+    productNameCtrl.clear();
+    costPriceCtrl.clear();
+    salePriceCtrl.clear();
+    quantityCtrl.text = '0';
+    imageCtrl.clear();
+    descriptionCtrl.clear();
+    pickedImageFile.value = null;
+
+    selectedCategoryId.value = null;
+    selectedBrandId.value = null;
+    selectedSupplierId.value = null;
+    status.value = true;
+  }
+
+  ProductModel get formData => ProductModel(
+        id: _editingId,
+        productName: productNameCtrl.text.trim(),
+        costPrice: double.tryParse(costPriceCtrl.text.trim()) ?? 0.0,
+        salePrice: double.tryParse(salePriceCtrl.text.trim()) ?? 0.0,
+        quantity: int.tryParse(quantityCtrl.text.trim()) ?? 0,
+        categoryId: selectedCategoryId.value,
+        brandId: selectedBrandId.value,
+        supplierId: selectedSupplierId.value,
+        image: imageCtrl.text.trim().isEmpty ? null : imageCtrl.text.trim(),
+        description: descriptionCtrl.text.trim().isEmpty ? null : descriptionCtrl.text.trim(),
+        status: status.value,
+        createdAt: _editingCreatedAt,
+      );
+
+  void getProducts() {
     loading.value = true;
-    service.getProducts().listen((data){
+    service.getProducts().listen((data) {
       product.value = data;
+      loading.value = false;
+    }, onError: (err) {
       loading.value = false;
     });
   }
 
-Future<void> addProduct(
-  ProductModel product
-) async {
-  await service.addProduct(product);
-}
-
-  Future<void> deleteProduct(String id){
-    return service.deleteProduct(id);
+  Future<void> submitSave() async {
+    if (formKey.currentState != null && !formKey.currentState!.validate()) return;
+    await addProduct(formData);
   }
 
-  Future<void> updateProduct(ProductModel product) async {}
+  Future<void> submitUpdate() async {
+    if (formKey.currentState != null && !formKey.currentState!.validate()) return;
+    await updateProduct(formData);
+  }
+
+  Future<void> addProduct(ProductModel productData) async {
+    loading.value = true;
+    try {
+      await service.addProduct(
+        productData,
+        imageFile: pickedImageFile.value,
+      );
+      clearForm();
+      Get.back();
+      Get.snackbar("Success", "Product added successfully");
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  Future<void> updateProduct(ProductModel productData) async {
+    loading.value = true;
+    try {
+      await service.updateProduct(
+        productData,
+        newImageFile: pickedImageFile.value,
+      );
+      clearForm();
+      Get.back();
+      Get.snackbar("Success", "Product updated successfully");
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  Future<void> deleteProduct(String id) async {
+    try {
+      await service.deleteProduct(id);
+      Get.snackbar("Success", "Product deleted successfully");
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    }
+  }
 }

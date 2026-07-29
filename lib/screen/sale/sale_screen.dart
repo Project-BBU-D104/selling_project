@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/sale_controller.dart';
+import 'package:selling_project/screen/home/widget/drawer_widget.dart';
+import 'package:selling_project/screen/sale/widget/sale_product_card_widget.dart';
 
 class SaleScreen extends StatelessWidget {
   SaleScreen({super.key});
@@ -10,10 +12,15 @@ class SaleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: DrawerWidget(),
       appBar: AppBar(
         title: const Text(
-          "POS",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF004C87)),
+          "Sale",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Color(0xFF111827),
+          ),
         ),
         actions: [
           IconButton(
@@ -24,122 +31,231 @@ class SaleScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: const Color(0xFFF9FAFB),
       body: Stack(
         children: [
           Column(
             children: [
-              const Expanded(
-                child: Center(
-                  child: Text("Product Grid List View Here"),
+              // 1. Search Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TextField(
+                  controller: ctr.searchController,
+                  onChanged: (_) => ctr.filterProducts(),
+                  decoration: InputDecoration(
+                    hintText: "Search Product...",
+                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    fillColor: Colors.white,
+                    filled: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 100), 
+
+              // 2. Category Filter Bar (Chips)
+              Obx(() {
+                final categories = ctr.categoryCtr.category;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: Row(
+                    children: [
+                      // Chip 'All'
+                      ChoiceChip(
+                        label: const Text('All'),
+                        selected: ctr.selectedCategoryId.value == 'All',
+                        selectedColor: const Color(0xFF007AE5),
+                        labelStyle: TextStyle(
+                          color: ctr.selectedCategoryId.value == 'All'
+                              ? Colors.white
+                              : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onSelected: (_) => ctr.selectCategory('All'),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // List Categories មកពី Firebase
+                      ...categories.map((cat) {
+                        bool isSelected = ctr.selectedCategoryId.value == cat.id;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            label: Text(cat.name),
+                            selected: isSelected,
+                            selectedColor: const Color(0xFF007AE5),
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            onSelected: (_) => ctr.selectCategory(cat.id ?? ''),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 8),
+
+              // 3. Product Grid View
+              Expanded(
+                child: Obx(() {
+                  if (ctr.filteredProducts.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        "No Products Found",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 8,
+                      bottom: 100, // Space សម្រាប់ Cart Bottom Bar
+                    ),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.78,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: ctr.filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = ctr.filteredProducts[index];
+                      return SaleProductCardWidget(
+                        product: product,
+                        onAdd: () => ctr.addToCart(product),
+                      );
+                    },
+                  );
+                }),
+              ),
             ],
           ),
-          Positioned(
-            bottom: 20,
-            left: 16,
-            right: 16,
-            child: InkWell(
-              onTap: () async {
-                await ctr.loadCustomer("UNqPzjSqpMTWTcUs1jLN");
-                ctr.loadSaleItems("INV002");
-              },
-              child: Container(
-                height: 70,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00A86B),
-                  borderRadius: BorderRadius.circular(35),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF00A86B).withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    )
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.shopping_cart_outlined,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                        Positioned(
-                          top: -5,
-                          right: -5,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.amber,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Text(
-                              "3",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+
+          // 4. Floating Cart Bottom Bar
+          Obx(() {
+            if (ctr.cartItems.isEmpty) return const SizedBox.shrink();
+
+            return Positioned(
+              bottom: 20,
+              left: 16,
+              right: 16,
+              child: InkWell(
+                onTap: () {
+                  ctr.createSale();
+                },
+                child: Container(
+                  height: 65,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A86B),
+                    borderRadius: BorderRadius.circular(35),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF00A86B).withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(
+                            Icons.shopping_cart_outlined,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                          Positioned(
+                            top: -4,
+                            right: -4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.amber,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                "${ctr.totalCartCount}",
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Current Order",
+                            style: TextStyle(color: Colors.white70, fontSize: 12),
                           ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(width: 20),
-                    const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Current Order",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
+                          Text(
+                            "${ctr.totalCartCount} Items",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Text(
+                        "\$${ctr.totalCartAmount.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Text(
-                          "3 Items",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
                         ),
-                      ],
-                    ),
-                    const Spacer(),
-                    const Text(
-                      "\$45.00",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: const Icon(
-                        Icons.arrow_forward,
-                        color: Color(0xFF00A86B),
-                        size: 20,
-                      ),
-                    )
-                  ],
+                        padding: const EdgeInsets.all(6),
+                        child: const Icon(
+                          Icons.arrow_forward,
+                          color: Color(0xFF00A86B),
+                          size: 18,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );

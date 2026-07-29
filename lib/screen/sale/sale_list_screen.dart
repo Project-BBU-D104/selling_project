@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/sale_controller.dart';
-import 'sale_detail_screen.dart';
+import 'package:selling_project/screen/sale/sale_detail_screen.dart';
+import 'package:selling_project/screen/sale/sale_screen.dart';
 
 class SaleListScreen extends StatelessWidget {
   SaleListScreen({super.key});
@@ -27,16 +28,22 @@ class SaleListScreen extends StatelessWidget {
                     onPressed: ctr.createSale,
                     icon: const Icon(Icons.save),
                     label: const Text("Test Save Sale"),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade200, foregroundColor: Colors.black87),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.black87,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: ctr.gotoSaleScreen,
+                    onPressed: () => Get.to(() => SaleScreen()),
                     icon: const Icon(Icons.add_shopping_cart),
                     label: const Text("POS Screen"),
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004C87), foregroundColor: Colors.white),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF004C87),
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -45,8 +52,17 @@ class SaleListScreen extends StatelessWidget {
           const Divider(),
           Expanded(
             child: Obx(() {
+              if (ctr.loading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               if (ctr.sales.isEmpty) {
-                return const Center(child: Text("No Sales Recorded"));
+                return const Center(
+                  child: Text(
+                    "No Sales Recorded",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                );
               }
 
               return ListView.builder(
@@ -63,7 +79,9 @@ class SaleListScreen extends StatelessWidget {
                       leading: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: sale.paymentStatus == "paid" ? Colors.green.shade50 : Colors.orange.shade50,
+                          color: sale.paymentStatus == "paid"
+                              ? Colors.green.shade50
+                              : Colors.orange.shade50,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -79,8 +97,14 @@ class SaleListScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 4),
-                          Text("Customer ID: ${sale.customerId ?? 'N/A'}", style: TextStyle(color: Colors.grey.shade600)),
-                          Text("Date: ${sale.saleDate.toString().substring(0, 16)}", style: const TextStyle(fontSize: 12)),
+                          Text(
+                            "Customer ID: ${sale.customerId ?? 'N/A'}",
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          Text(
+                            "Date: ${sale.saleDate.toString().substring(0, 16)}",
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ],
                       ),
                       trailing: Column(
@@ -89,7 +113,11 @@ class SaleListScreen extends StatelessWidget {
                         children: [
                           Text(
                             "\$${sale.totalAmount.toStringAsFixed(2)}",
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF004C87)),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color(0xFF004C87),
+                            ),
                           ),
                           const SizedBox(height: 4),
                           const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
@@ -97,13 +125,22 @@ class SaleListScreen extends StatelessWidget {
                       ),
                       onTap: () async {
                         ctr.loadingItems.value = true;
-                        if (sale.customerId != null) {
+                        if (sale.customerId != null && sale.customerId!.isNotEmpty) {
                           await ctr.loadCustomer(sale.customerId!);
                         } else {
                           ctr.customer.value = null;
                         }
-                        ctr.loadSaleItems(sale.id!);
-                        Get.to(() => SaleDetailScreen(saleId: sale.id!, invoiceNo: sale.invoiceNo, totalAmount: sale.totalAmount, subtotal: sale.subtotal));
+                        
+                        if (sale.id != null) {
+                          ctr.loadSaleItems(sale.id!);
+                        }
+                        
+                        Get.to(() => SaleDetailScreen(
+                              saleId: sale.id ?? '',
+                              invoiceNo: sale.invoiceNo,
+                              totalAmount: sale.totalAmount,
+                              subtotal: sale.subtotal,
+                            ));
                       },
                     ),
                   );

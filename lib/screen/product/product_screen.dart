@@ -1,174 +1,163 @@
-// // import 'package:flutter/material.dart';
-// // import 'package:get/get.dart';
-// // import 'package:selling_project/controller/brand_controller.dart';
-// // import 'package:selling_project/controller/category_controller.dart';
-// // import 'package:selling_project/controller/product_controller.dart';
-// // import 'package:selling_project/screen/product/widget/add_product_widget.dart';
-
-// // class ProductScreen extends StatelessWidget {
-// //   ProductScreen({super.key});
-
-// //   final ctr = Get.find<ProductController>();
-// //   final ctrCategory = Get.find<CategoryController>();
-// //   final ctrBrand = Get.find<BrandController>();
-
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     return Scaffold(
-// //       appBar: AppBar(title: const Text("Product")),
-// //       body: Column(
-// //         children: [
-// //           Expanded(child: Text("This is product")),
-// //         ],
-// //       ),
-
-// //     floatingActionButton: FloatingActionButton(
-// //       onPressed: () {
-// //         showModalBottomSheet(
-// //           context: context,
-// //           isScrollControlled: true,
-// //           builder: (_) => AddProductWidget(
-// //             categories: ctrCategory.category,
-// //              brands: ctrBrand.brands,
-// //           ),
-// //         );
-// //       },
-// //       child: const Icon(Icons.add),
-// //     ),
-// //   );
-// //   }
-// // }
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/controller/brand_controller.dart';
-import 'package:selling_project/controller/category_controller.dart';
 import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/screen/product/widget/product_add_widget.dart';
 import 'package:selling_project/screen/product/widget/product_card_widget.dart';
 import 'package:selling_project/screen/product/widget/product_edit_widget.dart';
-import 'package:selling_project/screen/product/widget/product_search_widget.dart';
-import 'package:selling_project/screen/product/widget/product_summary_widget.dart';
-
-
-
-
 
 class ProductScreen extends StatelessWidget {
-  ProductScreen({Key? key}) : super(key: key);
+  ProductScreen({super.key});
 
-  final ProductController controller = Get.find<ProductController>();
-  final CategoryController categoryController = Get.find<CategoryController>();
-  final BrandController brandController = Get.find<BrandController>();
-
-  void _openAddSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: ProductAddWidget(
-          categories: categoryController.category,
-          brands: brandController.brands,
-        ),
-      ),
-    );
-  }
-
-  void _openEditSheet(BuildContext context, product) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: ProductEditWidget(
-          product: product,
-          categories: categoryController.category,
-          brands: brandController.brands,
-        ),
-      ),
-    );
-  }
+  final ProductController controller = Get.put(ProductController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Product Management',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.black),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.black, size: 28),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            const ProductSummaryWidget(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const ProductSearchWidget(),
-                  const SizedBox(height: 12),
-                  const ProductFilterChips(),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _openAddSheet(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF13294B),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon:
-                              const Icon(Icons.add, color: Colors.white, size: 18),
-                          label: const Text(
-                            'Add New',
-                            style: TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFFE3E6EA)),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.tune,
-                            color: Color(0xFF13294B), size: 20),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Obx(
-                () => ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  itemCount: controller.product.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
-                  itemBuilder: (context, index) {
-                    final product = controller.product[index];
-                    return ProductCardWidget(
-                      product: product,
-                      onEdit: () => _openEditSheet(context, product),
-                      onDelete: () => controller.deleteProduct(product.id ?? ''),
-                    );
-                  },
+            const SizedBox(height: 12),
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Search products...',
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('All Products', isSelected: true),
+                  _buildFilterChip('Category GPU'),
+                  _buildFilterChip('Brand NVIDIA'),
+                  _buildFilterChip('Stock Low'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      controller.initAddForm();
+                      Get.bottomSheet(
+                        ProductAddWidget(),
+                        isScrollControlled: true,
+                      );
+                    },
+                    icon: const Icon(Icons.add_circle, color: Colors.white),
+                    label: const Text(
+                      'Add New',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4F46E5),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Icon(Icons.tune, color: Colors.black),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 4. Product Item List (Observed by GetX)
+            Expanded(
+              child: Obx(() {
+                if (controller.loading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (controller.product.isEmpty) {
+                  return const Center(child: Text("No products found"));
+                }
+
+                return ListView.builder(
+                  itemCount: controller.product.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.product[index];
+                    return ProductCardWidget(
+                      product: item,
+                      onEdit: () {
+                        controller.initEditForm(item);
+                        Get.bottomSheet(
+                          ProductEditWidget(),
+                          isScrollControlled: true,
+                        );
+                      },
+                      onDelete: () {
+                        controller.deleteProduct(item.id ?? '');
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, {bool isSelected = false}) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFFBAE6FD) : Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: isSelected ? const Color(0xFF0369A1) : Colors.grey.shade700,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
     );
