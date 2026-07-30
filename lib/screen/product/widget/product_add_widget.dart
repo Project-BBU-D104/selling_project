@@ -36,14 +36,48 @@ class ProductAddWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildFieldLabel(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6, top: 12),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hintText) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFF004D7F)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: 20,
-        left: 20,
-        right: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        top: 16,
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -61,10 +95,10 @@ class ProductAddWidget extends StatelessWidget {
                 children: [
                   const Text(
                     'Add New Product',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: 20),
                     onPressed: () {
                       productCtrl.clearForm();
                       Get.back();
@@ -72,126 +106,117 @@ class ProductAddWidget extends StatelessWidget {
                   )
                 ],
               ),
-              const Divider(),
-              const SizedBox(height: 10),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+
+              // Image Selector Container
               GestureDetector(
                 onTap: () => _showImagePickerModal(context),
                 child: Obx(() {
                   final file = productCtrl.pickedImageFile.value;
                   return Container(
-                    height: 140,
+                    height: 120,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: file != null
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10),
                             child: Image.file(file, fit: BoxFit.cover),
                           )
                         : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.add_a_photo_outlined, size: 40, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text('Tap to select product image', style: TextStyle(color: Colors.grey)),
+                            children: [
+                              Icon(Icons.add_a_photo_outlined, size: 36, color: Colors.grey.shade400),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Tap to select product image',
+                                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                              ),
                             ],
                           ),
                   );
                 }),
               ),
-              const SizedBox(height: 12),
 
+              _buildFieldLabel('Product Name'),
               TextFormField(
                 controller: productCtrl.productNameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Product Name *',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('e.g Industrial Drill Press'),
                 validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
               ),
-              const SizedBox(height: 12),
+
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: productCtrl.costPriceCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Cost Price (\$)*',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Cost Price'),
+                        TextFormField(
+                          controller: productCtrl.costPriceCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: _inputDecoration('\$ 0.00'),
+                          validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: TextFormField(
-                      controller: productCtrl.salePriceCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Sale Price (\$)*',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Sale Price'),
+                        TextFormField(
+                          controller: productCtrl.salePriceCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: _inputDecoration('\$ 0.00'),
+                          validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
 
+              _buildFieldLabel('Quantity'),
               TextFormField(
                 controller: productCtrl.quantityCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Stock Quantity',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputDecoration('0'),
               ),
-              const SizedBox(height: 12),
 
+              _buildFieldLabel('Category'),
               Obx(() => DropdownButtonFormField<String>(
                     initialValue: productCtrl.selectedCategoryId.value,
-                    hint: const Text('Select Category'),
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    hint: Text('Select Category', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
+                    decoration: _inputDecoration(''),
                     items: productCtrl.categoryCtrl.category.map((cat) {
-                      return DropdownMenuItem(value: cat.id, child: Text(cat.name));
+                      return DropdownMenuItem(value: cat.id, child: Text(cat.name, style: const TextStyle(fontSize: 13)));
                     }).toList(),
                     onChanged: (val) => productCtrl.selectedCategoryId.value = val,
                   )),
-              const SizedBox(height: 12),
 
-              Obx(() => DropdownButtonFormField<String>(
-                    initialValue: productCtrl.selectedBrandId.value,
-                    hint: const Text('Select Brand'),
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
-                    items: productCtrl.brandCtrl.brands.map((b) {
-                      return DropdownMenuItem(value: b.id, child: Text(b.name));
-                    }).toList(),
-                    onChanged: (val) => productCtrl.selectedBrandId.value = val,
-                  )),
-              const SizedBox(height: 12),
-
+              _buildFieldLabel('Supplier'),
               Obx(() => DropdownButtonFormField<String>(
                     initialValue: productCtrl.selectedSupplierId.value,
-                    hint: const Text('Select Supplier'),
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    hint: Text('Select Supplier', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
+                    decoration: _inputDecoration(''),
                     items: productCtrl.supplierCtrl.suppliers.map((sup) {
-                      return DropdownMenuItem(value: sup.id, child: Text(sup.name));
+                      return DropdownMenuItem(value: sup.id, child: Text(sup.name, style: const TextStyle(fontSize: 13)));
                     }).toList(),
                     onChanged: (val) => productCtrl.selectedSupplierId.value = val,
                   )),
-              const SizedBox(height: 12),
 
+              _buildFieldLabel('Description'),
               TextFormField(
                 controller: productCtrl.descriptionCtrl,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
+                maxLines: 3,
+                decoration: _inputDecoration('Enter product specifications and details...'),
               ),
               const SizedBox(height: 20),
 
@@ -200,7 +225,11 @@ class ProductAddWidget extends StatelessWidget {
                 height: 48,
                 child: Obx(() => ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4F46E5),
+                        backgroundColor: const Color(0xFF004D7F),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       onPressed: productCtrl.loading.value ? null : () => productCtrl.submitSave(),
                       child: productCtrl.loading.value
@@ -209,7 +238,10 @@ class ProductAddWidget extends StatelessWidget {
                               height: 20,
                               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                             )
-                          : const Text('Save Product', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          : const Text(
+                              'Save Product',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
                     )),
               )
             ],

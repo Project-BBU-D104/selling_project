@@ -17,15 +17,19 @@ class ProductScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
         title: const Text(
           'Product Management',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
-          ),
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.black, size: 28),
             onPressed: () {},
@@ -40,17 +44,18 @@ class ProductScreen extends StatelessWidget {
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search products...',
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 filled: true,
                 fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFF4F46E5)),
                 ),
               ),
             ),
@@ -61,12 +66,11 @@ class ProductScreen extends StatelessWidget {
                 children: [
                   _buildFilterChip('All Products', isSelected: true),
                   _buildFilterChip('Category GPU'),
-                  _buildFilterChip('Brand NVIDIA'),
                   _buildFilterChip('Stock Low'),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -78,35 +82,36 @@ class ProductScreen extends StatelessWidget {
                         isScrollControlled: true,
                       );
                     },
-                    icon: const Icon(Icons.add_circle, color: Colors.white),
+                    icon: const Icon(Icons.add_circle, color: Colors.white, size: 20),
                     label: const Text(
                       'Add New',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
+                      elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: const Icon(Icons.tune, color: Colors.black),
+                  child: const Icon(Icons.tune, color: Colors.black87, size: 22),
                 ),
               ],
             ),
             const SizedBox(height: 16),
 
-            // 4. Product Item List (Observed by GetX)
+            // Product List
             Expanded(
               child: Obx(() {
                 if (controller.loading.value) {
@@ -147,17 +152,20 @@ class ProductScreen extends StatelessWidget {
   Widget _buildFilterChip(String label, {bool isSelected = false}) {
     return Container(
       margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFBAE6FD) : Colors.grey.shade200,
+        color: isSelected ? const Color(0xFFBAE6FD) : Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected ? const Color(0xFFBAE6FD) : Colors.grey.shade300,
+        ),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 12,
-          color: isSelected ? const Color(0xFF0369A1) : Colors.grey.shade700,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? const Color(0xFF0369A1) : Colors.grey.shade600,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
         ),
       ),
     );
