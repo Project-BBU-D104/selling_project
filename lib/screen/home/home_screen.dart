@@ -70,9 +70,14 @@ class HomeScreen extends StatelessWidget {
                     () => ctr.gotoCategoryScreen(),
                   ),
                   _card(
-                    Icons.inventory,
-                    "Brand",
-                    () => ctr.gotoBrandScreen(),
+                    Icons.local_shipping_outlined,
+                    "Purchase",
+                    () => ctr.gotoPurchaseScreen(),
+                  ),
+                  _card(
+                    Icons.payment,
+                    "Payment",
+                    () => ctr.gotoPaymentScreen(),
                   ),
                 ],
               ),

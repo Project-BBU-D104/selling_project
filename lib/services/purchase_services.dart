@@ -4,7 +4,7 @@ import 'package:selling_project/services/api_services.dart';
 class PurchaseServices {
 
   final ApiServices api = ApiServices();
-  final String collection = "purchase";
+  final String collection = "purchases";
 
   // GET
   Stream<List<PurchaseModel>> getPurchases() {

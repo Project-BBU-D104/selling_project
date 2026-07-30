@@ -37,7 +37,6 @@ class DrawerWidget extends StatelessWidget {
               Get.until((route) => route.isFirst);
             },
           ),
-          
           _menu(
             Icons.shopping_cart,
             "Sales",
@@ -78,6 +77,11 @@ class DrawerWidget extends StatelessWidget {
             "Setting",
             () {},
           ),
+          // _menu(
+          //   Icons.payment,
+          //   "Payments",
+          //   () => ctr.gotoPaymentScreen()
+          // ),
           const Spacer(),
           const Divider(),
           _menu(

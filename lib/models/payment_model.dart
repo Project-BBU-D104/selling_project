@@ -1,55 +1,56 @@
 class PaymentModel {
   String? id;
-  String name;
-  String description;
-  Map<String,dynamic> sale;
+  String saleId;
+  String? invoiceNo;
+  String? customerName;
   String paymentMethod;
   double amount;
-  String referenceNo;
+  String? referenceNo;
+  String? note;
+  String status;
   DateTime paymentDate;
-  DateTime? createdAt;
-  DateTime? updatedAt;
-   
+
   PaymentModel({
     this.id,
-    required this.name,
-    required this.description,
-    required this.sale,
+    required this.saleId,
+    this.invoiceNo,
+    this.customerName,
     required this.paymentMethod,
     required this.amount,
-    required this.referenceNo,
+    this.referenceNo,
+    this.note,
+    this.status = 'Paid',
     required this.paymentDate,
-    this.createdAt,
-    this.updatedAt
   });
 
-  factory PaymentModel.fromJson(
-      Map<String,dynamic> json,
-      String? id
-  ){
+  factory PaymentModel.fromJson(Map<String, dynamic> json, String? id) {
     return PaymentModel(
-      id: id,
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      sale: json['sale'] ?? '',
-      paymentMethod: json['payment_method'] ?? '',
-      amount: json['amount'] ?? 0.0,
+      id: id ?? json['id'],
+      saleId: json['sale_id'] ?? '',
+      invoiceNo: json['invoice_no'] ?? '#INV-2023-001',
+      customerName: json['customer_name'] ?? '',
+      paymentMethod: json['payment_method'] ?? 'Cash Riel',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       referenceNo: json['reference_no'] ?? '',
-      paymentDate: json['payment_date'] ?? DateTime.now(),
-      createdAt: json['created_at'] ?? DateTime.now(),
-      updatedAt: json['updated_at'] ?? DateTime.now(),
+      note: json['note'] ?? '',
+      status: json['status'] ?? 'Paid',
+      paymentDate: json['payment_date'] != null
+          ? (json['payment_date'] is String
+              ? DateTime.parse(json['payment_date'])
+              : json['payment_date'].toDate())
+          : DateTime.now(),
     );
   }
 
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
-      "name": name,
-      "description": description,
-      "sale": sale,
+      "sale_id": saleId,
       "payment_method": paymentMethod,
       "amount": amount,
       "reference_no": referenceNo,
-      "payment_date": paymentDate
+      "note": note,
+      "status": status,
+      "payment_date": paymentDate.toIso8601String(),
     };
   }
 }
