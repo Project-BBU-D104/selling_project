@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CustomerModel {
   String? id;
   String customerName;
+  String? customerType;
   String? phone;
   String? email;
   String? address;
@@ -13,6 +14,7 @@ class CustomerModel {
   CustomerModel({
     this.id,
     required this.customerName,
+    this.customerType,
     this.phone,
     this.email,
     this.address,
@@ -25,6 +27,7 @@ class CustomerModel {
     return CustomerModel(
       id: id,
       customerName: json['customer_name'] ?? '',
+      customerType: json['customer_type'],
       phone: json['phone'],
       email: json['email'],
       address: json['address'],
@@ -37,10 +40,11 @@ class CustomerModel {
           : null,
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       "customer_name": customerName,
+      "customer_type": customerType,
       "phone": phone,
       "email": email,
       "address": address,
@@ -53,6 +57,7 @@ class CustomerModel {
   Map<String, dynamic> toUpdateJson() {
     return {
       "customer_name": customerName,
+      "customer_type": customerType,
       "phone": phone,
       "email": email,
       "address": address,

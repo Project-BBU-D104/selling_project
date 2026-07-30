@@ -13,8 +13,8 @@ class CustomerController extends GetxController {
   var lastSearchKeyword = ''.obs;
   var statusFilter = 'All'.obs;
 
-  // Form Controllers
   final customerNameController = TextEditingController();
+  final customerTypeController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final addressController = TextEditingController();
@@ -54,6 +54,7 @@ class CustomerController extends GetxController {
       final now = DateTime.now();
       CustomerModel customer = CustomerModel(
         customerName: customerNameController.text.trim(),
+        customerType: customerTypeController.text.trim().isEmpty ? null : customerTypeController.text.trim(),
         phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
         email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
         address: addressController.text.trim().isEmpty ? null : addressController.text.trim(),
@@ -91,6 +92,7 @@ class CustomerController extends GetxController {
       CustomerModel customer = CustomerModel(
         id: id,
         customerName: customerNameController.text.trim(),
+        customerType: customerTypeController.text.trim().isEmpty ? null : customerTypeController.text.trim(),
         phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
         email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
         address: addressController.text.trim().isEmpty ? null : addressController.text.trim(),
@@ -144,6 +146,7 @@ class CustomerController extends GetxController {
 
   void setCustomer(CustomerModel customer) {
     customerNameController.text = customer.customerName;
+    customerTypeController.text = customer.customerType ?? '';
     phoneController.text = customer.phone ?? '';
     emailController.text = customer.email ?? '';
     addressController.text = customer.address ?? '';
@@ -152,6 +155,7 @@ class CustomerController extends GetxController {
 
   void clearForm() {
     customerNameController.clear();
+    customerTypeController.clear();
     phoneController.clear();
     emailController.clear();
     addressController.clear();
@@ -175,9 +179,10 @@ class CustomerController extends GetxController {
       String query = lastSearchKeyword.value.toLowerCase();
       tempResults = tempResults.where((customer) {
         final matchesName = customer.customerName.toLowerCase().contains(query);
+        final matchesType = customer.customerType?.toLowerCase().contains(query) ?? false;
         final matchesPhone = customer.phone?.contains(query) ?? false;
         final matchesEmail = customer.email?.toLowerCase().contains(query) ?? false;
-        return matchesName || matchesPhone || matchesEmail;
+        return matchesName || matchesType || matchesPhone || matchesEmail;
       }).toList();
     }
     if (statusFilter.value == 'Active') {
@@ -192,6 +197,7 @@ class CustomerController extends GetxController {
   @override
   void onClose() {
     customerNameController.dispose();
+    customerTypeController.dispose();
     phoneController.dispose();
     emailController.dispose();
     addressController.dispose();

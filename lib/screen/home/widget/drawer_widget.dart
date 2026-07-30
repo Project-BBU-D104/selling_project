@@ -12,17 +12,17 @@ class DrawerWidget extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(
+          const UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
               color: Color(0xFF003B6D),
             ),
-            accountName: const Text(
+            accountName: Text(
               "HardwarePro Enterprise",
             ),
-            accountEmail: const Text(
+            accountEmail: Text(
               "Inventory Management System",
             ),
-            currentAccountPicture: const CircleAvatar(
+            currentAccountPicture: CircleAvatar(
               child: Icon(
                 Icons.business,
                 size: 40,
@@ -32,8 +32,12 @@ class DrawerWidget extends StatelessWidget {
           _menu(
             Icons.home,
             "Home",
-            () => Get.back(),
+            () {
+              Get.back();
+              Get.until((route) => route.isFirst);
+            },
           ),
+          
           _menu(
             Icons.shopping_cart,
             "Sales",
@@ -72,7 +76,7 @@ class DrawerWidget extends StatelessWidget {
           _menu(
             Icons.settings,
             "Setting",
-            () => (),
+            () {},
           ),
           const Spacer(),
           const Divider(),

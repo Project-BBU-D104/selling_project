@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/product_controller.dart';
+import 'package:selling_project/screen/product/widget/product_detail_screen.dart';
 import 'package:selling_project/screen/product/widget/product_add_widget.dart';
 import 'package:selling_project/screen/product/widget/product_card_widget.dart';
 import 'package:selling_project/screen/product/widget/product_edit_widget.dart';
@@ -128,6 +129,9 @@ class ProductScreen extends StatelessWidget {
                     final item = controller.product[index];
                     return ProductCardWidget(
                       product: item,
+                      onTap: () {
+                        Get.to(() => ProductDetailScreen(product: item));
+                      },
                       onEdit: () {
                         controller.initEditForm(item);
                         Get.bottomSheet(

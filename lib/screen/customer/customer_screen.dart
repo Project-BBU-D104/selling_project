@@ -10,75 +10,94 @@ class CustomerScreen extends StatelessWidget {
   CustomerScreen({super.key});
 
   final ctr = Get.find<CustomerController>();
-  final TextEditingController searchTxtController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.white,
       drawer: DrawerWidget(),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF003366)),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Customer Management',
-          style: TextStyle(
-            color: Color(0xFF003366),
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.black, size: 28),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
+        title: const Text(
+          'Customer',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.black, size: 26),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.black, size: 30),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Obx(() {
         if (ctr.loading.value && ctr.customers.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF003366)),
+            child: CircularProgressIndicator(color: Color(0xFF005288)),
           );
         }
 
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               CustomerSearch(
                 onChanged: (val) => ctr.searchCustomer(val),
               ),
-
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Obx(() => Text(
-                        'Total Customers (${ctr.filteredCustomers.length})',
+                        '${ctr.filteredCustomers.length} Customers',
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF111827),
+                          color: Colors.black,
                         ),
                       )),
-                  TextButton(
+                  ElevatedButton(
                     onPressed: () {
-                      ctr.searchController.clear();
-                      ctr.searchCustomer('');
-                      ctr.filterByStatus('All');
+                      ctr.clearForm();
+                      Get.to(() => const CustomerAddWidget());
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF005288),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
                     child: const Text(
-                      'View All',
+                      'Add Customer',
                       style: TextStyle(
-                        color: Color(0xFF0066B2),
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Expanded(
                 child: ctr.filteredCustomers.isEmpty
                     ? Center(
@@ -116,14 +135,6 @@ class CustomerScreen extends StatelessWidget {
           ),
         );
       }),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF003366),
-        onPressed: () {
-          ctr.clearForm();
-          Get.to(() => const CustomerAddWidget());
-        },
-        child: const Icon(Icons.person_add_alt_1, color: Colors.white),
-      ),
     );
   }
 }

@@ -36,7 +36,6 @@ class SaleScreen extends StatelessWidget {
         children: [
           Column(
             children: [
-              // 1. Search Bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: TextField(
@@ -60,8 +59,6 @@ class SaleScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // 2. Category Filter Bar (Chips)
               Obx(() {
                 final categories = ctr.categoryCtr.category;
                 return SingleChildScrollView(
@@ -69,7 +66,6 @@ class SaleScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Row(
                     children: [
-                      // Chip 'All'
                       ChoiceChip(
                         label: const Text('All'),
                         selected: ctr.selectedCategoryId.value == 'All',
@@ -86,7 +82,6 @@ class SaleScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // List Categories មកពី Firebase
                       ...categories.map((cat) {
                         bool isSelected = ctr.selectedCategoryId.value == cat.id;
                         return Padding(
@@ -112,8 +107,6 @@ class SaleScreen extends StatelessWidget {
               }),
 
               const SizedBox(height: 8),
-
-              // 3. Product Grid View
               Expanded(
                 child: Obx(() {
                   if (ctr.filteredProducts.isEmpty) {
@@ -130,7 +123,7 @@ class SaleScreen extends StatelessWidget {
                       left: 16,
                       right: 16,
                       top: 8,
-                      bottom: 100, // Space សម្រាប់ Cart Bottom Bar
+                      bottom: 100,
                     ),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
@@ -151,8 +144,6 @@ class SaleScreen extends StatelessWidget {
               ),
             ],
           ),
-
-          // 4. Floating Cart Bottom Bar
           Obx(() {
             if (ctr.cartItems.isEmpty) return const SizedBox.shrink();
 
@@ -171,7 +162,7 @@ class SaleScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(35),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF00A86B).withOpacity(0.3),
+                        color: const Color(0xFF00A86B).withValues(alpha: 0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       )
