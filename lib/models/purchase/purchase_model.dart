@@ -7,7 +7,7 @@ class PurchaseModel {
   double totalAmount;
   DateTime purchaseDate;
   DateTime? expectedDelivery;
-  String status; // 'Received', 'In Transit', 'Completed', 'Cancelled', 'Pending'
+  String status;
 
   PurchaseModel({
     this.id,

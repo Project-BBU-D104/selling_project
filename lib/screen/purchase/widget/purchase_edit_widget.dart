@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:selling_project/controller/purchase_controller.dart';
-//import 'package:selling_project/models/purchase/purchase_items_model.dart';
 import 'package:selling_project/models/purchase/purchase_model.dart';
 
 class PurchaseEditWidget extends StatefulWidget {
@@ -17,9 +16,9 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
   final ctr = Get.find<PurchaseController>();
 
   late TextEditingController poNoCtr;
-  final productNameCtr = TextEditingController();
-  final qtyCtr = TextEditingController(text: "0");
-  final priceCtr = TextEditingController(text: "0.00");
+  late TextEditingController productNameCtr;
+  late TextEditingController qtyCtr;
+  late TextEditingController priceCtr;
 
   String? selectedSupplier;
   DateTime? refDate;
@@ -29,13 +28,47 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
   void initState() {
     super.initState();
     poNoCtr = TextEditingController(text: widget.purchase.invoiceNo);
+    productNameCtr = TextEditingController();
+    qtyCtr = TextEditingController(text: "0");
+    priceCtr = TextEditingController(text: "0.00");
+
     selectedSupplier = widget.purchase.supplierName;
     refDate = widget.purchase.purchaseDate;
     expDeliveryDate = widget.purchase.expectedDelivery;
   }
 
   @override
+  void dispose() {
+    poNoCtr.dispose();
+    productNameCtr.dispose();
+    qtyCtr.dispose();
+    priceCtr.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // 1. Get dynamic suppliers list from supplierController
+    List<String> suppliers = ctr.supplierCtr.suppliers
+        .map((s) => s.name ?? "")
+        .where((name) => name.isNotEmpty)
+        .toList();
+
+    // Fallback: Default list if supplier controller list is empty
+    if (suppliers.isEmpty) {
+      suppliers = [
+        "Global Hardware Inc.",
+        "Silicon Dynamics Co.",
+        "Power Grid Solutions",
+        "Apex Logistics Parts",
+      ];
+    }
+
+    // 2. Ensure current selectedSupplier exists in the list to prevent Assertion Errors
+    if (selectedSupplier != null && !suppliers.contains(selectedSupplier)) {
+      suppliers.add(selectedSupplier!);
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
@@ -77,7 +110,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               DropdownButtonFormField<String>(
                 value: selectedSupplier,
                 decoration: _inputDecoration("Select a supplier"),
-                items: ["Global Hardware Inc.", "Silicon Dynamics Co.", "Power Grid Solutions", "Apex Logistics Parts"]
+                items: suppliers
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (val) => setState(() => selectedSupplier = val),
@@ -97,7 +130,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildLabel("Reference Data"),
+                        _buildLabel("Reference Date"),
                         InkWell(
                           onTap: () async {
                             DateTime? picked = await showDatePicker(

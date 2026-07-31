@@ -21,8 +21,8 @@ class CustomerScreen extends StatelessWidget {
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black, size: 28),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
+            onPressed: () => Get.back(),
           ),
         ),
         title: const Text(
