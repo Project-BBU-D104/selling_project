@@ -13,8 +13,7 @@ class SaleListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sales History",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Sales History", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF004C87),
         foregroundColor: Colors.white,
       ),
@@ -72,14 +71,11 @@ class SaleListScreen extends StatelessWidget {
                   final sale = ctr.sales[index];
 
                   return Card(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     elevation: 2,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       leading: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
@@ -90,15 +86,12 @@ class SaleListScreen extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.receipt_long,
-                          color: sale.paymentStatus == "paid"
-                              ? Colors.green
-                              : Colors.orange,
+                          color: sale.paymentStatus == "paid" ? Colors.green : Colors.orange,
                         ),
                       ),
                       title: Text(
                         "Invoice: ${sale.invoiceNo}",
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,24 +120,27 @@ class SaleListScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Icon(Icons.arrow_forward_ios,
-                              size: 14, color: Colors.grey),
+                          const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
                         ],
                       ),
                       onTap: () async {
                         ctr.loadingItems.value = true;
-                        if (sale.customerId != null &&
-                            sale.customerId!.isNotEmpty) {
+                        if (sale.customerId != null && sale.customerId!.isNotEmpty) {
                           await ctr.loadCustomer(sale.customerId!);
                         } else {
                           ctr.customer.value = null;
                         }
-
+                        
                         if (sale.id != null) {
                           ctr.loadSaleItems(sale.id!);
                         }
-
-                        Get.to(() => SaleDetailScreen(sale: sale));
+                        
+                        Get.to(() => SaleDetailScreen(
+                              saleId: sale.id ?? '',
+                              invoiceNo: sale.invoiceNo,
+                              totalAmount: sale.totalAmount,
+                              subtotal: sale.subtotal,
+                            ));
                       },
                     ),
                   );

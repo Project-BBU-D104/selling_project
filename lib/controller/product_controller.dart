@@ -24,9 +24,6 @@ class ProductController extends GetxController {
       : Get.put(SupplierController());
 
   RxList<ProductModel> product = <ProductModel>[].obs;
-  // Getter សម្រាប់សម្រួលដល់ការហៅ productList ពី Controller ផ្សេងៗ
-  List<ProductModel> get productList => product;
-
   RxBool loading = false.obs;
 
   final formKey = GlobalKey<FormState>();
@@ -65,6 +62,7 @@ class ProductController extends GetxController {
     super.onClose();
   }
 
+  // 🔹 Method ជ្រើសរើសរូបភាព
   Future<void> pickImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -142,54 +140,6 @@ class ProductController extends GetxController {
     }, onError: (err) {
       loading.value = false;
     });
-  }
-
-  // 🔹 NEW METHOD: សម្រាប់ដកចំនួនស្តុកទំនិញ (Decrease Stock)
-  Future<bool> decreaseProductStock(String? productId, int quantityToDeduct) async {
-    if (productId == null || productId.isEmpty) return false;
-
-    try {
-      int index = product.indexWhere((p) => p.id == productId);
-      if (index != -1) {
-        final currentProduct = product[index];
-        int currentQty = currentProduct.quantity;
-
-        if (currentQty >= quantityToDeduct) {
-          int updatedQty = currentQty - quantityToDeduct;
-
-          // បង្កើត Product Model ថ្មីដែលមាន Quantity ថយចុះ
-          ProductModel updatedProduct = ProductModel(
-            id: currentProduct.id,
-            productName: currentProduct.productName,
-            costPrice: currentProduct.costPrice,
-            salePrice: currentProduct.salePrice,
-            quantity: updatedQty,
-            categoryId: currentProduct.categoryId,
-            brandId: currentProduct.brandId,
-            supplierId: currentProduct.supplierId,
-            image: currentProduct.image,
-            description: currentProduct.description,
-            status: currentProduct.status,
-            createdAt: currentProduct.createdAt,
-          );
-
-          // អាប់ដេតទៅ Service / Firebase
-          await service.updateProduct(updatedProduct);
-          
-          // Refresh ទិន្នន័យក្នុង List
-          product[index] = updatedProduct;
-          product.refresh();
-          return true;
-        } else {
-          Get.snackbar("Stock Alert", "Product ${currentProduct.productName} out of stock!");
-          return false;
-        }
-      }
-      return false;
-    } catch (e) {
-      Get.snackbar("Error", "Failed to update stock: $e");
-      return false;
-    }
   }
 
   Future<void> submitSave() async {

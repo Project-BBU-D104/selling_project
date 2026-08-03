@@ -1,298 +1,214 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/models/sale/sale_model.dart';
+import 'package:selling_project/controller/sale_controller.dart';
 
 class SaleDetailScreen extends StatelessWidget {
-  final SaleModel? sale;
+  final String saleId;
+  final String invoiceNo;
+  final double subtotal;
+  final double totalAmount;
 
-  const SaleDetailScreen({super.key, this.sale});
+  SaleDetailScreen({
+    super.key,
+    required this.saleId,
+    required this.invoiceNo,
+    required this.subtotal,
+    required this.totalAmount,
+  });
+
+  final SaleController ctr = Get.find<SaleController>();
 
   @override
   Widget build(BuildContext context) {
-    // 🟢 កែសម្រួល៖ ទទួលយក Nullable (SaleModel?) និង Cast ដោយសុវត្ថិភាព
-    final SaleModel? saleData = sale ?? (Get.arguments is SaleModel ? Get.arguments as SaleModel : null);
-
-    // 🟢 កែសម្រួល៖ ការពារ App Crash ប្រសិនបើគ្មានទិន្នន័យ Sale ត្រូវបានបញ្ជូនមក
-    if (saleData == null) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF3F4F6),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFFF3F4F6),
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Get.back(),
-          ),
-          title: const Text(
-            "Sale Detail",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-        ),
-        body: const Center(
-          child: Text(
-            "No Sale Data Found",
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF3F4F6),
-        elevation: 0,
+        title: Text("Invoice #$invoiceNo", style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          "Sale Detail",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.print, color: Colors.black),
-            onPressed: () {},
-          )
-        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // INVOICE HEADER
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF003D6B),
-                borderRadius: BorderRadius.circular(16),
+      backgroundColor: Colors.grey.shade50,
+      body: Obx(() {
+        if (ctr.loadingItems.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final customer = ctr.customer.value;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Customer Section
+              const Text("CUSTOMER", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 8),
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0.5,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue.shade50,
+                    child: const Icon(Icons.person, color: Color(0xFF004C87)),
+                  ),
+                  title: Text(
+                    customer != null ? customer.customerName : "General Customer",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(customer != null ? "Phone: ${customer.phone}" : "No Account ID"),
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 20),
+
+              // Items Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "INVOICE",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade400,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          "Paid",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "#${saleData.id ?? 'INV-0000'}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Date: ${saleData.saleDate ?? 'N/A'}",
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
+                  Text("ITEMS (${ctr.saleItems.length})", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 8),
 
-            // CUSTOMER SECTION
-            const Text(
-              "CUSTOMER",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.black,
-                    child: Icon(Icons.person, color: Colors.white, size: 24),
+              // Items List
+              if (ctr.saleItems.isEmpty)
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: Text("No items found in this invoice")),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          saleData.customerName ?? "General Customer",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "ID: ${saleData.customerId ?? 'N/A'}",
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // PURCHASED ITEMS SECTION
-            const Text(
-              "PURCHASED ITEMS",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: saleData.items?.length ?? 0,
-              itemBuilder: (context, index) {
-                final item = saleData.items![index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 45,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.laptop_mac,
-                          size: 28,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: ctr.saleItems.length,
+                  itemBuilder: (context, index) {
+                    final item = ctr.saleItems[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
                           children: [
-                            Text(
-                              item.productName ?? 'Product Item',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                            Container(
+                              width: 45,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF004C87)),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.productName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "${item.quantity} x \$${item.unitPrice.toStringAsFixed(2)}",
+                                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 2),
                             Text(
-                              "${item.quantity} Unit x \$${item.price?.toStringAsFixed(2)}",
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 11,
-                              ),
+                              "\$${item.totalPrice.toStringAsFixed(2)}",
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             ),
                           ],
                         ),
                       ),
-                      Text(
-                        "\$${((item.quantity ?? 1) * (item.price ?? 0)).toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
+                    );
+                  },
+                ),
+              const SizedBox(height: 20),
 
-            // PAYMENT SUMMARY
-            const Text(
-              "PAYMENT SUMMARY",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
+              // Payment Method
+              const Text("PAYMENT METHOD", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 10),
+              Row(
                 children: [
-                  _buildSummaryRow(
-                    "Payment Method",
-                    saleData.paymentMethod ?? "Cash",
-                  ),
-                  _buildSummaryRow(
-                    "Subtotal",
-                    "\$${(saleData.subtotal ?? 0).toStringAsFixed(2)}",
-                  ),
-                  _buildSummaryRow(
-                    "Tax",
-                    "\$${(saleData.tax ?? 0).toStringAsFixed(2)}",
-                  ),
-                  _buildSummaryRow(
-                    "Discount",
-                    "-\$${(saleData.discount ?? 0).toStringAsFixed(2)}",
-                    isDiscount: true,
-                  ),
-                  const Divider(height: 24),
-                  _buildSummaryRow(
-                    "Total Paid",
-                    "\$${(saleData.totalAmount ?? 0).toStringAsFixed(2)}",
-                    isTotal: true,
-                  ),
+                  _buildPaymentTypeCard(Icons.money, "Cash", true),
+                  _buildPaymentTypeCard(Icons.credit_card, "Card", false),
+                  _buildPaymentTypeCard(Icons.qr_code, "Digital", false),
                 ],
+              ),
+              const SizedBox(height: 20),
+
+              // Summary
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    _buildSummaryRow("Subtotal", "\$${subtotal.toStringAsFixed(2)}", isBold: false),
+                    _buildSummaryRow("Discount", "-\$0.00", isBold: false, color: Colors.red),
+                    const Divider(height: 24),
+                    _buildSummaryRow("Total Amount", "\$${totalAmount.toStringAsFixed(2)}", isBold: true, fontSize: 18, color: const Color(0xFF004C87)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
+
+              // Confirm Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Get.snackbar("Invoice Status", "This order is recorded successfully.");
+                  },
+                  icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                  label: const Text("Completed Order", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF004C87),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildPaymentTypeCard(IconData icon, String label, bool isSelected) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF004C87) : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? const Color(0xFF004C87) : Colors.black54),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? const Color(0xFF004C87) : Colors.black87,
               ),
             ),
           ],
@@ -301,37 +217,14 @@ class SaleDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(
-    String title,
-    String value, {
-    bool isDiscount = false,
-    bool isTotal = false,
-  }) {
+  Widget _buildSummaryRow(String title, String value, {required bool isBold, double fontSize = 14, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: isTotal ? 14 : 12,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? Colors.black : Colors.grey.shade600,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 12,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isDiscount
-                  ? Colors.red
-                  : isTotal
-                      ? const Color(0xFF003D6B)
-                      : Colors.black,
-            ),
-          ),
+          Text(title, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: Colors.grey.shade700)),
+          Text(value, style: TextStyle(fontSize: fontSize, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: color ?? Colors.black87)),
         ],
       ),
     );

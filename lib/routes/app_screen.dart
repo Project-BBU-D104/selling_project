@@ -19,13 +19,13 @@ import 'package:selling_project/screen/home/home_screen.dart';
 import 'package:selling_project/screen/payment/payment_screen.dart';
 import 'package:selling_project/screen/product/product_screen.dart';
 import 'package:selling_project/screen/purchase/purchase_screen.dart';
-import 'package:selling_project/screen/sale/sale_detail_screen.dart';
+import 'package:selling_project/screen/sale/sale_list_screen.dart';
 import 'package:selling_project/screen/sale/sale_screen.dart';
-import 'package:selling_project/screen/sale/sale_success_screen.dart';
 import 'package:selling_project/screen/splash_screen.dart';
 import 'package:selling_project/screen/stock_adjustment/stock_adjustment_screen.dart';
 import 'package:selling_project/screen/supplier/supplier_screen.dart';
 import 'package:selling_project/screen/user/user_screen.dart';
+
 
 class AppScreen {
   static final pages = [
@@ -75,18 +75,9 @@ class AppScreen {
       binding: PurchaseBinding(),
     ),
     GetPage(
-        name: AppRoute.sale,
-        page: () => SaleScreen(),
-        binding: SaleBinding()),
-    GetPage(
-      name: AppRoute.saleDetailScreen,
-      page: () => const SaleDetailScreen(),
-      binding: SaleBinding(),
-    ),
-    GetPage(
-      name: AppRoute.saleSuccessScreen,
-      page: () => const SaleSuccessScreen(),
-      binding: SaleBinding(),
+      name: AppRoute.sale,
+      page: () => SaleScreen(),
+      binding: SaleBinding()
     ),
     GetPage(
       name: AppRoute.stockAdjustment,
@@ -102,10 +93,6 @@ class AppScreen {
       name: AppRoute.user,
       page: () => UserScreen(),
       binding: UserBinding(),
-    ),
-    GetPage(
-      name: AppRoute.saleSuccessScreen,
-      page: () => const SaleSuccessScreen(),
     ),
   ];
 }
