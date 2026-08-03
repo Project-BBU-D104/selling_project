@@ -53,7 +53,7 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
           children: [
             _buildLabel("Invoice Number"),
             DropdownButtonFormField<String>(
-              value: widget.payment.invoiceNo ?? "#INV-2023-001",
+              initialValue: widget.payment.invoiceNo ?? "#INV-2023-001",
               decoration: _inputDecoration(""),
               items: ["#INV-2023-001", "#INV-2023-002"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -79,7 +79,7 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
 
             _buildLabel("Payment Method"),
             DropdownButtonFormField<String>(
-              value: selectedMethod,
+              initialValue: selectedMethod,
               decoration: _inputDecoration(""),
               items: ["Bank Transfer", "Cash Riel", "ABA PAY", "Credit Card"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))

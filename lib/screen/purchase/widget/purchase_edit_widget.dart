@@ -108,7 +108,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
 
               _buildLabel("Supplier Name"),
               DropdownButtonFormField<String>(
-                value: selectedSupplier,
+                initialValue: selectedSupplier,
                 decoration: _inputDecoration("Select a supplier"),
                 items: suppliers
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))

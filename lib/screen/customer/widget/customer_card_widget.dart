@@ -59,7 +59,7 @@ class CustomerCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF005288).withOpacity(0.1),
+                          color: const Color(0xFF005288).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: const Color(0xFF005288), width: 0.8),
                         ),

@@ -53,7 +53,7 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
               const Divider(height: 24),
               _buildLabel("Supplier Name"),
               Obx(() => DropdownButtonFormField<SupplierModel>(
-                value: ctr.selectedSupplier.value,
+                initialValue: ctr.selectedSupplier.value,
                 hint: const Text("Select Supplier"),
                 decoration: _inputDecoration(""),
                 items: ctr.supplierDropdownItems,
@@ -149,7 +149,7 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                   children: [
                     _buildLabel("Select Product"),
                     Obx(() => DropdownButtonFormField<ProductModel>(
-                      value: ctr.selectedProduct.value,
+                      initialValue: ctr.selectedProduct.value,
                       hint: const Text("Select Product"),
                       decoration: _inputDecoration(""),
                       items: ctr.productDropdownItems,

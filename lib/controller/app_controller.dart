@@ -1,6 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
-import 'package:selling_project/routes/app_route.dart';
 
 class AppController extends ChangeNotifier {
   bool isLoading = true;   
@@ -16,8 +14,6 @@ class AppController extends ChangeNotifier {
     if (isLoading) {
       await Future.delayed(const Duration(milliseconds: 1500));
     }
- 
-    Get.offAllNamed(AppRoute.login);
     
     isLoading = false;
     notifyListeners();
