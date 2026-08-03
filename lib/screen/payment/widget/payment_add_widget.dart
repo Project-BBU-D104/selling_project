@@ -72,7 +72,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
 
             _buildLabel("Payment Method"),
             DropdownButtonFormField<String>(
-              value: selectedMethod,
+              initialValue: selectedMethod,
               decoration: _inputDecoration(""),
               items: ["Bank Transfer", "Cash Riel", "ABA PAY", "Credit Card"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))

@@ -119,7 +119,7 @@ class PurchaseScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(label, style: TextStyle(fontSize: 13, color: textColor.withOpacity(0.9))),
+          Text(label, style: TextStyle(fontSize: 13, color: textColor.withValues(alpha: 0.9))),
           const SizedBox(height: 4),
           Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
         ],

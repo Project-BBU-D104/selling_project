@@ -129,15 +129,14 @@ class ProductDetailScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      if (product.costPrice != null)
-                        Text(
-                          "Cost Price: \$${product.costPrice!.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade500,
-                            decoration: TextDecoration.lineThrough,
-                          ),
+                      Text(
+                        "Cost Price: \$${product.costPrice!.toStringAsFixed(2)}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                          decoration: TextDecoration.lineThrough,
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
