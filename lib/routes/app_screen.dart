@@ -21,6 +21,7 @@ import 'package:selling_project/screen/product/product_screen.dart';
 import 'package:selling_project/screen/purchase/purchase_screen.dart';
 import 'package:selling_project/screen/sale/review_order_screen.dart';
 import 'package:selling_project/screen/sale/sale_screen.dart';
+import 'package:selling_project/screen/sale/sales_completion_screen.dart';
 import 'package:selling_project/screen/splash_screen.dart';
 import 'package:selling_project/screen/stock_adjustment/stock_adjustment_screen.dart';
 import 'package:selling_project/screen/supplier/supplier_screen.dart';
@@ -80,8 +81,13 @@ class AppScreen {
       binding: SaleBinding()
     ),
     GetPage(
-      name: AppRoute.reviewOrder,
+      name: AppRoute.reviewOrderScreen,
       page: () => ReviewOrderScreen(),
+      binding: SaleBinding(),
+    ),
+    GetPage(
+      name: AppRoute.SalesCompletionScreen,
+      page: () => SalesCompletionScreen(),
       binding: SaleBinding(),
     ),
     GetPage(

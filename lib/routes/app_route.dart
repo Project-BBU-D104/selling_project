@@ -10,9 +10,8 @@ class AppRoute {
   static const String purchase = '/purchase';
 
   static const String sale = '/sale';
-  static const String saleDetailScreen = '/sale-detail';
-  static const String saleSuccessScreen = '/sale-success';
-  static const String reviewOrder = '/review-order';
+  static const String SalesCompletionScreen = '/sale-completion';
+  static const String reviewOrderScreen = '/review-order';
 
   static const String stockAdjustment = '/stock-adjustment';
   static const String supplier = '/supplier';

@@ -5,7 +5,7 @@ import 'package:selling_project/controller/home_controller.dart';
 class DrawerWidget extends StatelessWidget {
   DrawerWidget({super.key});
 
-  final ctr = Get.find<HomeController>();
+  final ctr = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
