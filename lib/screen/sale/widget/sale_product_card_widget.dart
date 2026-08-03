@@ -12,7 +12,7 @@ class SaleProductCardWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -89,7 +89,7 @@ class SaleProductCardWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Icon(
-                          Icons.add,
+                          Icons.shopping_cart_outlined,
                           size: 16,
                           color: Colors.white,
                         ),

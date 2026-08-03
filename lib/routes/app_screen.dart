@@ -19,7 +19,7 @@ import 'package:selling_project/screen/home/home_screen.dart';
 import 'package:selling_project/screen/payment/payment_screen.dart';
 import 'package:selling_project/screen/product/product_screen.dart';
 import 'package:selling_project/screen/purchase/purchase_screen.dart';
-import 'package:selling_project/screen/sale/sale_list_screen.dart';
+import 'package:selling_project/screen/sale/review_order_screen.dart';
 import 'package:selling_project/screen/sale/sale_screen.dart';
 import 'package:selling_project/screen/splash_screen.dart';
 import 'package:selling_project/screen/stock_adjustment/stock_adjustment_screen.dart';
@@ -78,6 +78,11 @@ class AppScreen {
       name: AppRoute.sale,
       page: () => SaleScreen(),
       binding: SaleBinding()
+    ),
+    GetPage(
+      name: AppRoute.reviewOrder,
+      page: () => ReviewOrderScreen(),
+      binding: SaleBinding(),
     ),
     GetPage(
       name: AppRoute.stockAdjustment,
