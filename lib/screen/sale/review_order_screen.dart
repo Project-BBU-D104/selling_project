@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:selling_project/controller/sale_controller.dart';
+import 'package:selling_project/models/sale/sale_items_model.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/routes/app_route.dart';
+import 'package:selling_project/utils/print_helper.dart'; // 📌 នាំចូល PrintHelper ដែលបានបង្កើតថ្មី
 
 class ReviewOrderScreen extends StatelessWidget {
   const ReviewOrderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 1. Safely retrieve SaleModel arguments
+    final SaleController saleController = Get.find<SaleController>();
     final SaleModel? saleData =
         Get.arguments is SaleModel ? Get.arguments as SaleModel : null;
 
-    // Validation: Return early if no order data is present
     if (saleData == null) {
       return Scaffold(
         appBar: AppBar(
@@ -31,9 +33,17 @@ class ReviewOrderScreen extends StatelessWidget {
       );
     }
 
-    // 2. Reactive payment method state
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (saleData.customerName != null && saleData.customerName!.isNotEmpty) {
+        saleController.selectedCustomerName.value = saleData.customerName!;
+      }
+      if (saleData.customerId != null && saleData.customerId!.isNotEmpty) {
+        saleController.selectedCustomerId.value = saleData.customerId!;
+      }
+    });
+
     final RxString selectedPaymentMethod = 'Cash'.obs;
-    final List<dynamic> itemList = saleData.items ?? [];
+    final List<SaleItemModel> itemList = saleData.items ?? [];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -95,25 +105,38 @@ class ReviewOrderScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (saleData.customerId?.isNotEmpty ?? false)
-                                ? saleData.customerId!
-                                : "General Customer",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                      child: Obx(() {
+                        final String currentName =
+                            saleController.selectedCustomerName.value.isNotEmpty
+                                ? saleController.selectedCustomerName.value
+                                : "General Customer";
+
+                        final String currentId =
+                            saleController.selectedCustomerId.value;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              currentName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            "Premium Account . ID: 88291",
-                            style: TextStyle(color: Colors.grey, fontSize: 11),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(height: 2),
+                            Text(
+                              currentId.isNotEmpty
+                                  ? "Customer ID: $currentId"
+                                  : "Standard Account",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
                     ),
                     IconButton(
                       icon: const Icon(
@@ -121,7 +144,9 @@ class ReviewOrderScreen extends StatelessWidget {
                         color: Colors.black54,
                         size: 20,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        saleController.openCustomerSelectBottomSheet();
+                      },
                     ),
                   ],
                 ),
@@ -156,19 +181,22 @@ class ReviewOrderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Items List with null-safety
               if (itemList.isNotEmpty)
                 ...itemList.map((item) => _buildItemCard(item))
               else
-                _buildDefaultItemCard(
-                  "MacBook Pro M2 14\"",
-                  "1 Unit . \$1,599.99",
-                  "\$1,599.99",
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "No items in cart",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
                 ),
 
               const SizedBox(height: 20),
 
-              // 3. PAYMENT METHOD SECTION
+              // 3. PAYMENT METHOD
               const Text(
                 "PAYMENT METHOD",
                 style: TextStyle(
@@ -217,19 +245,23 @@ class ReviewOrderScreen extends StatelessWidget {
                   children: [
                     _buildSummaryRow(
                       "Subtotal",
-                      "\$${(saleData.subtotal ?? 0.0).toStringAsFixed(2)}",
+                      "\$${saleData.subtotal.toStringAsFixed(2)}",
                     ),
-                    const SizedBox(height: 6),
-                    _buildSummaryRow(
-                      "Tax (8.25%)",
-                      "\$${(saleData.tax ?? 0.0).toStringAsFixed(2)}",
-                    ),
-                    const SizedBox(height: 6),
-                    _buildSummaryRow(
-                      "Discount (5%)",
-                      "-\$${(saleData.discount ?? 0.0).toStringAsFixed(2)}",
-                      isDiscount: true,
-                    ),
+                    if (saleData.tax > 0) ...[
+                      const SizedBox(height: 6),
+                      _buildSummaryRow(
+                        "Tax",
+                        "\$${saleData.tax.toStringAsFixed(2)}",
+                      ),
+                    ],
+                    if (saleData.discount > 0) ...[
+                      const SizedBox(height: 6),
+                      _buildSummaryRow(
+                        "Discount",
+                        "-\$${saleData.discount.toStringAsFixed(2)}",
+                        isDiscount: true,
+                      ),
+                    ],
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 10),
                       child: Divider(height: 1, color: Colors.black12),
@@ -245,7 +277,7 @@ class ReviewOrderScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "\$${(saleData.totalAmount ?? 0.0).toStringAsFixed(2)}",
+                          "\$${saleData.totalAmount.toStringAsFixed(2)}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -259,7 +291,7 @@ class ReviewOrderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // 5. CONFIRM & PAY BUTTON
+              // Confirm & Pay Button
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -271,14 +303,53 @@ class ReviewOrderScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
+                    saleData.customerName =
+                        saleController.selectedCustomerName.value;
+                    saleData.customerId =
+                        saleController.selectedCustomerId.value.isNotEmpty
+                            ? saleController.selectedCustomerId.value
+                            : null;
+
                     saleData.paymentMethod = selectedPaymentMethod.value;
                     saleData.paymentStatus = "Paid";
+                    saleData.saleDate = DateTime.now();
 
-                    Get.offNamed(
-                      AppRoute.SalesCompletionScreen,
-                      arguments: saleData,
+                    Get.dialog(
+                      const Center(child: CircularProgressIndicator()),
+                      barrierDismissible: false,
                     );
+
+                    try {
+                      bool isSuccess =
+                          await saleController.createSale(saleData);
+
+                      if (Get.isDialogOpen ?? false) Get.back();
+
+                      if (isSuccess) {
+                        Get.offNamed(
+                          AppRoute.SalesCompletionScreen,
+                          arguments: saleData,
+                        );
+                      } else {
+                        Get.snackbar(
+                          "Error",
+                          "Failed to save order to Firebase",
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red.shade400,
+                          colorText: Colors.white,
+                        );
+                      }
+                    } catch (e) {
+                      if (Get.isDialogOpen ?? false) Get.back();
+                      Get.snackbar(
+                        "Error",
+                        "Something went wrong: $e",
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red.shade400,
+                        colorText: Colors.white,
+                      );
+                    }
                   },
                   child: const Text(
                     "Confirm & Pay",
@@ -287,6 +358,38 @@ class ReviewOrderScreen extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // 🖨️ Print Receipt Button (ហៅប្រើពី PrintHelper ត្រង់នេះ)
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () => PrintHelper.showPrintOptionsModal(context, saleData),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade800,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.print, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        "Print Receipt",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -373,83 +476,7 @@ class ReviewOrderScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(dynamic item) {
-    if (item == null) return const SizedBox.shrink();
-
-    double itemPrice = 0.0;
-    int quantity = 1;
-    String productName = "Unknown Product";
-
-    try {
-      // Safely parse price from common field names
-      final rawPrice = item?.unitPrice ?? item?.price ?? item?.sellPrice;
-      if (rawPrice != null) {
-        itemPrice = double.tryParse(rawPrice.toString()) ?? 0.0;
-      }
-
-      // Safely parse quantity
-      final rawQty = item?.quantity ?? item?.qty;
-      if (rawQty != null) {
-        quantity = int.tryParse(rawQty.toString()) ?? 1;
-      }
-
-      // Safely extract product name
-      final rawName = item?.productName ?? item?.name ?? item?.title;
-      if (rawName != null) {
-        productName = rawName.toString();
-      }
-    } catch (_) {}
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.laptop, size: 30, color: Colors.black54),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  productName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  "$quantity Unit . \$${itemPrice.toStringAsFixed(2)}",
-                  style: const TextStyle(color: Colors.grey, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            "\$${(quantity * itemPrice).toStringAsFixed(2)}",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDefaultItemCard(String title, String subtitle, String price) {
+  Widget _buildItemCard(SaleItemModel item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -467,11 +494,15 @@ class ReviewOrderScreen extends StatelessWidget {
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.laptop_mac,
-              size: 32,
-              color: Colors.black87,
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: (item.imageUrl != null && item.imageUrl!.isNotEmpty)
+                ? Image.network(
+                    item.imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.laptop, size: 28, color: Colors.black54),
+                  )
+                : const Icon(Icons.laptop, size: 28, color: Colors.black54),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -479,7 +510,7 @@ class ReviewOrderScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  item.productName,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -487,14 +518,14 @@ class ReviewOrderScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  subtitle,
+                  "${item.quantity} Unit . \$${item.unitPrice.toStringAsFixed(2)}",
                   style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ],
             ),
           ),
           Text(
-            price,
+            "\$${(item.totalPrice).toStringAsFixed(2)}",
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ],

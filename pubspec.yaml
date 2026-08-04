@@ -52,6 +52,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   image_picker: ^1.2.2
   firebase_storage: ^13.4.3
+  pdf: ^3.10.7
+  printing: ^5.13.2
+  share_plus: ^10.1.2
+  path_provider: ^2.1.4
   
 dev_dependencies:
   flutter_test:

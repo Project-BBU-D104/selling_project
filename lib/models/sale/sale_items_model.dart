@@ -7,6 +7,7 @@ class SaleItemModel {
   int quantity;
   double unitPrice;
   double totalPrice;
+  String? imageUrl;
 
   SaleItemModel({
     this.id,
@@ -17,6 +18,7 @@ class SaleItemModel {
     required this.quantity,
     required this.unitPrice,
     required this.totalPrice,
+    this.imageUrl,
   });
 
   factory SaleItemModel.fromJson(
@@ -32,6 +34,7 @@ class SaleItemModel {
       quantity: json["quantity"] ?? 0,
       unitPrice: (json["unit_price"] ?? 0).toDouble(),
       totalPrice: (json["total_price"] ?? 0).toDouble(),
+      imageUrl: json["image_url"] ?? json["image"],
     );
   }
 
@@ -44,6 +47,7 @@ class SaleItemModel {
       "quantity": quantity,
       "unit_price": unitPrice,
       "total_price": totalPrice,
+      "image_url": imageUrl,
     };
   }
 }

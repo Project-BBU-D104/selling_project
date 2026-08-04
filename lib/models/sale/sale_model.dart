@@ -70,7 +70,7 @@ class SaleModel {
       "total_amount": totalAmount,
       "payment_status": paymentStatus,
       "payment_method": paymentMethod,
-      "sale_date": saleDate,
+      "sale_date": Timestamp.fromDate(saleDate),
       "items": items?.map((item) => item.toJson()).toList(),
     };
   }

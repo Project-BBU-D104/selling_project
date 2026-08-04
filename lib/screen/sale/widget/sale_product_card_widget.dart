@@ -12,7 +12,7 @@ class SaleProductCardWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {  
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -23,32 +23,29 @@ class SaleProductCardWidget extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image
+          // 🖼️ Product Image Container
           Expanded(
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(8.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                    ? Image.network(product.imageUrl!, fit: BoxFit.contain)
-                    : Image.asset('assets/images/placeholder.png', fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.laptop, size: 50, color: Colors.grey)),
+                child: _buildProductImage(product.imageUrl),
               ),
             ),
           ),
-          
-          // Product Details
+
+          // 📝 Product Details Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -68,33 +65,39 @@ class SaleProductCardWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 10, color: Colors.grey[500]),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Color(0xFF111827),
+                    Expanded(
+                      child: Text(
+                        '\$${product.price.toStringAsFixed(2)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Color(0xFF111827),
+                        ),
                       ),
                     ),
-                    InkWell(
-                      onTap: onAdd,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF004C87),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_cart_outlined,
-                          size: 16,
-                          color: Colors.white,
+                    Material(
+                      color: const Color(0xFF004C87),
+                      borderRadius: BorderRadius.circular(6),
+                      child: InkWell(
+                        onTap: onAdd,
+                        borderRadius: BorderRadius.circular(6),
+                        child: const Padding(
+                          padding: EdgeInsets.all(6.0),
+                          child: Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ],
@@ -102,6 +105,67 @@ class SaleProductCardWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Safe Network Image Loader with Auto-Fallback
+  Widget _buildProductImage(String? imageUrl) {
+    final cleanUrl = imageUrl?.trim();
+
+    if (cleanUrl != null && cleanUrl.isNotEmpty && _isValidUri(cleanUrl)) {
+      return Image.network(
+        cleanUrl,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      );
+    }
+
+    return _buildPlaceholder();
+  }
+
+  /// Helper to validate network image string format
+  bool _isValidUri(String url) {
+    final uri = Uri.tryParse(url);
+    return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
+  }
+
+  /// Fallback Placeholder Widget
+  Widget _buildPlaceholder() {
+    return Image.asset(
+      'assets/images/placeholder.png',
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: Colors.grey.shade100,
+          child: const Center(
+            child: Icon(
+              Icons.laptop,
+              size: 36,
+              color: Colors.grey,
+            ),
+          ),
+        );
+      },
     );
   }
 }

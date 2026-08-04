@@ -6,11 +6,13 @@ import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/screen/home/widget/drawer_widget.dart';
 import 'package:selling_project/screen/sale/widget/sale_product_card_widget.dart';
 
-class SaleScreen extends StatelessWidget {
-  SaleScreen({super.key});
+class SaleScreen extends GetView<SaleController> {
+  const SaleScreen({super.key});
 
-  // 1. ប្រើ lazy / put ដើមបីការពារ Null Controller
-  final SaleController ctr = Get.put(SaleController());
+  @override
+  SaleController get controller => Get.isRegistered<SaleController>()
+      ? Get.find<SaleController>()
+      : Get.put(SaleController());
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +41,55 @@ class SaleScreen extends StatelessWidget {
         children: [
           Column(
             children: [
-              // 🔍 SEARCH BAR
+              // 🔑 1. បន្ថែម Customer Selector Tile នៅលើគេ ដើមី្បជ្រើសរើស Customer
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Obx(() {
+                  final customerName = controller.selectedCustomerName.value.isNotEmpty
+                      ? controller.selectedCustomerName.value
+                      : "General Customer";
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: ListTile(
+                      dense: true,
+                      leading: const CircleAvatar(
+                        backgroundColor: Color(0xFF007AE5),
+                        radius: 16,
+                        child: Icon(Icons.person, color: Colors.white, size: 18),
+                      ),
+                      title: Text(
+                        customerName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        "Selected Customer",
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                      trailing: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                      onTap: () {
+                        if (controller.hasCustomerSelectDialog) {
+                          controller.openCustomerSelectBottomSheet();
+                        }
+                      },
+                    ),
+                  );
+                }),
+              ),
+
+              // Search Input
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: TextField(
-                  controller: ctr.searchController,
-                  onChanged: (_) => ctr.filterProducts(),
+                  controller: controller.searchController,
+                  onChanged: (_) => controller.filterProducts(),
                   decoration: InputDecoration(
                     hintText: "Search Product...",
                     hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
@@ -63,18 +108,16 @@ class SaleScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // 🏷️ CATEGORY FILTER CHIPS
               SizedBox(
                 height: 40,
                 child: Obx(() {
-                  final categories = ctr.categoryCtr.category;
-                  final selectedId = ctr.selectedCategoryId.value;
+                  final categories = controller.categoryCtr.category;
+                  final selectedId = controller.selectedCategoryId.value;
 
                   return ListView.separated(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: categories.length + 1, // +1 for "All"
+                    itemCount: categories.length + 1,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       if (index == 0) {
@@ -87,7 +130,7 @@ class SaleScreen extends StatelessWidget {
                             color: isSelected ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.w500,
                           ),
-                          onSelected: (_) => ctr.selectCategory('All'),
+                          onSelected: (_) => controller.selectCategory('All'),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -105,7 +148,7 @@ class SaleScreen extends StatelessWidget {
                           color: isSelected ? Colors.white : Colors.black87,
                           fontWeight: FontWeight.w500,
                         ),
-                        onSelected: (_) => ctr.selectCategory(cat.id ?? ''),
+                        onSelected: (_) => controller.selectCategory(cat.id ?? ''),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -114,13 +157,10 @@ class SaleScreen extends StatelessWidget {
                   );
                 }),
               ),
-
               const SizedBox(height: 8),
-
-              // 🛍️ PRODUCT GRID
               Expanded(
                 child: Obx(() {
-                  if (ctr.filteredProducts.isEmpty) {
+                  if (controller.filteredProducts.isEmpty) {
                     return const Center(
                       child: Text(
                         "No Products Found",
@@ -134,20 +174,20 @@ class SaleScreen extends StatelessWidget {
                       left: 16,
                       right: 16,
                       top: 8,
-                      bottom: 100,
+                      bottom: 110,
                     ),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.78,
+                      childAspectRatio: 0.75,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
-                    itemCount: ctr.filteredProducts.length,
+                    itemCount: controller.filteredProducts.length,
                     itemBuilder: (context, index) {
-                      final product = ctr.filteredProducts[index];
+                      final product = controller.filteredProducts[index];
                       return SaleProductCardWidget(
                         product: product,
-                        onAdd: () => ctr.addToCart(product),
+                        onAdd: () => controller.addToCart(product),
                       );
                     },
                   );
@@ -155,13 +195,11 @@ class SaleScreen extends StatelessWidget {
               ),
             ],
           ),
-
-          // 🛒 CURRENT ORDER BOTTOM BAR
           Obx(() {
-            if (ctr.cartItems.isEmpty) return const SizedBox.shrink();
+            if (controller.cartItems.isEmpty) return const SizedBox.shrink();
 
-            final int itemCount = ctr.totalCartCount;
-            final double totalAmount = ctr.totalCartAmount;
+            final int itemCount = controller.totalCartCount;
+            final double totalAmount = controller.totalCartAmount;
 
             return Positioned(
               bottom: 20,
@@ -173,12 +211,20 @@ class SaleScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(35),
                   onTap: () {
                     final double calculatedTax = totalAmount * 0.0825;
+                    final String? cId = controller.selectedCustomerId.value.isNotEmpty
+                        ? controller.selectedCustomerId.value
+                        : null;
+
+                    final String cName = controller.selectedCustomerName.value.isNotEmpty
+                        ? controller.selectedCustomerName.value
+                        : "General Customer";
 
                     SaleModel pendingSale = SaleModel(
-                      userId: "usr_123",
-                      customerId: "88291",
+                      userId: controller.currentUserId,
+                      customerId: cId,
+                      customerName: cName,
                       invoiceNo: "INV-${DateTime.now().millisecondsSinceEpoch}",
-                      items: List.from(ctr.cartItems),
+                      items: List.from(controller.cartItems),
                       subtotal: totalAmount,
                       tax: calculatedTax,
                       discount: 0.0,
@@ -186,6 +232,7 @@ class SaleScreen extends StatelessWidget {
                       saleDate: DateTime.now(),
                       paymentStatus: "Pending",
                     );
+
                     Get.toNamed(
                       AppRoute.reviewOrderScreen,
                       arguments: pendingSale,
