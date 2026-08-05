@@ -43,10 +43,21 @@ class ProductScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 12),
             TextField(
+              controller: controller.searchController,
+              onChanged: (value) => controller.updateSearchQuery(value),
               decoration: InputDecoration(
                 hintText: 'Search products...',
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () {
+                          controller.searchController.clear();
+                          controller.updateSearchQuery('');
+                        },
+                      )
+                    : const SizedBox.shrink()),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 filled: true,
                 fillColor: Colors.white,
@@ -63,13 +74,25 @@ class ProductScreen extends StatelessWidget {
             const SizedBox(height: 12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip('All Products', isSelected: true),
-                  _buildFilterChip('Category GPU'),
-                  _buildFilterChip('Stock Low'),
-                ],
-              ),
+              child: Obx(() => Row(
+                    children: [
+                      _buildFilterChip(
+                        'All Products',
+                        isSelected: controller.selectedFilter.value == 'All Products',
+                        onTap: () => controller.setFilter('All Products'),
+                      ),
+                      _buildFilterChip(
+                        'Category GPU',
+                        isSelected: controller.selectedFilter.value == 'Category GPU',
+                        onTap: () => controller.setFilter('Category GPU'),
+                      ),
+                      _buildFilterChip(
+                        'Stock Low',
+                        isSelected: controller.selectedFilter.value == 'Stock Low',
+                        onTap: () => controller.setFilter('Stock Low'),
+                      ),
+                    ],
+                  )),
             ),
             const SizedBox(height: 12),
             Row(
@@ -111,22 +134,22 @@ class ProductScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Product List
             Expanded(
               child: Obx(() {
                 if (controller.loading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (controller.product.isEmpty) {
+                final displayList = controller.filteredProducts;
+
+                if (displayList.isEmpty) {
                   return const Center(child: Text("No products found"));
                 }
 
                 return ListView.builder(
-                  itemCount: controller.product.length,
+                  itemCount: displayList.length,
                   itemBuilder: (context, index) {
-                    final item = controller.product[index];
+                    final item = displayList[index];
                     return ProductCardWidget(
                       product: item,
                       onTap: () {
@@ -153,23 +176,26 @@ class ProductScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterChip(String label, {bool isSelected = false}) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFBAE6FD) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? const Color(0xFFBAE6FD) : Colors.grey.shade300,
+  Widget _buildFilterChip(String label, {required bool isSelected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFBAE6FD) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF0284C7) : Colors.grey.shade300,
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          color: isSelected ? const Color(0xFF0369A1) : Colors.grey.shade600,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isSelected ? const Color(0xFF0369A1) : Colors.grey.shade600,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
         ),
       ),
     );

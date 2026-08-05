@@ -21,6 +21,10 @@ class ProductController extends GetxController {
   RxList<ProductModel> product = <ProductModel>[].obs;
   RxBool loading = false.obs;
 
+  RxString searchQuery = ''.obs;
+  RxString selectedFilter = 'All Products'.obs;
+  final TextEditingController searchController = TextEditingController();
+
   final formKey = GlobalKey<FormState>();
   final productNameCtrl = TextEditingController();
   final costPriceCtrl = TextEditingController();
@@ -53,7 +57,33 @@ class ProductController extends GetxController {
     quantityCtrl.dispose();
     imageCtrl.dispose();
     descriptionCtrl.dispose();
+    searchController.dispose();
     super.onClose();
+  }
+
+  List<ProductModel> get filteredProducts {
+    return product.where((item) {
+      final query = searchQuery.value.toLowerCase();
+      final matchesSearch = query.isEmpty ||
+          item.productName.toLowerCase().contains(query);
+
+      if (!matchesSearch) return false;
+
+      if (selectedFilter.value == 'Category GPU') {
+        return item.brandId != null && item.brandId!.toLowerCase().contains('gpu');
+      } else if (selectedFilter.value == 'Stock Low') {
+        return item.quantity > 0 && item.quantity <= 5;
+      }
+      return true;
+    }).toList();
+  }
+
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  void setFilter(String filterName) {
+    selectedFilter.value = filterName;
   }
 
   Future<void> pickImage(ImageSource source) async {
