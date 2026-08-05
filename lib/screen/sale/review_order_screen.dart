@@ -4,7 +4,6 @@ import 'package:selling_project/controller/sale_controller.dart';
 import 'package:selling_project/models/sale/sale_items_model.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/routes/app_route.dart';
-import 'package:selling_project/utils/print_helper.dart'; // 📌 នាំចូល PrintHelper ដែលបានបង្កើតថ្មី
 
 class ReviewOrderScreen extends StatelessWidget {
   const ReviewOrderScreen({super.key});
@@ -76,7 +75,6 @@ class ReviewOrderScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. CUSTOMER SECTION
               const Text(
                 "CUSTOMER",
                 style: TextStyle(
@@ -93,7 +91,7 @@ class ReviewOrderScreen extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withOpacity(0.08),
                   ),
                 ),
                 child: Row(
@@ -230,15 +228,13 @@ class ReviewOrderScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // 4. SUMMARY CARD
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withOpacity(0.08),
                   ),
                 ),
                 child: Column(
@@ -290,8 +286,8 @@ class ReviewOrderScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Confirm & Pay Button
+              
+              // ប៊ូតុង Confirm & Pay (រក្សាទុកនៅទីនេះ)
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -361,38 +357,7 @@ class ReviewOrderScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-
-              // 🖨️ Print Receipt Button (ហៅប្រើពី PrintHelper ត្រង់នេះ)
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () => PrintHelper.showPrintOptionsModal(context, saleData),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade800,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.print, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        "Print Receipt",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // ប៊ូតុង "Print Receipt" ត្រូវបានលុបចេញទីនេះរួចរាល់
             ],
           ),
         ),
@@ -418,7 +383,7 @@ class ReviewOrderScreen extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                     ? const Color(0xFF3B1EFA)
-                    : Colors.black.withValues(alpha: 0.08),
+                    : Colors.black.withOpacity(0.08),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -483,7 +448,7 @@ class ReviewOrderScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+        border: Border.all(color: Colors.black.withOpacity(0.08)),
       ),
       child: Row(
         children: [
@@ -518,7 +483,7 @@ class ReviewOrderScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "${item.quantity} Unit . \$${item.unitPrice.toStringAsFixed(2)}",
+                  "${item.quantity} Unit • \$${item.unitPrice.toStringAsFixed(2)}",
                   style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ],

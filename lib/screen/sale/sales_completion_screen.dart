@@ -2,24 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
+import 'package:selling_project/models/sale/sale_items_model.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/screen/home/widget/drawer_widget.dart';
+import 'package:selling_project/utils/print_helper.dart';
 
 class SalesCompletionScreen extends StatelessWidget {
   const SalesCompletionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ទទួល Data ចេញពី argument
-    final SaleModel? sale = Get.arguments as SaleModel?;
+    final SaleModel? sale = Get.arguments is SaleModel ? Get.arguments as SaleModel : null;
 
     final String transactionId = sale?.invoiceNo ?? "#HP-ERP-2023-9942";
-    final double subtotal = sale?.subtotal ?? 2618.99;
-    final double tax = sale?.tax ?? 216.06;
-    final double totalAmount = sale?.totalAmount ?? 2704.10;
+    final double subtotal = sale?.subtotal ?? 0.0;
+    final double tax = sale?.tax ?? 0.0;
+    final double totalAmount = sale?.totalAmount ?? 0.0;
+    final List<SaleItemModel> itemList = sale?.items ?? [];
+    
     final String formattedDate = sale?.saleDate != null
-        ? DateFormat('MMMM dd, yyyy . HH:mm a').format(sale!.saleDate!)
-        : "October 24, 2023 . 14:42PM";
+        ? DateFormat('MMMM dd, yyyy • HH:mm a').format(sale!.saleDate!)
+        : DateFormat('MMMM dd, yyyy • HH:mm a').format(DateTime.now());
+
+    final String customerName = sale?.customerName ?? "Jonathan Sterling";
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -30,7 +35,7 @@ class SalesCompletionScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
             onPressed: () {
               Get.offAllNamed(AppRoute.sale);
-            }
+            },
           ),
         ),
         title: const Text(
@@ -58,12 +63,11 @@ class SalesCompletionScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
           children: [
-            // 🎉 1. THANK YOU CARD
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF4338CA), // Deep Indigo / Royal Blue
+                color: const Color(0xFF4338CA),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -105,8 +109,6 @@ class SalesCompletionScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // 👤 2. CUSTOMER INFO CARD
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -130,9 +132,9 @@ class SalesCompletionScreen extends StatelessWidget {
                     "Transaction ID : $transactionId",
                     style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
-                  const Text(
-                    "Customer : Jonathan Sterling",
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                  Text(
+                    "Customer : $customerName",
+                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                   const Text(
                     "Phone Number : 012 455 7897",
@@ -155,8 +157,6 @@ class SalesCompletionScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // 🛍️ 3. ITEMS SUMMARY CARD
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -176,55 +176,34 @@ class SalesCompletionScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Item 1
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "NVIDIA RTX 4090 OC Edition",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                  if (itemList.isNotEmpty)
+                    ...itemList.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.productName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                  ),
+                                  Text(
+                                    "${item.quantity} unit x \$${item.unitPrice.toStringAsFixed(2)}",
+                                    style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                "\$${item.totalPrice.toStringAsFixed(2)}",
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                              ),
+                            ],
                           ),
-                          Text(
-                            "1 unit x \$1,599.99",
-                            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      const Text(
-                        "\$1,599.99",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Item 2
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Intel Core i9-13900k",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
-                          ),
-                          Text(
-                            "1 unit x \$589,00",
-                            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      const Text(
-                        "\$589,00",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
-                      )
-                    ],
-                  ),
+                        ))
+                  else
+                    const Text("No items recorded."),
 
                   const Divider(height: 24, thickness: 1, color: Colors.black26),
 
@@ -240,7 +219,7 @@ class SalesCompletionScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Tax(8.25%)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      const Text("Tax", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                       Text("\$${tax.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                     ],
                   ),
@@ -260,8 +239,6 @@ class SalesCompletionScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 20),
-
-            // 🔘 4. BEGIN NEW SALE BUTTON
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -286,8 +263,6 @@ class SalesCompletionScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
-
-            // 🖨️ 5. PRINT RECEIPT BUTTON
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -301,7 +276,9 @@ class SalesCompletionScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // TODO: Add Print Logic
+                  if (sale != null) {
+                    PrintHelper.showPrintOptionsModal(context, sale);
+                  }
                 },
                 icon: const Icon(Icons.print, size: 22),
                 label: const Text(

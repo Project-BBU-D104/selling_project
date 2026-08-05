@@ -31,6 +31,7 @@ class SaleProductCardWidget extends StatelessWidget {
         children: [
           // 🖼️ Product Image Container
           Expanded(
+            flex: 3, // កំណត់សមាមាត្រទំហំរូបភាព
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(8.0),
@@ -42,65 +43,69 @@ class SaleProductCardWidget extends StatelessWidget {
           ),
 
           // 📝 Product Details Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.productName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Color(0xFF1F2937),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  product.description ?? 'No specs available',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color(0xFF111827),
-                        ),
-                      ),
+          Expanded(
+            flex: 2, // កំណត់សមាមាត្រទំហំអត្ថបទ
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.productName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Color(0xFF1F2937),
                     ),
-                    Material(
-                      color: const Color(0xFF004C87),
-                      borderRadius: BorderRadius.circular(6),
-                      child: InkWell(
-                        onTap: onAdd,
-                        borderRadius: BorderRadius.circular(6),
-                        child: const Padding(
-                          padding: EdgeInsets.all(6.0),
-                          child: Icon(
-                            Icons.shopping_cart_outlined,
-                            size: 16,
-                            color: Colors.white,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    product.description ?? 'No specs available',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                  ),
+                  const Spacer(), // រុញតម្លៃនិងប៊ូតុងឱ្យមកក្រោមสุดជាប្រក្រតី
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '\$${product.price.toStringAsFixed(2)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF111827),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      Material(
+                        color: const Color(0xFF004C87),
+                        borderRadius: BorderRadius.circular(6),
+                        child: InkWell(
+                          onTap: onAdd,
+                          borderRadius: BorderRadius.circular(6),
+                          child: const Padding(
+                            padding: EdgeInsets.all(6.0),
+                            child: Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                ],
+              ),
             ),
           ),
         ],

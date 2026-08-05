@@ -22,7 +22,7 @@ Future<void> main() async {
   await GetStorage.init();
   Get.put(AppController());
 
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "assets/.env");
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,

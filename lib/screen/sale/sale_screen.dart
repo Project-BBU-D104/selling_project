@@ -17,7 +17,7 @@ class SaleScreen extends GetView<SaleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: DrawerWidget(),
+      drawer:  DrawerWidget(),
       appBar: AppBar(
         title: const Text(
           "Sale",
@@ -37,302 +37,268 @@ class SaleScreen extends GetView<SaleController> {
         elevation: 0,
       ),
       backgroundColor: const Color(0xFFF9FAFB),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // 🔑 1. បន្ថែម Customer Selector Tile នៅលើគេ ដើមី្បជ្រើសរើស Customer
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: Obx(() {
-                  final customerName = controller.selectedCustomerName.value.isNotEmpty
-                      ? controller.selectedCustomerName.value
-                      : "General Customer";
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                const SizedBox(height: 8),
 
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: ListTile(
-                      dense: true,
-                      leading: const CircleAvatar(
-                        backgroundColor: Color(0xFF007AE5),
-                        radius: 16,
-                        child: Icon(Icons.person, color: Colors.white, size: 18),
+                // Search Input
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: TextField(
+                    controller: controller.searchController,
+                    onChanged: (_) => controller.filterProducts(),
+                    decoration: InputDecoration(
+                      hintText: "Search Product...",
+                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      fillColor: Colors.white,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
-                      title: Text(
-                        customerName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
-                      subtitle: const Text(
-                        "Selected Customer",
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
-                      trailing: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                      onTap: () {
-                        if (controller.hasCustomerSelectDialog) {
-                          controller.openCustomerSelectBottomSheet();
-                        }
-                      },
-                    ),
-                  );
-                }),
-              ),
-
-              // Search Input
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: TextField(
-                  controller: controller.searchController,
-                  onChanged: (_) => controller.filterProducts(),
-                  decoration: InputDecoration(
-                    hintText: "Search Product...",
-                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    fillColor: Colors.white,
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 40,
-                child: Obx(() {
-                  final categories = controller.categoryCtr.category;
-                  final selectedId = controller.selectedCategoryId.value;
+                const SizedBox(height: 8),
 
-                  return ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: categories.length + 1,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        final isSelected = selectedId == 'All';
+                // Categories Horizontal List
+                SizedBox(
+                  height: 40,
+                  child: Obx(() {
+                    final categories = controller.categoryCtr.category;
+                    final selectedId = controller.selectedCategoryId.value;
+
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: categories.length + 1,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          final isSelected = selectedId == 'All';
+                          return ChoiceChip(
+                            label: const Text('All'),
+                            selected: isSelected,
+                            selectedColor: const Color(0xFF007AE5),
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            onSelected: (_) => controller.selectCategory('All'),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          );
+                        }
+
+                        final cat = categories[index - 1];
+                        final isSelected = selectedId == cat.id;
+
                         return ChoiceChip(
-                          label: const Text('All'),
+                          label: Text(cat.name ?? ''),
                           selected: isSelected,
                           selectedColor: const Color(0xFF007AE5),
                           labelStyle: TextStyle(
                             color: isSelected ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.w500,
                           ),
-                          onSelected: (_) => controller.selectCategory('All'),
+                          onSelected: (_) => controller.selectCategory(cat.id ?? ''),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                         );
-                      }
+                      },
+                    );
+                  }),
+                ),
+                const SizedBox(height: 8),
 
-                      final cat = categories[index - 1];
-                      final isSelected = selectedId == cat.id;
-
-                      return ChoiceChip(
-                        label: Text(cat.name ?? ''),
-                        selected: isSelected,
-                        selectedColor: const Color(0xFF007AE5),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        onSelected: (_) => controller.selectCategory(cat.id ?? ''),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                // Product Grid View
+                Expanded(
+                  child: Obx(() {
+                    if (controller.filteredProducts.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          "No Products Found",
+                          style: TextStyle(color: Colors.grey),
                         ),
                       );
-                    },
-                  );
-                }),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Obx(() {
-                  if (controller.filteredProducts.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        "No Products Found",
-                        style: TextStyle(color: Colors.grey),
+                    }
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: 8,
+                        bottom: 90,
                       ),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.72,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: controller.filteredProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = controller.filteredProducts[index];
+                        return SaleProductCardWidget(
+                          product: product,
+                          onAdd: () => controller.addToCart(product),
+                        );
+                      },
                     );
-                  }
+                  }),
+                ),
+              ],
+            ),
+            Obx(() {
+              if (controller.cartItems.isEmpty) return const SizedBox.shrink();
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      top: 8,
-                      bottom: 110,
-                    ),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemCount: controller.filteredProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = controller.filteredProducts[index];
-                      return SaleProductCardWidget(
-                        product: product,
-                        onAdd: () => controller.addToCart(product),
+              final int itemCount = controller.totalCartCount;
+              final double totalAmount = controller.totalCartAmount;
+
+              return Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(35),
+                    onTap: () {
+                      final double calculatedTax = totalAmount * 0.0825;
+                      final String? cId = controller.selectedCustomerId.value.isNotEmpty
+                          ? controller.selectedCustomerId.value
+                          : null;
+
+                      final String cName = controller.selectedCustomerName.value.isNotEmpty
+                          ? controller.selectedCustomerName.value
+                          : "General Customer";
+
+                      SaleModel pendingSale = SaleModel(
+                        userId: controller.currentUserId,
+                        customerId: cId,
+                        customerName: cName,
+                        invoiceNo: "INV-${DateTime.now().millisecondsSinceEpoch}",
+                        items: List.from(controller.cartItems),
+                        subtotal: totalAmount,
+                        tax: calculatedTax,
+                        discount: 0.0,
+                        totalAmount: totalAmount + calculatedTax,
+                        saleDate: DateTime.now(),
+                        paymentStatus: "Pending",
+                      );
+
+                      Get.toNamed(
+                        AppRoute.reviewOrderScreen,
+                        arguments: pendingSale,
+                        preventDuplicates: true,
                       );
                     },
-                  );
-                }),
-              ),
-            ],
-          ),
-          Obx(() {
-            if (controller.cartItems.isEmpty) return const SizedBox.shrink();
-
-            final int itemCount = controller.totalCartCount;
-            final double totalAmount = controller.totalCartAmount;
-
-            return Positioned(
-              bottom: 20,
-              left: 16,
-              right: 16,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(35),
-                  onTap: () {
-                    final double calculatedTax = totalAmount * 0.0825;
-                    final String? cId = controller.selectedCustomerId.value.isNotEmpty
-                        ? controller.selectedCustomerId.value
-                        : null;
-
-                    final String cName = controller.selectedCustomerName.value.isNotEmpty
-                        ? controller.selectedCustomerName.value
-                        : "General Customer";
-
-                    SaleModel pendingSale = SaleModel(
-                      userId: controller.currentUserId,
-                      customerId: cId,
-                      customerName: cName,
-                      invoiceNo: "INV-${DateTime.now().millisecondsSinceEpoch}",
-                      items: List.from(controller.cartItems),
-                      subtotal: totalAmount,
-                      tax: calculatedTax,
-                      discount: 0.0,
-                      totalAmount: totalAmount + calculatedTax,
-                      saleDate: DateTime.now(),
-                      paymentStatus: "Pending",
-                    );
-
-                    Get.toNamed(
-                      AppRoute.reviewOrderScreen,
-                      arguments: pendingSale,
-                      preventDuplicates: true,
-                    );
-                  },
-                  child: Container(
-                    height: 65,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00A86B),
-                      borderRadius: BorderRadius.circular(35),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF00A86B).withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        )
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Icon(
-                              Icons.shopping_cart_outlined,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                            Positioned(
-                              top: -4,
-                              right: -4,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.amber,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Text(
-                                  "$itemCount",
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00A86B),
+                        borderRadius: BorderRadius.circular(35),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00A86B).withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          )
+                        ],
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              const Icon(
+                                Icons.shopping_cart_outlined,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                              Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.amber,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    "$itemCount",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Current Order",
+                                style: TextStyle(color: Colors.white70, fontSize: 12),
                               ),
-                            )
-                          ],
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Current Order",
-                              style: TextStyle(color: Colors.white70, fontSize: 12),
-                            ),
-                            Text(
-                              "$itemCount Items",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                              Text(
+                                "$itemCount Items",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Text(
+                            "\$${totalAmount.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Text(
-                          "\$${totalAmount.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          padding: const EdgeInsets.all(6),
-                          child: const Icon(
-                            Icons.arrow_forward,
-                            color: Color(0xFF00A86B),
-                            size: 18,
-                          ),
-                        )
-                      ],
+                          const SizedBox(width: 12),
+                          Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(6),
+                            child: const Icon(
+                              Icons.arrow_forward,
+                              color: Color(0xFF00A86B),
+                              size: 18,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
-        ],
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

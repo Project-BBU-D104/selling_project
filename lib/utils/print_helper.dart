@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
+import 'package:selling_project/services/telegram_services.dart';
 
 class PrintHelper {
   static void showPrintOptionsModal(BuildContext context, SaleModel saleData) {
@@ -39,6 +41,14 @@ class PrintHelper {
                 onTap: () {
                   Navigator.pop(context);
                   shareToTelegram(saleData);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy, color: Colors.orange),
+                title: const Text("Copy Invoice Text"),
+                onTap: () {
+                  Navigator.pop(context);
+                  copyInvoiceText(context, saleData);
                 },
               ),
               ListTile(
@@ -107,28 +117,50 @@ class PrintHelper {
     );
   }
 
-  // ២. ផ្ញើទៅកាន់ Telegram
+  // ២. ផ្ញើទៅកាន់ Telegram (ຜ່ານ Telegram Bot API)
   static Future<void> shareToTelegram(SaleModel saleData) async {
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) => pw.Center(
-          child: pw.Text("Receipt Total: \$${saleData.totalAmount}"),
-        ),
+    try {
+      bool success = await TelegramServices.sendSaleInvoice(saleData);
+      if (success) {
+        debugPrint("Successfully sent invoice to Telegram!");
+      } else {
+        debugPrint("Failed to send invoice to Telegram.");
+      }
+    } catch (e) {
+      debugPrint("Error sharing to Telegram: $e");
+    }
+  }
+
+  // ៣. មុខងារសម្រាប់ Copy ព័ត៌មានវិក្កយបត្រទុកក្នុង Clipboard
+  static Future<void> copyInvoiceText(BuildContext context, SaleModel saleData) async {
+    // រៀបចំទម្រង់អត្ថបទវិក្កយបត្រសម្រាប់ Copy
+    String invoiceText = "🧾 INVOICE RECEIPT\n"
+        "Customer: ${saleData.customerName ?? 'General'}\n"
+        "Date: ${DateTime.now().toString().substring(0, 16)}\n"
+        "----------------------------------\n";
+
+    if (saleData.items != null) {
+      for (var item in saleData.items!) {
+        invoiceText += "${item.productName} (x${item.quantity}) - \$${item.totalPrice.toStringAsFixed(2)}\n";
+      }
+    }
+
+    invoiceText += "----------------------------------\n"
+        "Total Amount: \$${saleData.totalAmount.toStringAsFixed(2)}";
+
+    // Copy ចូលទៅក្នុង Clipboard
+    await Clipboard.setData(ClipboardData(text: invoiceText));
+
+    // បង្ហាញដំណឹង (SnackBar) ថាបាន Copy រួចរាល់
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("បានចម្លង (Copied) វិក្កយបត្រចូល Clipboard រួចរាល់!"),
+        duration: Duration(seconds: 2),
       ),
     );
-
-    final output = await getTemporaryDirectory();
-    final file = File("${output.path}/receipt.pdf");
-    await file.writeAsBytes(await pdf.save());
-
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      text:
-          "New Order\nCustomer: ${saleData.customerName ?? 'General'}\nTotal: \$${saleData.totalAmount.toStringAsFixed(2)}",
-    );
   }
-  // ៣. Export ទៅ Excel (CSV)
+
+  // ៤. Export ទៅ Excel (CSV)
   static Future<void> exportToExcel(SaleModel saleData) async {
     try {
       String csvData = "Product Name,Quantity,Unit Price,Total\n";
