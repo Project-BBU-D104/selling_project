@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/controller/category_controller.dart';
+import 'package:selling_project/controller/brand_controller.dart';
 import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/models/customer_model.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
@@ -16,7 +16,7 @@ class SaleController extends GetxController {
   final CustomerServices customerService = CustomerServices();
 
   late ProductController productCtr;
-  late CategoryController categoryCtr;
+  late BrandController brandCtr;
 
   StreamSubscription? _salesSubscription;
   StreamSubscription? _saleItemsSubscription;
@@ -31,8 +31,7 @@ class SaleController extends GetxController {
   final customer = Rxn<CustomerModel>();
   final RxString selectedCustomerId = ''.obs;
   final RxString selectedCustomerName = 'General Customer'.obs;
-  
-  // បញ្ជី Customers សម្រាប់បង្ហាញពេលជ្រើសរើស
+
   final RxList<CustomerModel> customerList = <CustomerModel>[].obs;
   final RxBool loadingCustomers = false.obs;
 
@@ -40,7 +39,7 @@ class SaleController extends GetxController {
 
   final RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
   final RxList<SaleItemModel> cartItems = <SaleItemModel>[].obs;
-  final RxString selectedCategoryId = 'All'.obs;
+  final RxString selectedBrandId = 'All'.obs;
 
   late TextEditingController searchController;
 
@@ -53,14 +52,12 @@ class SaleController extends GetxController {
     productCtr = Get.isRegistered<ProductController>()
         ? Get.find<ProductController>()
         : Get.put(ProductController(), permanent: true);
-
-    categoryCtr = Get.isRegistered<CategoryController>()
-        ? Get.find<CategoryController>()
-        : Get.put(CategoryController(), permanent: true);
+    brandCtr = Get.isRegistered<BrandController>()
+        ? Get.find<BrandController>()
+        : Get.put(BrandController(), permanent: true);
 
     super.onInit();
 
-    // Handle Arguments
     if (Get.arguments != null) {
       if (Get.arguments is CustomerModel) {
         selectCustomer(Get.arguments as CustomerModel);
@@ -106,10 +103,8 @@ class SaleController extends GetxController {
 
   void filterProducts() {
     List<ProductModel> temp = List.from(productCtr.product);
-
-    if (selectedCategoryId.value != 'All') {
-      temp =
-          temp.where((p) => p.categoryId == selectedCategoryId.value).toList();
+    if (selectedBrandId.value != 'All') {
+      temp = temp.where((p) => p.brandId == selectedBrandId.value).toList();
     }
 
     if (searchController.text.trim().isNotEmpty) {
@@ -122,8 +117,8 @@ class SaleController extends GetxController {
     filteredProducts.assignAll(temp);
   }
 
-  void selectCategory(String categoryId) {
-    selectedCategoryId.value = categoryId;
+  void selectBrand(String brandId) {
+    selectedBrandId.value = brandId;
     filterProducts();
   }
 
@@ -136,14 +131,12 @@ class SaleController extends GetxController {
         name.trim().isNotEmpty ? name : 'General Customer';
   }
 
-  // មុខងារកំណត់ឈ្មោះអតិថិជនផ្ទាល់ (សម្រាប់យកទៅប្រើជាមួយ BottomSheet ពេលកែប្រែ)
   void setCustomerByName(String name, String id) {
     selectedCustomerName.value = name.trim().isNotEmpty ? name : 'General Customer';
     selectedCustomerId.value = id;
     customer.value = null; 
   }
 
-  // Bottom Sheet សម្រាប់ជ្រើសរើស Customer លើ SaleScreen
   void openCustomerSelectBottomSheet() {
     Get.bottomSheet(
       Container(
@@ -226,10 +219,10 @@ class SaleController extends GetxController {
 
   void addToCart(ProductModel product) {
     int index = cartItems.indexWhere((item) => item.productId == product.id);
-    final catMatch = categoryCtr.category.firstWhereOrNull(
-      (c) => c.id == product.categoryId,
+    final brandMatch = brandCtr.brands.firstWhereOrNull(
+      (b) => b.id == product.brandId,
     );
-    String resolvedCategoryName = catMatch?.name ?? 'General';
+    String resolvedBrandName = brandMatch?.name ?? 'General Brand';
 
     if (index != -1) {
       var existing = cartItems[index];
@@ -239,8 +232,6 @@ class SaleController extends GetxController {
         id: existing.id,
         productId: existing.productId,
         productName: existing.productName,
-        categoryId: existing.categoryId,
-        categoryName: existing.categoryName,
         quantity: newQty,
         unitPrice: existing.unitPrice,
         totalPrice: newQty * existing.unitPrice,
@@ -251,8 +242,6 @@ class SaleController extends GetxController {
         SaleItemModel(
           productId: product.id ?? '',
           productName: product.productName,
-          categoryId: product.categoryId ?? '',
-          categoryName: resolvedCategoryName,
           quantity: 1,
           unitPrice: product.price,
           totalPrice: product.price,
@@ -266,7 +255,7 @@ class SaleController extends GetxController {
   void resetSale() {
     cartItems.clear();
     searchController.clear();
-    selectedCategoryId.value = 'All';
+    selectedBrandId.value = 'All';
     selectedCustomerId.value = '';
     selectedCustomerName.value = 'General Customer';
     customer.value = null;
@@ -296,7 +285,6 @@ class SaleController extends GetxController {
 
     if (customSaleData != null) {
       saleToSave = customSaleData;
-      // 🔑 បញ្ចូលឈ្មោះអតិថិជនចុងក្រោយពី Controller ទៅក្នុង customSaleData ធានាថាអត់ភ្លេច
       saleToSave.customerName = selectedCustomerName.value;
       saleToSave.customerId = selectedCustomerId.value.isNotEmpty
           ? selectedCustomerId.value

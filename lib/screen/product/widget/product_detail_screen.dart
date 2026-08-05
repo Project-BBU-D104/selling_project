@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/controller/category_controller.dart';
+import 'package:selling_project/controller/brand_controller.dart';
 import 'package:selling_project/controller/supplier_controller.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
 
@@ -9,20 +9,20 @@ class ProductDetailScreen extends StatelessWidget {
 
   const ProductDetailScreen({super.key, required this.product});
 
-  String _getCategoryName(String? categoryId) {
-    if (categoryId == null || categoryId.trim().isEmpty) {
+  String _getBrandName(String? brandId) {
+    if (brandId == null || brandId.trim().isEmpty) {
       return 'N/A';
     }
-    if (Get.isRegistered<CategoryController>()) {
-      final categoryCtrl = Get.find<CategoryController>();
-      final category = categoryCtrl.category.firstWhereOrNull(
-        (cat) => cat.id == categoryId,
+    if (Get.isRegistered<BrandController>()) {
+      final brandCtrl = Get.find<BrandController>();
+      final brand = brandCtrl.brands.firstWhereOrNull(
+        (b) => b.id == brandId,
       );
-      if (category != null && category.name.isNotEmpty) {
-        return category.name;
+      if (brand != null && brand.name.isNotEmpty) {
+        return brand.name;
       }
     }
-    return categoryId;
+    return brandId;
   }
   String _getSupplierName(String? supplierId) {
     if (supplierId == null || supplierId.trim().isEmpty) {
@@ -151,8 +151,8 @@ class ProductDetailScreen extends StatelessWidget {
                       children: [
                         _buildDetailRow(
                           icon: Icons.category_outlined,
-                          title: 'Category',
-                          value: _getCategoryName(product.categoryId),
+                          title: 'Brand',
+                          value: _getBrandName(product.brandId),
                         ),
                         const Divider(height: 24),
                         _buildDetailRow(

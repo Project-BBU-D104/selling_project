@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:selling_project/controller/brand_controller.dart';
-import 'package:selling_project/controller/category_controller.dart';
 import 'package:selling_project/controller/supplier_controller.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/services/product_services.dart';
@@ -11,10 +10,6 @@ import 'package:selling_project/services/product_services.dart';
 class ProductController extends GetxController {
   final ProductServices service = ProductServices();
 
-  final categoryCtrl = Get.isRegistered<CategoryController>()
-      ? Get.find<CategoryController>()
-      : Get.put(CategoryController());
-      
   final brandCtrl = Get.isRegistered<BrandController>()
       ? Get.find<BrandController>()
       : Get.put(BrandController());
@@ -37,7 +32,6 @@ class ProductController extends GetxController {
   Rxn<File> pickedImageFile = Rxn<File>();
   final ImagePicker _picker = ImagePicker();
 
-  RxnString selectedCategoryId = RxnString();
   RxnString selectedBrandId = RxnString();
   RxnString selectedSupplierId = RxnString();
   RxBool status = true.obs;
@@ -62,7 +56,6 @@ class ProductController extends GetxController {
     super.onClose();
   }
 
-  // 🔹 Method ជ្រើសរើសរូបភាព
   Future<void> pickImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -91,8 +84,6 @@ class ProductController extends GetxController {
     quantityCtrl.text = item.quantity.toString();
     imageCtrl.text = item.image ?? '';
     descriptionCtrl.text = item.description ?? '';
-
-    selectedCategoryId.value = item.categoryId;
     selectedBrandId.value = item.brandId;
     selectedSupplierId.value = item.supplierId;
     status.value = item.status;
@@ -110,8 +101,6 @@ class ProductController extends GetxController {
     imageCtrl.clear();
     descriptionCtrl.clear();
     pickedImageFile.value = null;
-
-    selectedCategoryId.value = null;
     selectedBrandId.value = null;
     selectedSupplierId.value = null;
     status.value = true;
@@ -123,7 +112,6 @@ class ProductController extends GetxController {
         costPrice: double.tryParse(costPriceCtrl.text.trim()) ?? 0.0,
         salePrice: double.tryParse(salePriceCtrl.text.trim()) ?? 0.0,
         quantity: int.tryParse(quantityCtrl.text.trim()) ?? 0,
-        categoryId: selectedCategoryId.value,
         brandId: selectedBrandId.value,
         supplierId: selectedSupplierId.value,
         image: imageCtrl.text.trim().isEmpty ? null : imageCtrl.text.trim(),

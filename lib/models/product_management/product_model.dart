@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProductModel {
   String? id;
   String productName;
-  String? categoryId;
   String? brandId;
   String? supplierId;
   double costPrice;
@@ -18,7 +17,6 @@ class ProductModel {
   ProductModel({
     this.id,
     required this.productName,
-    this.categoryId,
     this.brandId,
     this.supplierId,
     required this.costPrice,
@@ -38,7 +36,6 @@ class ProductModel {
   ProductModel copyWith({
     String? id,
     String? productName,
-    String? categoryId,
     String? brandId,
     String? supplierId,
     double? costPrice,
@@ -53,7 +50,6 @@ class ProductModel {
     return ProductModel(
       id: id ?? this.id,
       productName: productName ?? this.productName,
-      categoryId: categoryId ?? this.categoryId,
       brandId: brandId ?? this.brandId,
       supplierId: supplierId ?? this.supplierId,
       costPrice: costPrice ?? this.costPrice,
@@ -74,7 +70,6 @@ class ProductModel {
     return ProductModel(
       id: id ?? json['id']?.toString(),
       productName: json['product_name'] ?? json['name'] ?? '',
-      categoryId: json['category_id']?.toString(),
       brandId: json['brand_id']?.toString(),
       supplierId: json['supplier_id']?.toString(),
       costPrice: (json['cost_price'] ?? 0).toDouble(),
@@ -94,7 +89,6 @@ class ProductModel {
     return {
       if (id != null) "id": id,
       "product_name": productName,
-      "category_id": categoryId,
       "brand_id": brandId,
       "supplier_id": supplierId,
       "cost_price": costPrice,

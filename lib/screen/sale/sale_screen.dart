@@ -70,12 +70,11 @@ class SaleScreen extends GetView<SaleController> {
                 ),
                 const SizedBox(height: 8),
 
-                // Categories Horizontal List
                 SizedBox(
                   height: 40,
                   child: Obx(() {
-                    final categories = controller.categoryCtr.category;
-                    final selectedId = controller.selectedCategoryId.value;
+                    final categories = controller.brandCtr.brands;
+                    final selectedId = controller.selectedBrandId.value;
 
                     return ListView.separated(
                       scrollDirection: Axis.horizontal,
@@ -93,7 +92,7 @@ class SaleScreen extends GetView<SaleController> {
                               color: isSelected ? Colors.white : Colors.black87,
                               fontWeight: FontWeight.w500,
                             ),
-                            onSelected: (_) => controller.selectCategory('All'),
+                            onSelected: (_) => controller.selectBrand('All'),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -111,7 +110,7 @@ class SaleScreen extends GetView<SaleController> {
                             color: isSelected ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.w500,
                           ),
-                          onSelected: (_) => controller.selectCategory(cat.id ?? ''),
+                          onSelected: (_) => controller.selectBrand(cat.id ?? ''),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),

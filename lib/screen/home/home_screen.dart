@@ -65,9 +65,9 @@ class HomeScreen extends StatelessWidget {
                     () => ctr.gotoProductScreen(),
                   ),
                   _card(
-                    Icons.category,
-                    "Category",
-                    () => ctr.gotoCategoryScreen(),
+                    Icons.inventory,
+                    "Brand",
+                    () => ctr.gotoBrandScreen(),
                   ),
                   _card(
                     Icons.local_shipping_outlined,

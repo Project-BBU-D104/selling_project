@@ -324,7 +324,7 @@ class ReviewOrderScreen extends StatelessWidget {
 
                       if (isSuccess) {
                         Get.offNamed(
-                          AppRoute.SalesCompletionScreen,
+                          AppRoute.salesCompletionScreen,
                           arguments: saleData,
                         );
                       } else {

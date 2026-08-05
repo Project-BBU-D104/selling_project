@@ -190,15 +190,15 @@ class ProductAddWidget extends StatelessWidget {
                 decoration: _inputDecoration('0'),
               ),
 
-              _buildFieldLabel('Category'),
+              _buildFieldLabel('Brand'),
               Obx(() => DropdownButtonFormField<String>(
-                    initialValue: productCtrl.selectedCategoryId.value,
-                    hint: Text('Select Category', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
+                    initialValue: productCtrl.selectedBrandId.value,
+                    hint: Text('Select Brand', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
                     decoration: _inputDecoration(''),
-                    items: productCtrl.categoryCtrl.category.map((cat) {
-                      return DropdownMenuItem(value: cat.id, child: Text(cat.name, style: const TextStyle(fontSize: 13)));
+                    items: productCtrl.brandCtrl.brands.map((brand) {
+                      return DropdownMenuItem(value: brand.id, child: Text(brand.name, style: const TextStyle(fontSize: 13)));
                     }).toList(),
-                    onChanged: (val) => productCtrl.selectedCategoryId.value = val,
+                    onChanged: (val) => productCtrl.selectedBrandId.value = val,
                   )),
 
               _buildFieldLabel('Supplier'),

@@ -32,10 +32,10 @@ class BrandCardWidget extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blueAccent),
-              onPressed: onEdit,
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.edit, color: Colors.blueAccent),
+            //   onPressed: onEdit,
+            // ),
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.redAccent),
               onPressed: onDelete,

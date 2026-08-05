@@ -48,11 +48,6 @@ class DrawerWidget extends StatelessWidget {
             () => ctr.gotoProductScreen(),
           ),
           _menu(
-            Icons.category,
-            "Category",
-            () => ctr.gotoCategoryScreen(),
-          ),
-          _menu(
             Icons.inventory,
             "Brand",
             () => ctr.gotoBrandScreen(),

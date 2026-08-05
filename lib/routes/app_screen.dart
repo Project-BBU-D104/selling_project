@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:selling_project/binding/brand_binding.dart';
-import 'package:selling_project/binding/category_binding.dart';
 import 'package:selling_project/binding/customer_binding.dart';
 import 'package:selling_project/binding/home_binding.dart';
 import 'package:selling_project/binding/payment_binding.dart';
@@ -13,7 +12,6 @@ import 'package:selling_project/binding/user_binding.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/screen/auth/login_screen.dart';
 import 'package:selling_project/screen/brand/brand_screen.dart';
-import 'package:selling_project/screen/category/category_screen.dart';
 import 'package:selling_project/screen/customer/customer_screen.dart';
 import 'package:selling_project/screen/home/home_screen.dart';
 import 'package:selling_project/screen/payment/payment_screen.dart';
@@ -51,11 +49,6 @@ class AppScreen {
       binding: BrandBinding(),
     ),
     GetPage(
-      name: AppRoute.category,
-      page: () => CategoryScreen(),
-      binding: CategoryBinding(),
-    ),
-    GetPage(
       name: AppRoute.customer,
       page: () => CustomerScreen(),
       binding: CustomerBinding(),
@@ -86,7 +79,7 @@ class AppScreen {
       binding: SaleBinding(),
     ),
     GetPage(
-      name: AppRoute.SalesCompletionScreen,
+      name: AppRoute.salesCompletionScreen,
       page: () => SalesCompletionScreen(),
       binding: SaleBinding(),
     ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:selling_project/controller/category_controller.dart';
+import 'package:selling_project/controller/brand_controller.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
 
 class ProductCardWidget extends StatelessWidget {
@@ -17,19 +17,19 @@ class ProductCardWidget extends StatelessWidget {
     this.onDelete,
   });
 
-  String _getCategoryName(String? categoryId) {
+  String _getBrandName(String? categoryId) {
     if (categoryId == null || categoryId.trim().isEmpty) {
       return 'Uncategorized';
     }
-    if (Get.isRegistered<CategoryController>()) {
-      final categoryCtrl = Get.find<CategoryController>();
+    if (Get.isRegistered<BrandController>()) {
+      final brandCtrl = Get.find<BrandController>();
 
-      final category = categoryCtrl.category.firstWhereOrNull(
-        (cat) => cat.id == categoryId,
+      final brand = brandCtrl.brands.firstWhereOrNull(
+        (b) => b.id == categoryId,
       );
 
-      if (category != null && category.name.isNotEmpty) {
-        return category.name;
+      if (brand != null && brand.name.isNotEmpty) {
+        return brand.name;
       }
     }
     return categoryId;
@@ -113,7 +113,7 @@ class ProductCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        "Cat: ${_getCategoryName(product.categoryId)}",
+                        "Brand: ${_getBrandName(product.brandId)}",
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey.shade700,

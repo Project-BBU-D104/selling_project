@@ -2,8 +2,8 @@ class SaleItemModel {
   String? id;
   String productId;
   String productName;
-  String categoryId;
-  String categoryName;
+  String? brandId;
+  String? brandName;
   int quantity;
   double unitPrice;
   double totalPrice;
@@ -13,8 +13,8 @@ class SaleItemModel {
     this.id,
     required this.productId,
     required this.productName,
-    required this.categoryId,
-    required this.categoryName,
+    this.brandId,
+    this.brandName,
     required this.quantity,
     required this.unitPrice,
     required this.totalPrice,
@@ -29,8 +29,8 @@ class SaleItemModel {
       id: id,
       productId: json["product_id"] ?? "",
       productName: json["product_name"] ?? "",
-      categoryId: json["category_id"] ?? "",
-      categoryName: json["category_name"] ?? "",
+      brandId: json["brand_id"] ?? json["categoryId"],
+      brandName: json["brand_name"] ?? json["categoryName"],
       quantity: json["quantity"] ?? 0,
       unitPrice: (json["unit_price"] ?? 0).toDouble(),
       totalPrice: (json["total_price"] ?? 0).toDouble(),
@@ -42,8 +42,8 @@ class SaleItemModel {
     return {
       "product_id": productId,
       "product_name": productName,
-      "category_id": categoryId,
-      "category_name": categoryName,
+      "brand_id": brandId,
+      "brand_name": brandName,
       "quantity": quantity,
       "unit_price": unitPrice,
       "total_price": totalPrice,
