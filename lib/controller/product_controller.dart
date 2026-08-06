@@ -69,8 +69,9 @@ class ProductController extends GetxController {
 
       if (!matchesSearch) return false;
 
-      if (selectedFilter.value == 'Category GPU') {
-        return item.brandId != null && item.brandId!.toLowerCase().contains('gpu');
+      // ប្តូរលក្ខខណ្ឌពី Category GPU មកជា In Stock
+      if (selectedFilter.value == 'In Stock') {
+        return item.quantity > 0;
       } else if (selectedFilter.value == 'Stock Low') {
         return item.quantity > 0 && item.quantity <= 5;
       }

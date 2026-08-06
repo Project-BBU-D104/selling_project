@@ -82,9 +82,9 @@ class ProductScreen extends StatelessWidget {
                         onTap: () => controller.setFilter('All Products'),
                       ),
                       _buildFilterChip(
-                        'Category GPU',
-                        isSelected: controller.selectedFilter.value == 'Category GPU',
-                        onTap: () => controller.setFilter('Category GPU'),
+                        'In Stock',
+                        isSelected: controller.selectedFilter.value == 'In Stock',
+                        onTap: () => controller.setFilter('In Stock'),
                       ),
                       _buildFilterChip(
                         'Stock Low',
