@@ -79,6 +79,11 @@ class HomeScreen extends StatelessWidget {
                     "Payment",
                     () => ctr.gotoPaymentScreen(),
                   ),
+                  _card(
+                    Icons.tune,
+                    "Stock Adjustment",
+                    () => ctr.gotoStockAdjustmentScreen(),
+                  ),
                 ],
               ),
             ),

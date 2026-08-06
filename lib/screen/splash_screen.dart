@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               // Title
               const Text(
-                'Inventory\nManagement',
+                'Computer\nManagement',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 42,

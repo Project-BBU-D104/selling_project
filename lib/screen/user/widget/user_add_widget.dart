@@ -30,7 +30,6 @@ class UserAddWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Provision access for a new team member.', style: TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 20),
             Center(
               child: Column(
@@ -93,37 +92,50 @@ class UserAddWidget extends StatelessWidget {
                     if (val != null) controller.selectedRole.value = val;
                   },
                 )),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('System Status (Active)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                Obx(() => Switch(
-                      value: controller.isUserActive.value,
-                      activeThumbColor: primaryColor,
-                      onChanged: (val) => controller.isUserActive.value = val,
-                    )),
-              ],
-            ),
             const SizedBox(height: 24),
-
-            // Buttons
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: OutlinedButton.icon(
                     onPressed: () => Get.back(),
-                    child: const Text('Discard'),
+                    label: const Text(
+                      'Discard',
+                      style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Obx(() => ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: primaryColor, padding: const EdgeInsets.symmetric(vertical: 14)),
+                  child: Obx(() => ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          elevation: 2,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                         onPressed: controller.loading.value ? null : () => controller.createUser(),
-                        child: controller.loading.value
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text('Create User', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        icon: controller.loading.value
+                            ? const SizedBox.shrink()
+                            : null,
+                        label: controller.loading.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Text(
+                                'Create User',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
                       )),
                 ),
               ],
@@ -156,7 +168,7 @@ class UserAddWidget extends StatelessWidget {
   void _showPickerModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(16))),
       builder: (_) => SafeArea(
         child: Wrap(
           children: [

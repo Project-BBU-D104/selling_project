@@ -22,7 +22,6 @@ class UserController extends GetxController {
   final passwordController = TextEditingController();
 
   var selectedRole = 'Staff'.obs;
-  var isUserActive = true.obs;
   var currentTab = 'All Users'.obs;
   var searchKeyword = ''.obs;
 
@@ -95,7 +94,6 @@ class UserController extends GetxController {
     phoneController.text = user.phone ?? '';
     passwordController.text = user.password;
     selectedRole.value = roleOptions.contains(user.role) ? user.role : 'Staff';
-    isUserActive.value = user.status;
     existingImageUrl.value = user.imageUrl;
     selectedImage.value = null;
   }
@@ -106,7 +104,6 @@ class UserController extends GetxController {
     phoneController.clear();
     passwordController.clear();
     selectedRole.value = 'Staff';
-    isUserActive.value = true;
     selectedImage.value = null;
     existingImageUrl.value = null;
   }
@@ -114,6 +111,11 @@ class UserController extends GetxController {
   Future<void> createUser() async {
     if (fullNameController.text.trim().isEmpty) {
       Get.snackbar("Error", "Full name is required", backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
+    if (emailController.text.trim().isEmpty) {
+      Get.snackbar("Error", "Email is required for Firebase Authentication", backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
@@ -125,22 +127,24 @@ class UserController extends GetxController {
         uploadedUrl = await _service.uploadImage(selectedImage.value!);
       }
 
+      String passwordToUse = passwordController.text.trim().isEmpty ? '123456' : passwordController.text.trim();
+
       UserModel newUser = UserModel(
         fullName: fullNameController.text.trim(),
-        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        email: emailController.text.trim(),
         phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-        password: passwordController.text.trim().isEmpty ? '123456' : passwordController.text.trim(),
+        password: passwordToUse,
         role: selectedRole.value,
-        status: isUserActive.value,
+        status: true,
         imageUrl: uploadedUrl,
       );
+      await _service.addUser(newUser, passwordToUse);
 
-      await _service.addUser(newUser);
       clearForm();
       Get.back();
-      Get.snackbar("Success", "User created successfully", backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar("Success", "User created successfully", backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
     } catch (e) {
-      Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", e.toString(), backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
     } finally {
       loading.value = false;
     }
@@ -162,7 +166,7 @@ class UserController extends GetxController {
         phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
         password: passwordController.text.trim().isEmpty ? user.password : passwordController.text.trim(),
         role: selectedRole.value,
-        status: isUserActive.value,
+        status: user.status,
         imageUrl: imageUrl,
         createdAt: user.createdAt,
       );
@@ -170,9 +174,9 @@ class UserController extends GetxController {
       await _service.updateUser(updated);
       clearForm();
       Get.back();
-      Get.snackbar("Success", "User updated successfully", backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar("Success", "User updated successfully", backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
     } catch (e) {
-      Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", e.toString(), backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
     } finally {
       loading.value = false;
     }
@@ -180,10 +184,13 @@ class UserController extends GetxController {
 
   Future<void> removeUser(String id) async {
     try {
+      loading.value = true;
       await _service.deleteUser(id);
-      Get.snackbar("Success", "User deleted successfully", backgroundColor: Colors.black87, colorText: Colors.white);
+      Get.snackbar("Success", "User deleted successfully", backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
     } catch (e) {
-      Get.snackbar("Error", e.toString(), backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", e.toString(), backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 3));
+    } finally {
+      loading.value = false;
     }
   }
 }

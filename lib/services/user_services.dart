@@ -1,30 +1,33 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:selling_project/models/user_model.dart';
-import 'package:selling_project/services/api_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserService {
-  final ApiServices _api = ApiServices();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // ប្រើ Firestore ផ្ទាល់
   final String collection = 'users';
 
-  // Supabase instance
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  /// Fetch users
+  /// Fetch users from Firestore
   Stream<List<UserModel>> getUsers() {
-    return _api.get(collection).map((snapshot) {
-      return snapshot.map((json) => UserModel.fromJson(json)).toList();
+    return _firestore.collection(collection).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return UserModel.fromJson(data);
+      }).toList();
     });
   }
 
-  /// Upload image to Supabase Storage bucket 'user-images'
+  /// Upload image to Supabase Storage
   Future<String?> uploadImage(File file) async {
     try {
       final extension = file.path.split('.').last;
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
       final path = 'profiles/$fileName';
 
-      // 2. Upload file ទៅកាន់ Supabase Storage
       await _supabase.storage.from('user-images').upload(
             path,
             file,
@@ -44,23 +47,56 @@ class UserService {
     }
   }
 
-  /// Add new user
-  Future<void> addUser(UserModel user) async {
-    Map<String, dynamic> data = user.toJson();
-    final generatedId = await _api.post(collection, data);
-    await _api.put(collection, generatedId, {'id': generatedId});
+  /// Add new user (បង្កើតទាំងក្នុង Firebase Auth និង Firestore ព្រមគ្នា)
+  Future<void> addUser(UserModel user, String password) async {
+    try {
+      // ១. បង្កើតគណនីក្នុង Firebase Authentication ជាមុនសិន
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: user.email ?? '',
+        password: password,
+      );
+      String uid = userCredential.user!.uid;
+
+      // ២. បង្កើត Model ជាមួយ UID ដែលបានពី Auth
+      UserModel userWithId = UserModel(
+        id: uid,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        password: password, 
+        role: user.role,
+        status: user.status,
+        imageUrl: user.imageUrl,
+        createdAt: user.createdAt,
+      );
+
+      // ៣. រក្សាទុកចូល Firestore យ៉ាងពិតប្រាកដដោយប្រើ doc(uid)
+      await _firestore.collection(collection).doc(uid).set(userWithId.toJson());
+      
+    } catch (e) {
+      throw Exception("Failed to create user: $e");
+    }
   }
 
-  /// Update existing user
+  /// Update existing user in Firestore
   Future<void> updateUser(UserModel user) async {
     if (user.id == null || user.id!.isEmpty) {
       throw Exception("Cannot update user without a valid ID");
     }
-    await _api.put(collection, user.id!, user.toJson());
+
+    try {
+      await _firestore.collection(collection).doc(user.id!).update(user.toJson());
+    } catch (e) {
+      throw Exception("Failed to update user: $e");
+    }
   }
 
-  /// Delete user
+  /// Delete user from Firestore
   Future<void> deleteUser(String id) async {
-    await _api.delete(collection, id);
+    try {
+      await _firestore.collection(collection).doc(id).delete();
+    } catch (e) {
+      throw Exception("Failed to delete user: $e");
+    }
   }
 }

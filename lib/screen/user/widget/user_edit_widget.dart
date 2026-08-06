@@ -19,7 +19,7 @@ class UserEditWidget extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text('Edit User Details', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+        title: const Text('Edit User', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: primaryColor),
           onPressed: () => Get.back(),
@@ -30,7 +30,6 @@ class UserEditWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Edit User Profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Center(
               child: Column(
@@ -97,32 +96,54 @@ class UserEditWidget extends StatelessWidget {
                     if (val != null) controller.selectedRole.value = val;
                   },
                 )),
-            const SizedBox(height: 12),
-
+            const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('System Status (Active)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                Obx(() => Switch(
-                      value: controller.isUserActive.value,
-                      activeThumbColor: primaryColor,
-                      onChanged: (val) => controller.isUserActive.value = val,
-                    )),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => Get.back(),
+                    label: const Text(
+                      'Discard',
+                      style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Obx(() => ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          elevation: 2,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: controller.loading.value ? null : () => controller.saveUpdatedUser(user),
+                        icon: controller.loading.value
+                            ? const SizedBox.shrink()
+                            : null,
+                        label: controller.loading.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Text(
+                                'Update User',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                      )),
+                ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            Obx(() => SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
-                    onPressed: controller.loading.value ? null : () => controller.saveUpdatedUser(user),
-                    child: controller.loading.value
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Update User', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                )),
           ],
         ),
       ),
