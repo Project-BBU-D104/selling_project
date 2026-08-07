@@ -26,8 +26,8 @@ class UserController extends GetxController {
   var searchKeyword = ''.obs;
 
   final List<String> roleOptions = [
-    'System Admin',
-    'Chief Admin',
+    'Admin',
+    'Cashier',
     'Logistics Manager',
     'Sales Associate',
     'Support Tech',
