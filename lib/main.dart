@@ -18,7 +18,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  _initStorage();
+  await _initStorage();
   await GetStorage.init();
   Get.put(AppController());
 
@@ -51,15 +51,34 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = GetStorage();
+    bool isDarkModeSaved = box.read('isDarkMode') ?? false;
+
     return GetMaterialApp(
       title: 'Selling Project',
       debugShowCheckedModeBanner: false,
+      
       theme: ThemeData(
         useMaterial3: true,
+        brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
+          brightness: Brightness.light,
         ),
       ),
+
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF121212),
+      ),
+      
+      themeMode: isDarkModeSaved ? ThemeMode.dark : ThemeMode.light,
+
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.mouse,

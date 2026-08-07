@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               // Title
               const Text(
-                'Computer\nManagement',
+                'Computer Shop',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 42,
@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
               // Subtitle
               const Text(
-                'HARDWAREPRO ENTERPRISE',
+                'Inventory Management',
                 style: TextStyle(
                   fontSize: 18,
                   letterSpacing: 2,

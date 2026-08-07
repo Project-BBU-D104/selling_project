@@ -2,12 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:selling_project/models/user_model.dart';
 import 'package:selling_project/services/auth_service.dart';
 
 class SettingController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _box = GetStorage();
 
   var userName = "Loading...".obs;
   var userEmail = "Loading...".obs;
@@ -23,6 +25,21 @@ class SettingController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUserData();
+    
+    //ទាញយកតម្លៃ Dark Mode
+    isDarkMode.value = _box.read('isDarkMode') ?? false;
+  }
+
+  //កែសម្រួលមុខងារ toggleDarkMode
+  void toggleDarkMode(bool value) {
+    isDarkMode.value = value;
+    _box.write('isDarkMode', value);
+    
+    if (value) {
+      Get.changeThemeMode(ThemeMode.dark);
+    } else {
+      Get.changeThemeMode(ThemeMode.light);
+    }
   }
 
   Future<void> fetchUserData() async {
@@ -38,8 +55,6 @@ class SettingController extends GetxController {
           userEmail.value = userModel.email ?? currentUser.email ?? 'No Email';
           userRole.value = userModel.role;
           userProfileImage.value = userModel.imageUrl ?? '';
-          
-          print("Loaded Image URL: ${userProfileImage.value}");
         } else {
           userName.value = currentUser.displayName ?? 'User';
           userEmail.value = currentUser.email ?? 'No Email';
@@ -53,7 +68,6 @@ class SettingController extends GetxController {
     }
   }
 
-  void toggleDarkMode(bool value) => isDarkMode.value = value;
   void togglePushNotifications(bool value) => pushNotifications.value = value;
   void toggleEmailAlerts(bool value) => emailAlerts.value = value;
 

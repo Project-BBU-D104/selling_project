@@ -17,10 +17,10 @@ class DrawerWidget extends StatelessWidget {
               color: Color(0xFF003B6D),
             ),
             accountName: Text(
-              "HardwarePro Enterprise",
+              "Computer Shop",
             ),
             accountEmail: Text(
-              "Inventory Management System",
+              "Inventory Management",
             ),
             currentAccountPicture: CircleAvatar(
               child: Icon(
@@ -76,6 +76,11 @@ class DrawerWidget extends StatelessWidget {
           //   Icons.payment,
           //   "Payments",
           //   () => ctr.gotoPaymentScreen()
+          // ),
+          // _menu(
+          //   Icons.local_shipping_outlined,
+          //   "Purchase",
+          //   () => ctr.gotoPurchaseScreen()
           // ),
           const Spacer(),
           const Divider(),
