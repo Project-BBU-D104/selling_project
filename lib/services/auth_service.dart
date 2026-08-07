@@ -18,7 +18,7 @@
 //   }) async {
 //     _logDebugInfo();
 //     await _checkNetworkConnectivity();
-    
+
 //     try {
 //       final credential =
 //           await auth.createUserWithEmailAndPassword(
@@ -34,7 +34,7 @@
 //         'username': username,
 //         'email': email,
 //       });
-      
+
 //     } on FirebaseAuthException catch (e) {
 //       print("❌ Firebase Auth Error: ${e.code} - ${e.message}");
 //       rethrow;
@@ -85,17 +85,17 @@
 
 //   /// Diagnostic: Check Firebase initialization and device info
 //   void _logDebugInfo() {
-   
+
 //     if (Firebase.apps.isNotEmpty) {
 //       print("App Name: ${Firebase.apps[0].name}");
 //     }
-     
+
 //   }
 
 //   /// Diagnostic: Check network connectivity
 //   Future<void> _checkNetworkConnectivity() async {
 //     try {
-       
+
 //       final result = await InternetAddress.lookup('google.com');
 //       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
 //         print("✓ Network connectivity: OK");
@@ -115,6 +115,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 
 class AuthService {
+  static final AuthService instance = AuthService._internal();
+
+  AuthService._internal();
+
+  factory AuthService() {
+    return instance;
+  }
+
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -128,26 +136,22 @@ class AuthService {
     await _checkNetworkConnectivity();
 
     try {
-      final credential =
-          await auth.createUserWithEmailAndPassword(
+      final credential = await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      await firestore
-          .collection('users')
-          .doc(credential.user!.uid)
-          .set({
+      await firestore.collection('users').doc(credential.user!.uid).set({
         'uid': credential.user!.uid,
         'username': username,
         'email': email,
       });
     } on FirebaseAuthException catch (e) {
-      print("❌ Firebase Auth Error: ${e.code}");
-      print("❌ Message: ${e.message}");
+      print("Firebase Auth Error: ${e.code}");
+      print("Message: ${e.message}");
       rethrow;
     } catch (e) {
-      print("❌ Unexpected Error: $e");
+      print("Unexpected Error: $e");
       rethrow;
     }
   }
@@ -180,12 +184,12 @@ class AuthService {
 
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      print("❌ Firebase Auth Error");
+      print("Firebase Auth Error");
       print("Code: ${e.code}");
       print("Message: ${e.message}");
       rethrow;
     } catch (e, stackTrace) {
-      print("❌ Login Error: $e");
+      print("Login Error: $e");
       print(stackTrace);
       rethrow;
     }
@@ -211,13 +215,11 @@ class AuthService {
     if (kIsWeb) return;
 
     try {
-      final result =
-          await InternetAddress.lookup(
+      final result = await InternetAddress.lookup(
         'google.com',
       );
 
-      if (result.isNotEmpty &&
-          result.first.rawAddress.isNotEmpty) {
+      if (result.isNotEmpty && result.first.rawAddress.isNotEmpty) {
         print("✓ Network OK");
       }
     } on SocketException {

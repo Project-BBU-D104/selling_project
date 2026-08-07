@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // ប្រើ Firestore ផ្ទាល់
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String collection = 'users';
 
   final SupabaseClient _supabase = Supabase.instance.client;

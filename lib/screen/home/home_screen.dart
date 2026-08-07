@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       drawer: DrawerWidget(),
       appBar: AppBar(
-        title: const Text("HardwarePro Enterprise"),
+        title: const Text("Computer Shop"),
         backgroundColor: const Color(0xFF003B6D),
         foregroundColor: Colors.white,
       ),
@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Inventory Management System",
+                    "Inventory Management",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -56,32 +56,32 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _card(
                     Icons.shopping_cart,
-                    "Sales",
+                    "Sales".tr,
                     () => ctr.gotoSaleListScreen(),
                   ),
                   _card(
                     Icons.sell,
-                    "Products",
+                    "Products".tr,
                     () => ctr.gotoProductScreen(),
                   ),
                   _card(
                     Icons.inventory,
-                    "Brand",
+                    "Brand".tr,
                     () => ctr.gotoBrandScreen(),
                   ),
                   _card(
                     Icons.local_shipping_outlined,
-                    "Purchase",
+                    "Purchase".tr,
                     () => ctr.gotoPurchaseScreen(),
                   ),
                   _card(
                     Icons.payment,
-                    "Payment",
+                    "Payment".tr,
                     () => ctr.gotoPaymentScreen(),
                   ),
                   _card(
                     Icons.tune,
-                    "Stock Adjustment",
+                    "Stock Adjustment".tr,
                     () => ctr.gotoStockAdjustmentScreen(),
                   ),
                 ],

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io'; // ថែម import នេះសម្រាប់ File
+import 'dart:io';
 import 'package:get_storage/get_storage.dart';
 import 'package:selling_project/constants/enum.dart';
 import 'package:selling_project/utils/helper.dart';
@@ -23,7 +23,7 @@ abstract class IStorageService {
   Future<void> lastUserLoginRemove();
   Map<String, dynamic> get lastUserLoginRead;
 
-  // 🔹 បន្ថែម method សម្រាប់ Supabase Storage
+  //បន្ថែម method សម្រាប់ Supabase Storage
   Future<String?> uploadImage(File file, {String bucketName});
 }
 

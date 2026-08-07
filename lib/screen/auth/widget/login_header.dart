@@ -21,7 +21,7 @@ class LoginHeader extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         const Text(
-          "HardwarePro Enterprise",
+          "Computer Management",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22,

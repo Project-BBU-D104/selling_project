@@ -31,7 +31,7 @@ class DrawerWidget extends StatelessWidget {
           ),
           _menu(
             Icons.home,
-            "Home",
+            "Home".tr,
             () {
               Get.back();
               Get.until((route) => route.isFirst);
@@ -39,38 +39,38 @@ class DrawerWidget extends StatelessWidget {
           ),
           _menu(
             Icons.shopping_cart,
-            "Sales",
+            "Sales".tr,
             () => ctr.gotoSaleListScreen(),
           ),
           _menu(
             Icons.sell,
-            "Products",
+            "Products".tr,
             () => ctr.gotoProductScreen(),
           ),
           _menu(
             Icons.inventory,
-            "Brand",
+            "Brand".tr,
             () => ctr.gotoBrandScreen(),
           ),
           _menu(
             Icons.people,
-            "Customers",
+            "Customers".tr,
             () => ctr.gotoCustomerScreen(),
           ),
           _menu(
             Icons.local_shipping,
-            "Suppliers",
+            "Suppliers".tr,
             () => ctr.gotoSupplierScreen(),
           ),
           _menu(
             Icons.person,
-            "User",
+            "User".tr,
             () => ctr.gotoUserScreen(),
           ),
           _menu(
             Icons.settings,
-            "Setting",
-            () {},
+            "Setting".tr,
+            () => ctr.gotoSettingScreen(),
           ),
           // _menu(
           //   Icons.payment,
@@ -81,7 +81,7 @@ class DrawerWidget extends StatelessWidget {
           const Divider(),
           _menu(
             Icons.logout,
-            "Logout",
+            "Logout".tr,
             () => ctr.onLogout(),
             color: Colors.red,
           ),

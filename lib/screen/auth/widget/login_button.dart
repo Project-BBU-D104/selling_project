@@ -38,7 +38,7 @@ class LoginButton extends StatelessWidget {
                   color: Colors.white,
                 )
               : const Text(
-                  "Sign In to Dashboard",
+                  "Log In",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

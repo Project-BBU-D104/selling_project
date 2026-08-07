@@ -33,4 +33,7 @@ class HomeController extends GetxController{
   void onLogout() {
     Get.toNamed(AppRoute.login);
   }
+  void gotoSettingScreen() {
+    Get.toNamed(AppRoute.setting);
+  }
 }
