@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:selling_project/models/sale/sale_model.dart';
 
 class TelegramServices {
-  static const String botToken = "8811714388:AAGUNGvminDnv0sk_ORTrgdQEe0spcuRtrY";
-  static const String chatId = "5231068047";
 
   static Future<bool> sendSaleInvoice(SaleModel sale) async {
     String message = "🧾 *វិក្កយបត្រការលក់ (Sales Invoice)*\n\n"
