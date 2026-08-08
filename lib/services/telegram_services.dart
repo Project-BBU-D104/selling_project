@@ -1,10 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 
 class TelegramServices {
+  static String get botToken => dotenv.env['TELEGRAM_BOT_TOKEN'] ?? '';
+  static String get chatId => dotenv.env['TELEGRAM_CHAT_ID'] ?? '';
 
   static Future<bool> sendSaleInvoice(SaleModel sale) async {
+    if (botToken.isEmpty || chatId.isEmpty) {
+      print("Error: Telegram botToken or chatId is missing in .env");
+      return false;
+    }
+
     String message = "🧾 *វិក្កយបត្រការលក់ (Sales Invoice)*\n\n"
         "🆔 លេខវិក្កយបត្រ: `${sale.invoiceNo ?? 'N/A'}`\n"
         "👤 អតិថិជន: *${sale.customerName ?? 'General Customer'}*\n"
