@@ -1,68 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/stock_adjustment_controller.dart';
-import 'package:selling_project/models/stock_adjustment_model.dart';
-import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_card_widget.dart';
 import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_add_widget.dart';
+import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_card_widget.dart';
 
-class StockAdjustmentScreen extends GetView<StockAdjustmentController> {
+class StockAdjustmentScreen extends StatelessWidget {
   const StockAdjustmentScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final StockAdjustmentController controller = Get.isRegistered<StockAdjustmentController>()
+        ? Get.find<StockAdjustmentController>()
+        : Get.put(StockAdjustmentController());
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Stock Adjustments"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline, size: 28),
-            onPressed: () => Get.bottomSheet(
-              const StockAdjustmentAddWidget(),
-              isScrollControlled: true,
-            ),
-          ),
-        ],
+        title: const Text('Stock Adjustment History'),
       ),
-      body: StreamBuilder<List<StockAdjustmentModel>>(
-        stream: controller.stockAdjustmentsStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text("No stock adjustments recorded yet.", style: TextStyle(color: Colors.grey)),
-            );
-          }
+      body: Obx(() {
+        if (controller.stockAdjustments.isEmpty) {
+          return const Center(
+            child: Text('No stock adjustment data available'),
+          );
+        }
 
-          final adjustments = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: adjustments.length,
-            itemBuilder: (context, index) {
-              final item = adjustments[index];
-              return StockAdjustmentCardWidget(
-                adjustment: item,
-                onDelete: () {
-                  Get.defaultDialog(
-                    title: "Delete Adjustment",
-                    middleText: "Are you sure you want to delete this record?",
-                    textConfirm: "Yes",
-                    textCancel: "No",
-                    confirmTextColor: Colors.white,
-                    onConfirm: () {
-                      Get.back();
-                      controller.deleteStockAdjustment(item.id!);
-                    },
-                  );
-                },
-              );
-            },
+        return ListView.builder(
+          itemCount: controller.stockAdjustments.length,
+          itemBuilder: (context, index) {
+            final adjustment = controller.stockAdjustments[index];
+            return StockAdjustmentCardWidget(adjustment: adjustment);
+          },
+        );
+      }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.bottomSheet(
+            const Material(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              child: StockAdjustmentAddWidget(),
+            ),
+            isScrollControlled: true,
           );
         },
+        child: const Icon(Icons.add),
       ),
     );
   }

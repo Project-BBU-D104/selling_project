@@ -10,13 +10,8 @@ import 'package:selling_project/services/product_services.dart';
 class ProductController extends GetxController {
   final ProductServices service = ProductServices();
 
-  final brandCtrl = Get.isRegistered<BrandController>()
-      ? Get.find<BrandController>()
-      : Get.put(BrandController());
-
-  final supplierCtrl = Get.isRegistered<SupplierController>()
-      ? Get.find<SupplierController>()
-      : Get.put(SupplierController());
+  late final BrandController brandCtrl;
+  late final SupplierController supplierCtrl;
 
   RxList<ProductModel> product = <ProductModel>[].obs;
   RxBool loading = false.obs;
@@ -46,6 +41,14 @@ class ProductController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    brandCtrl = Get.isRegistered<BrandController>()
+        ? Get.find<BrandController>()
+        : Get.put(BrandController());
+
+    supplierCtrl = Get.isRegistered<SupplierController>()
+        ? Get.find<SupplierController>()
+        : Get.put(SupplierController());
+
     getProducts();
   }
 
@@ -69,7 +72,6 @@ class ProductController extends GetxController {
 
       if (!matchesSearch) return false;
 
-      // ប្តូរលក្ខខណ្ឌពី Category GPU មកជា In Stock
       if (selectedFilter.value == 'In Stock') {
         return item.quantity > 0;
       } else if (selectedFilter.value == 'Stock Low') {
@@ -159,6 +161,10 @@ class ProductController extends GetxController {
     }, onError: (err) {
       loading.value = false;
     });
+  }
+
+  void fetchProducts() {
+    getProducts();
   }
 
   Future<void> submitSave() async {

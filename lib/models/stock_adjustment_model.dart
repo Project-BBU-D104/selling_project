@@ -1,58 +1,72 @@
 class StockAdjustmentModel {
-  String? id;
-  String name;
-  String description;
-  Map<String, dynamic> product;
-  String adjustmentType;
-  int quantity;
-  String reason;
-  DateTime adjustmentDate = DateTime.now();
-  DateTime? createdAt = DateTime.now();
-  DateTime? updatedAt = DateTime.now();
-   
+  final String? id;
+  final String productId;
+  final String? productName;
+  final String adjustmentType;
+  final int quantity;
+  final String? reason;
+  final String? userId;
+  final String? userName;
+  final DateTime? adjustmentDate;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+
   StockAdjustmentModel({
     this.id,
-    required this.name,
-    required this.description,
-    required this.product,
+    required this.productId,
+    this.productName,
     required this.adjustmentType,
     required this.quantity,
-    required this.reason,
-    required this.adjustmentDate,
+    this.reason,
+    this.userId,
+    this.userName,
+    this.adjustmentDate,
     this.createdAt,
-    this.updatedAt
-
+    this.updatedAt,
   });
 
-  factory StockAdjustmentModel.fromJson(
-      Map<String,dynamic> json,
-      String? id
-  ){
+  factory StockAdjustmentModel.fromJson(Map<String, dynamic> json) {
     return StockAdjustmentModel(
-      id: id,
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      product: json['product'] ?? {},
-      adjustmentType: json['adjustment_type'] ?? '',
-      quantity: json['quantity'] ?? 0,
-      reason: json['reason'] ?? '',
-      adjustmentDate: json['adjustment_date'] ?? DateTime.now(),
-      createdAt: json['created_at'] ?? DateTime.now(),
-      updatedAt: json['updated_at'] ?? DateTime.now(),
+      id: json['id']?.toString(),
+      
+      // ✅ ការពារ Null ដោយផ្ដល់តម្លៃដើម '' ប្រសិនបើជួប null ឬរក key មិនឃើញ
+      productId: json['product_id']?.toString() ?? json['productId']?.toString() ?? '',
+      productName: json['product_name']?.toString() ?? json['productName']?.toString(),
+      
+      adjustmentType: json['adjustment_type']?.toString() ?? json['adjustmentType']?.toString() ?? '',
+      
+      // ✅ ការពារ error ពេល quantity មកជា double ឬ String
+      quantity: json['quantity'] is int 
+          ? json['quantity'] 
+          : int.tryParse(json['quantity']?.toString() ?? '0') ?? 0,
+          
+      reason: json['reason']?.toString(),
+      userId: json['user_id']?.toString() ?? json['userId']?.toString(),
+      userName: json['user_name']?.toString() ?? json['userName']?.toString(),
+      
+      adjustmentDate: json['adjustment_date'] != null
+          ? DateTime.tryParse(json['adjustment_date'].toString())
+          : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'].toString())
+          : null,
     );
   }
 
-  Map<String,dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
-      "name": name,
-      "description": description,
-      "product": product,
-      "adjustment_type": adjustmentType,
-      "quantity": quantity,
-      "reason": reason,
-      "adjustment_date": adjustmentDate,
-      "created_at": createdAt,
-      "updated_at": updatedAt
+      if (id != null) 'id': id,
+      'product_id': productId,
+      'adjustment_type': adjustmentType,
+      'quantity': quantity,
+      'reason': reason,
+      'user_id': userId,
+      'adjustment_date': adjustmentDate?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 }

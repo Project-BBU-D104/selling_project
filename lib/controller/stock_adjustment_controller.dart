@@ -1,81 +1,170 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:selling_project/controller/auth_controller.dart';
+import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/models/stock_adjustment_model.dart';
+import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/services/stock_adjustment_services.dart';
 
 class StockAdjustmentController extends GetxController {
-  final StockAdjustmentServices _services = StockAdjustmentServices();
-
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
+  final StockAdjustmentServices _service = StockAdjustmentServices();
+  
   final quantityController = TextEditingController();
   final reasonController = TextEditingController();
 
-  var adjustmentType = 'Decrease'.obs;
-  var selectedProduct = <String, dynamic>{}.obs;
-
   var isLoading = false.obs;
+  var adjustmentType = 'ADD'.obs;
+  var selectedProduct = Rxn<ProductModel>();
 
-  Stream<List<StockAdjustmentModel>> get stockAdjustmentsStream => _services.getStockAdjustments();
+  RxList<StockAdjustmentModel> stockAdjustments = <StockAdjustmentModel>[].obs;
 
   @override
-  void onClose() {
-    nameController.dispose();
-    descriptionController.dispose();
-    quantityController.dispose();
-    reasonController.dispose();
-    super.onClose();
+  void onInit() {
+    super.onInit();
+    
+    if (Get.isRegistered<ProductController>()) {
+      Get.find<ProductController>().fetchProducts();
+    } else {
+      Get.put(ProductController());
+    }
+
+    stockAdjustments.bindStream(_service.getStockAdjustments());
   }
 
-  // clear form
-  void clearForm() {
-    nameController.clear();
-    descriptionController.clear();
-    quantityController.clear();
-    reasonController.clear();
-    adjustmentType.value = 'Decrease';
-    selectedProduct.clear();
-  }
+  Future<void> addAdjustment() async {
+    if (selectedProduct.value == null) {
+      Get.snackbar(
+        'Error', 
+        'Please select a product',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.red, 
+        colorText: Colors.white,
+      );
+      return;
+    }
 
-  // add stock
-  Future<void> addStockAdjustment() async {
+    if (quantityController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error', 
+        'Please enter quantity',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.red, 
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    int qty = int.tryParse(quantityController.text.trim()) ?? 0;
+    if (qty <= 0) {
+      Get.snackbar(
+        'Error', 
+        'Quantity must be greater than 0',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.red, 
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (adjustmentType.value == 'SUBTRACT' && qty > selectedProduct.value!.quantity) {
+      Get.snackbar(
+        'Warning', 
+        'Quantity to subtract ($qty) exceeds current stock (${selectedProduct.value!.quantity})!',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.orange, 
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     try {
-      if (nameController.text.isEmpty || quantityController.text.isEmpty) {
-        Get.snackbar("Error", "Please fill in all required fields", snackPosition: SnackPosition.BOTTOM);
-        return;
+      isLoading.value = true;
+
+      String? currentUserId;
+      String? currentUserName;
+
+      if (Get.isRegistered<AuthController>()) {
+        final authCtrl = Get.find<AuthController>();
+        currentUserId = authCtrl.currentUser.value?.id;
+        currentUserName = authCtrl.currentUser.value?.email; 
       }
 
-      isLoading.value = true;
       StockAdjustmentModel newAdjustment = StockAdjustmentModel(
-        name: nameController.text,
-        description: descriptionController.text,
-        product: selectedProduct,
+        productId: selectedProduct.value!.id ?? '',
+        productName: selectedProduct.value!.productName,
         adjustmentType: adjustmentType.value,
-        quantity: int.parse(quantityController.text),
-        reason: reasonController.text,
+        quantity: qty,
+        reason: reasonController.text.trim(),
+        userId: currentUserId,
+        userName: currentUserName,
         adjustmentDate: DateTime.now(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      await _services.addBrand(newAdjustment); 
-      
+
+      await _service.addStockAdjustment(
+        newAdjustment,
+        selectedProduct.value!.quantity,
+      );
+
+      if (Get.isRegistered<ProductController>()) {
+        Get.find<ProductController>().fetchProducts();
+      }
+
       clearForm();
       Get.back();
-      Get.snackbar("Success", "Stock adjustment recorded successfully", snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Success', 
+        'Stock adjustment saved and updated successfully',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.green, 
+        colorText: Colors.white,
+      );
     } catch (e) {
-      Get.snackbar("Error", "Failed to add: $e", snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error', 
+        'Something went wrong: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.red, 
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  //delete stock
-  Future<void> deleteStockAdjustment(String id) async {
+  Future<void> deleteAdjustment(String id) async {
     try {
-      await _services.deleteStockAdjustment(id);
-      Get.snackbar("Success", "Deleted successfully", snackPosition: SnackPosition.BOTTOM);
+      await _service.deleteStockAdjustment(id);
+      Get.snackbar(
+        'Success', 
+        'Data deleted successfully',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.green, 
+        colorText: Colors.white,
+      );
     } catch (e) {
-      Get.snackbar("Error", "Failed to delete: $e", snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Error', 
+        'Failed to delete data: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM, 
+        backgroundColor: Colors.red, 
+        colorText: Colors.white,
+      );
     }
+  }
+
+  void clearForm() {
+    selectedProduct.value = null;
+    adjustmentType.value = 'ADD';
+    quantityController.clear();
+    reasonController.clear();
+  }
+
+  @override
+  void onClose() {
+    quantityController.dispose();
+    reasonController.dispose();
+    super.onClose();
   }
 }

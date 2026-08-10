@@ -2,13 +2,32 @@ import 'package:get/get.dart';
 import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/services/auth_service.dart';
 import 'package:selling_project/services/storage_service.dart';
+import 'package:selling_project/models/user_model.dart';
 
 class AuthController extends GetxController {
   final AuthService service = AuthService();
-
   final StorageService storage = StorageService();
 
   RxBool loading = false.obs;
+  Rxn<UserModel> currentUser = Rxn<UserModel>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadUserFromStorage();
+  }
+
+  void _loadUserFromStorage() {
+    final userData = storage.lastUserLoginRead;
+
+    if (userData != null && userData is Map<String, dynamic>) {
+      try {
+        currentUser.value = UserModel.fromJson(userData);
+      } catch (e) {
+        print("Error parsing user data: $e");
+      }
+    }
+  }
 
   Future<void> register({
     required String username,
@@ -54,10 +73,20 @@ class AuthController extends GetxController {
         throw Exception("User not found");
       }
 
+      currentUser.value = UserModel(
+        id: user.uid,
+        password: password,
+        fullName: user.displayName ?? email.split('@').first,
+        email: user.email ?? "",
+        role: "admin",
+      );
+
       await storage.lastUserLoginWrite(
         data: {
-          "uid": user.uid,
+          "id": user.uid,
+          "full_name": user.displayName ?? email.split('@').first,
           "email": user.email ?? "",
+          "role": "admin",
         },
       );
 
