@@ -23,6 +23,7 @@ class AuthController extends GetxController {
     if (userData != null && userData is Map<String, dynamic>) {
       try {
         currentUser.value = UserModel.fromJson(userData);
+        print("LOADED USER FROM STORAGE: ${currentUser.value?.fullName}");
       } catch (e) {
         print("Error parsing user data: $e");
       }
@@ -72,21 +73,22 @@ class AuthController extends GetxController {
       if (user == null) {
         throw Exception("User not found");
       }
-
+      String nameToUse = user.displayName ?? email.split('@').first;
       currentUser.value = UserModel(
         id: user.uid,
         password: password,
-        fullName: user.displayName ?? email.split('@').first,
-        email: user.email ?? "",
+        fullName: nameToUse,
+        email: user.email ?? email,
         role: "admin",
       );
 
       await storage.lastUserLoginWrite(
         data: {
           "id": user.uid,
-          "full_name": user.displayName ?? email.split('@').first,
-          "email": user.email ?? "",
+          "full_name": nameToUse,
+          "email": user.email ?? email,
           "role": "admin",
+          "password": password,
         },
       );
 

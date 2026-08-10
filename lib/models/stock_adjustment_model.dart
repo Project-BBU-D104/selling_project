@@ -28,14 +28,11 @@ class StockAdjustmentModel {
   factory StockAdjustmentModel.fromJson(Map<String, dynamic> json) {
     return StockAdjustmentModel(
       id: json['id']?.toString(),
-      
-      // ✅ ការពារ Null ដោយផ្ដល់តម្លៃដើម '' ប្រសិនបើជួប null ឬរក key មិនឃើញ
       productId: json['product_id']?.toString() ?? json['productId']?.toString() ?? '',
       productName: json['product_name']?.toString() ?? json['productName']?.toString(),
+
       
       adjustmentType: json['adjustment_type']?.toString() ?? json['adjustmentType']?.toString() ?? '',
-      
-      // ✅ ការពារ error ពេល quantity មកជា double ឬ String
       quantity: json['quantity'] is int 
           ? json['quantity'] 
           : int.tryParse(json['quantity']?.toString() ?? '0') ?? 0,
@@ -64,6 +61,7 @@ class StockAdjustmentModel {
       'quantity': quantity,
       'reason': reason,
       'user_id': userId,
+      'user_name': userName,
       'adjustment_date': adjustmentDate?.toIso8601String(),
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),

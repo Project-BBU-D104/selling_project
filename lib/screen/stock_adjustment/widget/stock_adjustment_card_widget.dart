@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/controller/stock_adjustment_controller.dart';
 import 'package:selling_project/models/stock_adjustment_model.dart';
+import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_detail_widget.dart';
 
 class StockAdjustmentCardWidget extends StatelessWidget {
   final StockAdjustmentModel adjustment;
@@ -26,138 +27,123 @@ class StockAdjustmentCardWidget extends StatelessWidget {
         : (matchedProduct?.productName ?? 'Unknown Product');
 
     final bool isAdd = adjustment.adjustmentType == 'ADD';
-    final String formattedDate = adjustment.adjustmentDate != null
-        ? DateFormat('dd-MM-yyyy HH:mm').format(adjustment.adjustmentDate!)
-        : 'N/A';
+    final sign = isAdd ? '+' : '-';
+    final iconColor = isAdd ? const Color(0xFF2E7D32) : const Color(0xFFC62828);
+    final badgeColor = isAdd ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ListTile(
-        onTap: () => _showDetailDialog(context, displayName, formattedDate, isAdd),
-        leading: CircleAvatar(
-          backgroundColor: isAdd ? Colors.green.shade100 : Colors.red.shade100,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        onTap: () {
+          Get.bottomSheet(
+            StockAdjustmentDetailWidget(
+              adjustment: adjustment,
+              resolvedProductName: displayName,
+            ),
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+          );
+        },
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: badgeColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(
-            isAdd ? Icons.add : Icons.remove,
-            color: isAdd ? Colors.green : Colors.red,
+            isAdd ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+            color: iconColor,
+            size: 22,
           ),
         ),
-        title: Text(
-          displayName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (adjustment.reason != null && adjustment.reason!.isNotEmpty)
-              Text('Reason: ${adjustment.reason}'),
-            Text(
-              formattedDate,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${isAdd ? '+' : '-'}${adjustment.quantity}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isAdd ? Colors.green : Colors.red,
+            Expanded(
+              child: Text(
+                displayName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F2C59)),
               ),
             ),
-            const SizedBox(width: 4),
-            // 📌 Delete button
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-              onPressed: () => _confirmDelete(context, controller),
+            Text(
+              '$sign${adjustment.quantity}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: iconColor,
+              ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showDetailDialog(
-    BuildContext context,
-    String productName,
-    String formattedDate,
-    bool isAdd,
-  ) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Adjustment Detail',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  adjustment.reason != null && adjustment.reason!.isNotEmpty
+                      ? adjustment.reason!
+                      : 'General',
+                  style: const TextStyle(fontSize: 11, color: Colors.black87),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text('•', style: TextStyle(color: Colors.grey)),
+              const SizedBox(width: 8),
+              Text(
+                adjustment.adjustmentDate != null
+                    ? DateFormat('hh:mm a').format(adjustment.adjustmentDate!)
+                    : 'Just now',
+                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                onPressed: () => _confirmDelete(context, controller),
+              ),
+            ],
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _detailRow('Product Name:', productName),
-            _detailRow('Type:', isAdd ? 'Add Stock (+)' : 'Remove Stock (-)'),
-            _detailRow('Quantity:', '${adjustment.quantity}'),
-            _detailRow(
-              'Reason:',
-              (adjustment.reason != null && adjustment.reason!.isNotEmpty)
-                  ? adjustment.reason!
-                  : 'None',
-            ),
-            if (adjustment.userName != null && adjustment.userName!.isNotEmpty)
-              _detailRow('Updated By:', adjustment.userName!),
-            _detailRow('Date:', formattedDate),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 💡 Confirm delete dialog
   void _confirmDelete(BuildContext context, StockAdjustmentController controller) {
     Get.dialog(
       AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this stock adjustment data?'),
+        content: const Text('Are you sure you want to delete this stock adjustment record?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Close'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () {
               Get.back();
               if (adjustment.id != null) {

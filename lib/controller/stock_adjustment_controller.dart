@@ -5,12 +5,15 @@ import 'package:selling_project/controller/product_controller.dart';
 import 'package:selling_project/models/stock_adjustment_model.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/services/stock_adjustment_services.dart';
+import 'package:selling_project/services/storage_service.dart';
 
 class StockAdjustmentController extends GetxController {
   final StockAdjustmentServices _service = StockAdjustmentServices();
-  
+  final StorageService _storageService = StorageService();
+
   final quantityController = TextEditingController();
   final reasonController = TextEditingController();
+  final remarksController = TextEditingController();
 
   var isLoading = false.obs;
   var adjustmentType = 'ADD'.obs;
@@ -21,7 +24,7 @@ class StockAdjustmentController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    
+
     if (Get.isRegistered<ProductController>()) {
       Get.find<ProductController>().fetchProducts();
     } else {
@@ -31,13 +34,47 @@ class StockAdjustmentController extends GetxController {
     stockAdjustments.bindStream(_service.getStockAdjustments());
   }
 
+  void selectProduct(ProductModel product) {
+    selectedProduct.value = product;
+  }
+
+  void clearSelectedProduct() {
+    selectedProduct.value = null;
+  }
+
+  void increaseQuantity() {
+    int val = int.tryParse(quantityController.text) ?? 0;
+    quantityController.text = (val + 1).toString();
+  }
+
+  void decreaseQuantity() {
+    int val = int.tryParse(quantityController.text) ?? 0;
+    if (val > 1) {
+      quantityController.text = (val - 1).toString();
+    }
+  }
+
+  Iterable<ProductModel> filterProducts(
+      String query, List<ProductModel> allProducts) {
+    if (query.isEmpty) {
+      return allProducts;
+    }
+    final lowerQuery = query.toLowerCase();
+    return allProducts.where((ProductModel p) {
+      final nameMatches =
+          (p.productName ?? '').toLowerCase().contains(lowerQuery);
+      final skuMatches = (p.id ?? '').toLowerCase().contains(lowerQuery);
+      return nameMatches || skuMatches;
+    });
+  }
+
   Future<void> addAdjustment() async {
     if (selectedProduct.value == null) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Please select a product',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.red, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
       return;
@@ -45,10 +82,10 @@ class StockAdjustmentController extends GetxController {
 
     if (quantityController.text.trim().isEmpty) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Please enter quantity',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.red, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
       return;
@@ -57,21 +94,22 @@ class StockAdjustmentController extends GetxController {
     int qty = int.tryParse(quantityController.text.trim()) ?? 0;
     if (qty <= 0) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Quantity must be greater than 0',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.red, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
       return;
     }
 
-    if (adjustmentType.value == 'SUBTRACT' && qty > selectedProduct.value!.quantity) {
+    if (adjustmentType.value == 'SUBTRACT' &&
+        qty > selectedProduct.value!.quantity) {
       Get.snackbar(
-        'Warning', 
+        'Warning',
         'Quantity to subtract ($qty) exceeds current stock (${selectedProduct.value!.quantity})!',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.orange, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
         colorText: Colors.white,
       );
       return;
@@ -83,11 +121,28 @@ class StockAdjustmentController extends GetxController {
       String? currentUserId;
       String? currentUserName;
 
+      // 1. ព្យាយាមទាញយកពី AuthController ជាមុនសិន
       if (Get.isRegistered<AuthController>()) {
         final authCtrl = Get.find<AuthController>();
         currentUserId = authCtrl.currentUser.value?.id;
-        currentUserName = authCtrl.currentUser.value?.email; 
+        currentUserName = authCtrl.currentUser.value?.fullName ??
+            authCtrl.currentUser.value?.email;
       }
+
+      if (currentUserId == null || currentUserName == null) {
+        try {
+          final userData = _storageService.lastUserLoginRead;
+          if (userData != null && userData is Map<String, dynamic>) {
+            currentUserId ??= userData['id']?.toString();
+            currentUserName ??= userData['full_name']?.toString() ??
+                userData['email']?.toString();
+          }
+        } catch (e) {
+          print("Error reading user from storage: $e");
+        }
+      }
+
+      print("DEBUG SAVE -> User ID: $currentUserId, User Name: $currentUserName");
 
       StockAdjustmentModel newAdjustment = StockAdjustmentModel(
         productId: selectedProduct.value!.id ?? '',
@@ -114,18 +169,18 @@ class StockAdjustmentController extends GetxController {
       clearForm();
       Get.back();
       Get.snackbar(
-        'Success', 
+        'Success',
         'Stock adjustment saved and updated successfully',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.green, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Something went wrong: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.red, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {
@@ -137,18 +192,18 @@ class StockAdjustmentController extends GetxController {
     try {
       await _service.deleteStockAdjustment(id);
       Get.snackbar(
-        'Success', 
+        'Success',
         'Data deleted successfully',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.green, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        'Error', 
+        'Error',
         'Failed to delete data: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM, 
-        backgroundColor: Colors.red, 
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     }
@@ -159,12 +214,14 @@ class StockAdjustmentController extends GetxController {
     adjustmentType.value = 'ADD';
     quantityController.clear();
     reasonController.clear();
+    remarksController.clear();
   }
 
   @override
   void onClose() {
     quantityController.dispose();
     reasonController.dispose();
+    remarksController.dispose();
     super.onClose();
   }
 }
