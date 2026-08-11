@@ -125,22 +125,43 @@ class StockAdjustmentController extends GetxController {
       if (Get.isRegistered<AuthController>()) {
         final authCtrl = Get.find<AuthController>();
         currentUserId = authCtrl.currentUser.value?.id;
-        currentUserName = authCtrl.currentUser.value?.fullName ??
-            authCtrl.currentUser.value?.email;
+        
+        String? nameFromAuth = authCtrl.currentUser.value?.fullName;
+        if (nameFromAuth != null && nameFromAuth.isNotEmpty && nameFromAuth != currentUserId) {
+          currentUserName = nameFromAuth;
+        } else {
+          // បើគ្មាន fullName យក Email មកកាត់យកតែអក្សរមុខសញ្ញា @ (ឧទាហរណ៍ admin@gmail.com ទៅជា admin)
+          String? email = authCtrl.currentUser.value?.email;
+          if (email != null && email.contains('@')) {
+            currentUserName = email.split('@').first;
+          }
+        }
       }
 
+      // 2. បើរកមិនឃើញពី AuthController ទេ ទាញយកពី StorageService
       if (currentUserId == null || currentUserName == null) {
         try {
           final userData = _storageService.lastUserLoginRead;
           if (userData != null && userData is Map<String, dynamic>) {
             currentUserId ??= userData['id']?.toString();
-            currentUserName ??= userData['full_name']?.toString() ??
-                userData['email']?.toString();
+            
+            String? nameFromStorage = userData['full_name']?.toString();
+            if (nameFromStorage != null && nameFromStorage.isNotEmpty && nameFromStorage != currentUserId) {
+              currentUserName ??= nameFromStorage;
+            } else {
+              String? emailStorage = userData['email']?.toString();
+              if (emailStorage != null && emailStorage.contains('@')) {
+                currentUserName ??= emailStorage.split('@').first;
+              }
+            }
           }
         } catch (e) {
           print("Error reading user from storage: $e");
         }
       }
+
+      // 3. Fallback ចុងក្រោយ បើគ្មានសោះ
+      currentUserName ??= 'Staff';
 
       print("DEBUG SAVE -> User ID: $currentUserId, User Name: $currentUserName");
 
@@ -151,7 +172,7 @@ class StockAdjustmentController extends GetxController {
         quantity: qty,
         reason: reasonController.text.trim(),
         userId: currentUserId,
-        userName: currentUserName,
+        userName: currentUserName, // 👈 ឥឡូវនេះវាជារូបរាង Username ឬអក្សរមុន @ យ៉ាងស្រស់ស្អាត
         adjustmentDate: DateTime.now(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
