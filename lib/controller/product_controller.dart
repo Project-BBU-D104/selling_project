@@ -211,6 +211,35 @@ class ProductController extends GetxController {
     }
   }
 
+  Future<void> updateProductStock(String productId, int soldQuantity) async {
+    try {
+      final index = product.indexWhere((p) => p.id == productId);
+      if (index != -1) {
+        final currentProduct = product[index];
+
+        int newQuantity = currentProduct.quantity - soldQuantity;
+        if (newQuantity < 0) newQuantity = 0;
+
+        ProductModel updatedProduct = ProductModel(
+          id: currentProduct.id,
+          productName: currentProduct.productName,
+          costPrice: currentProduct.costPrice,
+          salePrice: currentProduct.salePrice,
+          quantity: newQuantity,
+          brandId: currentProduct.brandId,
+          supplierId: currentProduct.supplierId,
+          image: currentProduct.image,
+          description: currentProduct.description,
+          status: currentProduct.status,
+          createdAt: currentProduct.createdAt,
+        );
+        await service.updateProduct(updatedProduct);
+      }
+    } catch (e) {
+      debugPrint("Error updating product stock: $e");
+    }
+  }
+
   Future<void> deleteProduct(String id) async {
     try {
       await service.deleteProduct(id);

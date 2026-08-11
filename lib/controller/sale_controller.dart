@@ -319,11 +319,14 @@ class SaleController extends GetxController {
     loading.value = true;
     try {
       String saleId = await service.addSale(saleToSave);
+      
       if (saleToSave.items != null && saleToSave.items!.isNotEmpty) {
         for (final item in saleToSave.items!) {
           await service.addSaleItem(saleId, item);
+          await productCtr.updateProductStock(item.productId, item.quantity);
         }
       }
+      
       resetSale();
 
       loading.value = false;

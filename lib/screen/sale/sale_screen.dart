@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:selling_project/controller/sale_controller.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/routes/app_route.dart';
-import 'package:selling_project/screen/home/widget/drawer_widget.dart';
 import 'package:selling_project/screen/sale/widget/sale_product_card_widget.dart';
 
 class SaleScreen extends GetView<SaleController> {
@@ -17,7 +16,6 @@ class SaleScreen extends GetView<SaleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer:  DrawerWidget(),
       appBar: AppBar(
         title: const Text(
           "Sale",

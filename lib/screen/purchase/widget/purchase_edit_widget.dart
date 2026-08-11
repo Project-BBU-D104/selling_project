@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:selling_project/controller/purchase_controller.dart';
+import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/models/purchase/purchase_model.dart';
+import 'package:selling_project/models/supplier_model.dart';
 
 class PurchaseEditWidget extends StatefulWidget {
   final PurchaseModel purchase;
@@ -16,11 +18,9 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
   final ctr = Get.find<PurchaseController>();
 
   late TextEditingController poNoCtr;
-  late TextEditingController productNameCtr;
   late TextEditingController qtyCtr;
   late TextEditingController priceCtr;
 
-  String? selectedSupplier;
   DateTime? refDate;
   DateTime? expDeliveryDate;
 
@@ -28,19 +28,32 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
   void initState() {
     super.initState();
     poNoCtr = TextEditingController(text: widget.purchase.invoiceNo);
-    productNameCtr = TextEditingController();
-    qtyCtr = TextEditingController(text: "0");
+    qtyCtr = TextEditingController(text: "1");
     priceCtr = TextEditingController(text: "0.00");
 
-    selectedSupplier = widget.purchase.supplierName;
     refDate = widget.purchase.purchaseDate;
     expDeliveryDate = widget.purchase.expectedDelivery;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        ctr.supplierCtr.getSuppliers();
+      } catch (_) {}
+      if (ctr.supplierCtr.suppliers.isNotEmpty) {
+        try {
+          final matchedSupplier = ctr.supplierCtr.suppliers.firstWhere(
+            (s) => s.id == widget.purchase.supplierId || s.name == widget.purchase.supplierName,
+          );
+          ctr.selectedSupplier.value = matchedSupplier;
+        } catch (e) {
+          ctr.selectedSupplier.value = null;
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     poNoCtr.dispose();
-    productNameCtr.dispose();
     qtyCtr.dispose();
     priceCtr.dispose();
     super.dispose();
@@ -48,27 +61,6 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Get dynamic suppliers list from supplierController
-    List<String> suppliers = ctr.supplierCtr.suppliers
-        .map((s) => s.name ?? "")
-        .where((name) => name.isNotEmpty)
-        .toList();
-
-    // Fallback: Default list if supplier controller list is empty
-    if (suppliers.isEmpty) {
-      suppliers = [
-        "Global Hardware Inc.",
-        "Silicon Dynamics Co.",
-        "Power Grid Solutions",
-        "Apex Logistics Parts",
-      ];
-    }
-
-    // 2. Ensure current selectedSupplier exists in the list to prevent Assertion Errors
-    if (selectedSupplier != null && !suppliers.contains(selectedSupplier)) {
-      suppliers.add(selectedSupplier!);
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
@@ -107,20 +99,22 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               const Divider(height: 24),
 
               _buildLabel("Supplier Name"),
-              DropdownButtonFormField<String>(
-                initialValue: selectedSupplier,
-                decoration: _inputDecoration("Select a supplier"),
-                items: suppliers
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (val) => setState(() => selectedSupplier = val),
-              ),
+              Obx(() => DropdownButtonFormField<SupplierModel>(
+                    value: ctr.supplierCtr.suppliers.contains(ctr.selectedSupplier.value) 
+                        ? ctr.selectedSupplier.value 
+                        : null,
+                    decoration: _inputDecoration("Select a supplier"),
+                    items: ctr.supplierDropdownItems,
+                    onChanged: (val) {
+                      ctr.selectedSupplier.value = val;
+                    },
+                  )),
               const SizedBox(height: 12),
 
               _buildLabel("# Reference / PO Number"),
               TextField(
                 controller: poNoCtr,
-                decoration: _inputDecoration("PO-2023-001"),
+                decoration: _inputDecoration("PO-2026-001"),
               ),
               const SizedBox(height: 12),
 
@@ -181,16 +175,25 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               ),
               const SizedBox(height: 16),
 
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Purchase Items", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF003B6D))),
-                  Row(
-                    children: [
-                      Icon(Icons.add_circle_outline, size: 18, color: Color(0xFF003B6D)),
-                      SizedBox(width: 4),
-                      Text("Add Item", style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold)),
-                    ],
+                  const Text("Purchase Items", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF003B6D))),
+                  GestureDetector(
+                    onTap: () {
+                      int q = int.tryParse(qtyCtr.text) ?? 1;
+                      double p = double.tryParse(priceCtr.text) ?? 0.0;
+                      ctr.addTempItem(q, p);
+                      qtyCtr.text = "1";
+                      priceCtr.text = "0.00";
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(Icons.add_circle_outline, size: 18, color: Color(0xFF003B6D)),
+                        SizedBox(width: 4),
+                        Text("Add Item", style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -205,11 +208,19 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLabel("Product Name"),
-                    TextField(
-                      controller: productNameCtr,
-                      decoration: _inputDecoration("e.g M12 Grade 8 Bolts"),
-                    ),
+                    _buildLabel("Select Product"),
+                    Obx(() => DropdownButtonFormField<ProductModel>(
+                          value: ctr.selectedProduct.value,
+                          hint: const Text("Select Product"),
+                          decoration: _inputDecoration(""),
+                          items: ctr.productDropdownItems,
+                          onChanged: (val) {
+                            ctr.selectedProduct.value = val;
+                            if (val != null) {
+                              priceCtr.text = (val.costPrice ?? val.price ?? 0.0).toString();
+                            }
+                          },
+                        )),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -221,7 +232,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                               TextField(
                                 controller: qtyCtr,
                                 keyboardType: TextInputType.number,
-                                decoration: _inputDecoration("0"),
+                                decoration: _inputDecoration("1"),
                               ),
                             ],
                           ),
@@ -246,6 +257,31 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                 ),
               ),
 
+              // ITEM LIST
+              Obx(() => ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: ctr.tempItems.length,
+                    itemBuilder: (context, index) {
+                      final item = ctr.tempItems[index];
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(item.productName ?? "", style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text("${item.quantity} x \$${item.unitPrice.toStringAsFixed(2)}"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("\$${item.totalPrice.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.red),
+                              onPressed: () => ctr.removeTempItem(index),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )),
+
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -256,10 +292,15 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () async {
+                    if (ctr.selectedSupplier.value == null) {
+                      Get.snackbar("Error", "Please select supplier");
+                      return;
+                    }
+
                     final updated = PurchaseModel(
                       id: widget.purchase.id,
-                      supplierId: widget.purchase.supplierId,
-                      supplierName: selectedSupplier,
+                      supplierId: ctr.selectedSupplier.value!.id ?? widget.purchase.supplierId,
+                      supplierName: ctr.selectedSupplier.value!.name,
                       invoiceNo: poNoCtr.text,
                       totalAmount: widget.purchase.totalAmount,
                       purchaseDate: refDate ?? widget.purchase.purchaseDate,

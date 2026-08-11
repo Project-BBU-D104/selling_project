@@ -23,12 +23,11 @@ class StockAdjustmentDetailWidget extends StatelessWidget {
             ? adjustment.productName!
             : 'Unknown Product');
 
-    // កន្លែងទាញយក User (អាចបន្ថែមការឆែកមើល Field ផ្សេងទៀតប្រសិនបើមាន)
     final displayUser = (adjustment.userName != null && adjustment.userName!.isNotEmpty)
         ? adjustment.userName!
         : (adjustment.userId != null && adjustment.userId!.isNotEmpty)
             ? adjustment.userId!
-            : 'N/A'; // បើគ្មានទិន្នន័យទាំងពីរ វាបង្ហាញ N/A ដើម
+            : 'N/A';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -119,7 +118,7 @@ class StockAdjustmentDetailWidget extends StatelessWidget {
           _buildDetailRow(
             icon: Icons.person_outline,
             label: 'User',
-            value: displayUser, // ប្រើប្រាស់ biến ដែលបាន טរពិនិត្យរួច
+            value: displayUser,
           ),
           _buildDetailRow(
             icon: Icons.calendar_today_outlined,

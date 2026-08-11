@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:selling_project/controller/stock_adjustment_controller.dart';
 import 'package:selling_project/models/stock_adjustment_model.dart';
 import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_add_widget.dart';
@@ -7,6 +8,21 @@ import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_
 
 class StockAdjustmentScreen extends StatelessWidget {
   const StockAdjustmentScreen({super.key});
+
+  // មុខងារសម្រាប់បែងចែកចំណងជើងតាមថ្ងៃខែ
+  String _getDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final aDate = DateTime(date.year, date.month, date.day);
+
+    if (aDate == today) {
+      return 'TODAY';
+    } else if (aDate == today.subtract(const Duration(days: 1))) {
+      return 'YESTERDAY';
+    } else {
+      return DateFormat('dd MMM yyyy').format(date).toUpperCase();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,29 +89,47 @@ class StockAdjustmentScreen extends StatelessWidget {
                 );
               }
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'TODAY',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: controller.stockAdjustments.length,
-                    itemBuilder: (context, index) {
-                      final adjustment = controller.stockAdjustments[index];
-                      return StockAdjustmentCardWidget(adjustment: adjustment);
-                    },
-                  ),
-                ],
+              // ធ្វើការจัดกลุ่ม (Group) ទិន្នន័យតាមកាលបរិច្ឆេទ
+              Map<String, List<StockAdjustmentModel>> groupedMap = {};
+              for (var item in controller.stockAdjustments) {
+                // ប្រើ adjustmentDate ឬ createdAt
+                DateTime date = item.adjustmentDate ?? item.createdAt ?? DateTime.now();
+                String headerKey = _getDateHeader(date);
+                if (groupedMap[headerKey] == null) {
+                  groupedMap[headerKey] = [];
+                }
+                groupedMap[headerKey]!.add(item);
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: groupedMap.keys.length,
+                itemBuilder: (context, index) {
+                  String key = groupedMap.keys.elementAt(index);
+                  List<StockAdjustmentModel> listForDate = groupedMap[key]!;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        child: Text(
+                          key,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                      ...listForDate.map((adjustment) {
+                        return StockAdjustmentCardWidget(adjustment: adjustment);
+                      }).toList(),
+                    ],
+                  );
+                },
               );
             }),
           ],
