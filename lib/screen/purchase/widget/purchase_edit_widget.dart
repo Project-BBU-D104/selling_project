@@ -34,19 +34,31 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
     refDate = widget.purchase.purchaseDate;
     expDeliveryDate = widget.purchase.expectedDelivery;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // 1. Clear Form មុនគេ
+    ctr.clearForm();
+
+    // 2. Fetch Items និង Match Supplier នៅក្នុង Frame Callback
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Load items របស់ Purchase នេះ
+      if (widget.purchase.id != null) {
+        await ctr.fetchPurchaseItemsForEdit(widget.purchase.id!);
+      }
+
+      // Load នឹង Match Supplier ឱ្យចំ
       try {
-        ctr.supplierCtr.getSuppliers();
-      } catch (_) {}
-      if (ctr.supplierCtr.suppliers.isNotEmpty) {
-        try {
-          final matchedSupplier = ctr.supplierCtr.suppliers.firstWhere(
-            (s) => s.id == widget.purchase.supplierId || s.name == widget.purchase.supplierName,
-          );
-          ctr.selectedSupplier.value = matchedSupplier;
-        } catch (e) {
-          ctr.selectedSupplier.value = null;
+        if (ctr.supplierCtr.suppliers.isEmpty) {
+           ctr.supplierCtr.getSuppliers();
         }
+
+        final matchedSupplier = ctr.supplierCtr.suppliers.firstWhereOrNull(
+          (s) => s.id == widget.purchase.supplierId || s.name == widget.purchase.supplierName,
+        );
+
+        if (matchedSupplier != null) {
+          ctr.selectedSupplier.value = matchedSupplier;
+        }
+      } catch (e) {
+        debugPrint("Error selecting supplier: $e");
       }
     });
   }
@@ -89,19 +101,28 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               const Text("Edit Purchase Order", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const Divider(height: 24),
 
+              // SUPPLIER DROPDOWN
               _buildLabel("Supplier Name"),
-              Obx(() => DropdownButtonFormField<SupplierModel>(
-                    value: ctr.supplierCtr.suppliers.contains(ctr.selectedSupplier.value) 
-                        ? ctr.selectedSupplier.value 
-                        : null,
-                    decoration: _inputDecoration("Select a supplier"),
-                    items: ctr.supplierDropdownItems,
-                    onChanged: (val) {
-                      ctr.selectedSupplier.value = val;
-                    },
-                  )),
+              Obx(() {
+                SupplierModel? currentSelected;
+                if (ctr.selectedSupplier.value != null) {
+                  currentSelected = ctr.supplierCtr.suppliers.firstWhereOrNull(
+                    (s) => s.id == ctr.selectedSupplier.value!.id,
+                  );
+                }
+
+                return DropdownButtonFormField<SupplierModel>(
+                  value: currentSelected,
+                  decoration: _inputDecoration("Select a supplier"),
+                  items: ctr.supplierDropdownItems,
+                  onChanged: (val) {
+                    ctr.selectedSupplier.value = val;
+                  },
+                );
+              }),
               const SizedBox(height: 12),
 
+              // PO NUMBER
               _buildLabel("# Reference / PO Number"),
               TextField(
                 controller: poNoCtr,
@@ -109,6 +130,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               ),
               const SizedBox(height: 12),
 
+              // DATES
               Row(
                 children: [
                   Expanded(
@@ -166,6 +188,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               ),
               const SizedBox(height: 16),
 
+              // ADD ITEM HEADER
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -190,6 +213,7 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
               ),
               const SizedBox(height: 8),
 
+              // PRODUCT FORM
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -248,7 +272,9 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                 ),
               ),
 
-              // ITEM LIST
+              const SizedBox(height: 12),
+
+              // ITEM LIST DISPLAY
               Obx(() => ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -274,6 +300,8 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                   )),
 
               const SizedBox(height: 24),
+
+              // UPDATE BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -288,17 +316,25 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
                       return;
                     }
 
+                    if (ctr.tempItems.isEmpty) {
+                      Get.snackbar("Error", "Please add at least one item");
+                      return;
+                    }
+
+                    double newTotal = ctr.tempItems.fold(0.0, (sum, i) => sum + i.totalPrice);
+
                     final updated = PurchaseModel(
                       id: widget.purchase.id,
                       supplierId: ctr.selectedSupplier.value!.id ?? widget.purchase.supplierId,
-                      supplierName: ctr.selectedSupplier.value!.name,
+                      supplierName: ctr.selectedSupplier.value!.name ?? widget.purchase.supplierName,
                       invoiceNo: poNoCtr.text,
-                      totalAmount: widget.purchase.totalAmount,
+                      totalAmount: newTotal,
                       purchaseDate: refDate ?? widget.purchase.purchaseDate,
                       expectedDelivery: expDeliveryDate,
                       status: widget.purchase.status,
                     );
 
+                    // ហៅ updatePurchase ដោយត្រឹមត្រូវ
                     await ctr.updatePurchase(updated);
                     Get.back();
                   },

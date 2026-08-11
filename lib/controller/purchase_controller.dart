@@ -31,6 +31,7 @@ class PurchaseController extends GetxController {
   RxBool loading = false.obs;
   RxString selectedFilter = 'All Purchases'.obs;
   RxString searchQuery = ''.obs;
+
   double get totalMonthlyAmount {
     final now = DateTime.now();
 
@@ -78,6 +79,11 @@ class PurchaseController extends GetxController {
     getPurchases();
   }
 
+  // Auto-Select Product ពេល Add រួចចេញពី Dialog
+  void selectProductDirectly(ProductModel product) {
+    selectedProduct.value = product;
+  }
+
   // Fetch Purchases from Service
   void getPurchases() {
     loading.value = true;
@@ -88,7 +94,7 @@ class PurchaseController extends GetxController {
       },
       onError: (error) {
         loading.value = false;
-        print("Error fetching purchases: $error");
+        debugPrint("Error fetching purchases: $error");
       },
     );
   }
@@ -112,7 +118,8 @@ class PurchaseController extends GetxController {
       final query = searchQuery.value.toLowerCase().trim();
       list = list.where((p) {
         final supplier = p.supplierName?.toLowerCase() ?? '';
-        final inv = p.invoiceNo.toLowerCase();
+        // ✅ Fixed: Added Null-safe checks to avoid void/null method call errors
+        final inv = p.invoiceNo?.toLowerCase() ?? '';
         return supplier.contains(query) || inv.contains(query);
       }).toList();
     }
@@ -144,7 +151,23 @@ class PurchaseController extends GetxController {
   }
 
   void removeTempItem(int index) {
-    tempItems.removeAt(index);
+    if (index >= 0 && index < tempItems.length) {
+      tempItems.removeAt(index);
+    }
+  }
+
+  // Fetch Items សម្រាប់ដាក់ចូលក្នុង Edit Form
+  Future<void> fetchPurchaseItemsForEdit(String purchaseId) async {
+    loading.value = true;
+    try {
+      // ស្កែនទាញយក Stream ដំបូងមកប្រើ
+      final items = await service.getPurchaseItems(purchaseId).first;
+      tempItems.assignAll(items);
+    } catch (e) {
+      debugPrint("Error fetching purchase items for edit: $e");
+    } finally {
+      loading.value = false;
+    }
   }
 
   Future<void> submitPurchase({
@@ -154,7 +177,7 @@ class PurchaseController extends GetxController {
   }) async {
     if (selectedSupplier.value == null || tempItems.isEmpty) return;
 
-    double total = tempItems.fold(0, (sum, i) => sum + i.totalPrice);
+    double total = tempItems.fold(0.0, (sum, i) => sum + i.totalPrice);
 
     final newPurchase = PurchaseModel(
       supplierId: selectedSupplier.value!.id ?? "",
@@ -166,28 +189,61 @@ class PurchaseController extends GetxController {
       status: 'Pending',
     );
 
-    String pId = await service.addPurchase(newPurchase);
-    for (var item in tempItems) {
-      await service.addPurchaseItem(pId, item);
+    try {
+      loading.value = true;
+      String pId = await service.addPurchase(newPurchase);
+      for (var item in tempItems) {
+        await service.addPurchaseItem(pId, item);
+      }
+      clearForm();
+    } catch (e) {
+      debugPrint("Error submitting purchase: $e");
+    } finally {
+      loading.value = false;
     }
-
-    clearForm();
   }
 
+  // Update Purchase Detail & Sync Items
   Future<void> updatePurchase(PurchaseModel purchase) async {
-    await service.updatePurhcase(purchase);
+    try {
+      loading.value = true;
+      await service.updatePurchase(purchase);
+
+      if (purchase.id != null) {
+        for (var item in tempItems) {
+          await service.addPurchaseItem(purchase.id!, item);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error updating purchase: $e");
+    } finally {
+      loading.value = false;
+    }
   }
 
   Future<void> deletePurchase(String id) async {
-    await service.deletePurchase(id);
+    try {
+      loading.value = true;
+      await service.deletePurchase(id);
+    } catch (e) {
+      debugPrint("Error deleting purchase: $e");
+    } finally {
+      loading.value = false;
+    }
   }
 
   void getPurchaseItems(String purchaseId) {
     loading.value = true;
-    service.getPurchaseItems(purchaseId).listen((data) {
-      purchaseItems.value = data;
-      loading.value = false;
-    });
+    service.getPurchaseItems(purchaseId).listen(
+      (data) {
+        purchaseItems.value = data;
+        loading.value = false;
+      },
+      onError: (error) {
+        loading.value = false;
+        debugPrint("Error getting purchase items: $error");
+      },
+    );
   }
 
   Future<void> addPurchaseItem(String purchaseId, PurchaseItemsModel item) async {

@@ -1,50 +1,48 @@
 import 'package:selling_project/models/purchase/purchase_items_model.dart';
 import 'package:selling_project/models/purchase/purchase_model.dart';
 import 'package:selling_project/services/api_services.dart';
-class PurchaseServices {
 
+class PurchaseServices {
   final ApiServices api = ApiServices();
   final String collection = "purchases";
 
-  // GET
+  // GET ALL PURCHASES
   Stream<List<PurchaseModel>> getPurchases() {
-    return api
-        .get(collection)
-        .map((data){
-          return data.map((item){
-            return PurchaseModel.fromJson(
-              item,
-              item["id"]
-            );
-          }).toList();
-        });
+    return api.get(collection).map((data) {
+      return data.map((item) {
+        return PurchaseModel.fromJson(
+          item,
+          item["id"] ?? "",
+        );
+      }).toList();
+    });
   }
-  // POST
-  Future<String> addPurchase(
-      PurchaseModel purchase
-  ) async {
+
+  Future<String> addPurchase(PurchaseModel purchase) async {
     return await api.post(
       collection,
-      purchase.toJson()
+      purchase.toJson(),
     );
   }
-  // UPDATE
-  Future<void> updatePurhcase(
-      PurchaseModel purchase
-  ) async {
+
+  Future<void> updatePurchase(PurchaseModel purchase) async {
+    if (purchase.id == null || purchase.id!.isEmpty) {
+      throw Exception("Purchase ID cannot be null or empty during update.");
+    }
+
     await api.put(
       collection,
       purchase.id!,
-      purchase.toJson()
+      purchase.toJson(),
     );
   }
-  // DELETE
-  Future<void> deletePurchase(
-      String id
-  ) async {
+
+  // DELETE PURCHASE
+  Future<void> deletePurchase(String id) async {
+    if (id.isEmpty) return;
     await api.delete(
       collection,
-      id
+      id,
     );
   }
 
@@ -52,6 +50,8 @@ class PurchaseServices {
     String purchaseId,
     PurchaseItemsModel item,
   ) async {
+    if (purchaseId.isEmpty) return;
+
     await api.postSubCollection(
       collection,
       purchaseId,
@@ -59,9 +59,11 @@ class PurchaseServices {
       item.toJson(),
     );
   }
-   Stream<List<PurchaseItemsModel>> getPurchaseItems(
-    String purchaseId,
-  ) {
+  Stream<List<PurchaseItemsModel>> getPurchaseItems(String purchaseId) {
+    if (purchaseId.isEmpty) {
+      return Stream.value([]);
+    }
+
     return api
         .getSubCollection(
           collection,
@@ -72,9 +74,9 @@ class PurchaseServices {
       return data.map((item) {
         return PurchaseItemsModel.fromJson(
           item,
-          item["id"],
+          item["id"] ?? "",
         );
       }).toList();
     });
-}
+  }
 }

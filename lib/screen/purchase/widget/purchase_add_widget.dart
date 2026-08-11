@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:selling_project/controller/purchase_controller.dart';
 import 'package:selling_project/models/product_management/product_model.dart';
 import 'package:selling_project/models/supplier_model.dart';
+import 'package:selling_project/screen/product/widget/product_add_widget.dart';
 
 class PurchaseAddWidget extends StatefulWidget {
   const PurchaseAddWidget({super.key});
@@ -15,7 +16,7 @@ class PurchaseAddWidget extends StatefulWidget {
 class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
   final ctr = Get.find<PurchaseController>();
 
-  final poNoCtr = TextEditingController(text: "PO-2026-001");
+  final poNoCtr = TextEditingController();
   final qtyCtr = TextEditingController(text: "1");
   final priceCtr = TextEditingController(text: "0.00");
 
@@ -26,6 +27,22 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
   void initState() {
     super.initState();
     ctr.clearForm();
+    _generateAutoPoNumber();
+  }
+
+  void _generateAutoPoNumber() {
+    final now = DateTime.now();
+    final dateStr = DateFormat('yyyyMMdd').format(now);
+    final uniqueId = now.millisecondsSinceEpoch.toString().substring(10);
+    poNoCtr.text = "PO-$dateStr-$uniqueId";
+  }
+
+  @override
+  void dispose() {
+    poNoCtr.dispose();
+    qtyCtr.dispose();
+    priceCtr.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,21 +56,30 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text("Add Purchase", style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Add Purchase",
+          style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Add Purchase Order", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                "Add Purchase Order",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const Divider(height: 24),
               _buildLabel("Supplier Name"),
               Obx(() => DropdownButtonFormField<SupplierModel>(
-                initialValue: ctr.selectedSupplier.value,
+                value: ctr.selectedSupplier.value,
                 hint: const Text("Select Supplier"),
                 decoration: _inputDecoration(""),
                 items: ctr.supplierDropdownItems,
@@ -62,7 +88,15 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
               const SizedBox(height: 12),
 
               _buildLabel("# Reference / PO Number"),
-              TextField(controller: poNoCtr, decoration: _inputDecoration("PO-2026-001")),
+              TextField(
+                controller: poNoCtr,
+                readOnly: true,
+                decoration: _inputDecoration("").copyWith(
+                  fillColor: Colors.grey.shade100,
+                  filled: true,
+                  suffixIcon: const Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                ),
+              ),
               const SizedBox(height: 12),
 
               Row(
@@ -83,8 +117,14 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                             if (picked != null) setState(() => refDate = picked);
                           },
                           child: InputDecorator(
-                            decoration: _inputDecoration("").copyWith(suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18)),
-                            child: Text(refDate == null ? "dd/mm/yyyy" : DateFormat('dd/MM/yyyy').format(refDate!)),
+                            decoration: _inputDecoration("").copyWith(
+                              suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+                            ),
+                            child: Text(
+                              refDate == null
+                                  ? "dd/mm/yyyy"
+                                  : DateFormat('dd/MM/yyyy').format(refDate!),
+                            ),
                           ),
                         ),
                       ],
@@ -107,8 +147,14 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                             if (picked != null) setState(() => expDeliveryDate = picked);
                           },
                           child: InputDecorator(
-                            decoration: _inputDecoration("").copyWith(suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18)),
-                            child: Text(expDeliveryDate == null ? "dd/mm/yyyy" : DateFormat('dd/MM/yyyy').format(expDeliveryDate!)),
+                            decoration: _inputDecoration("").copyWith(
+                              suffixIcon: const Icon(Icons.calendar_today_outlined, size: 18),
+                            ),
+                            child: Text(
+                              expDeliveryDate == null
+                                  ? "dd/mm/yyyy"
+                                  : DateFormat('dd/MM/yyyy').format(expDeliveryDate!),
+                            ),
                           ),
                         ),
                       ],
@@ -120,7 +166,10 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Purchase Items", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF003B6D))),
+                  const Text(
+                    "Purchase Items",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF003B6D)),
+                  ),
                   GestureDetector(
                     onTap: () {
                       int q = int.tryParse(qtyCtr.text) ?? 1;
@@ -133,7 +182,10 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                       children: [
                         Icon(Icons.add_circle_outline, size: 18, color: Color(0xFF003B6D)),
                         SizedBox(width: 4),
-                        Text("Add Item", style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold)),
+                        Text(
+                          "Add Item",
+                          style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ),
@@ -143,23 +195,46 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
 
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildLabel("Select Product"),
-                    Obx(() => DropdownButtonFormField<ProductModel>(
-                      initialValue: ctr.selectedProduct.value,
-                      hint: const Text("Select Product"),
-                      decoration: _inputDecoration(""),
-                      items: ctr.productDropdownItems,
-                      onChanged: (val) {
-                        ctr.selectedProduct.value = val;
-                        if (val != null) {
-                          priceCtr.text = (val.costPrice ?? val.price ?? 0.0).toString();
-                        }
-                      },
-                    )),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Obx(() => DropdownButtonFormField<ProductModel>(
+                            value: ctr.selectedProduct.value,
+                            hint: const Text("Select Product"),
+                            decoration: _inputDecoration(""),
+                            items: ctr.productDropdownItems,
+                            onChanged: (val) {
+                              ctr.selectedProduct.value = val;
+                              if (val != null) {
+                                priceCtr.text = (val.costPrice ?? val.price ?? 0.0).toString();
+                              }
+                            },
+                          )),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFF003B6D),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: const Icon(Icons.add, color: Colors.white),
+                          onPressed: () {
+                            Get.bottomSheet(
+                              ProductAddWidget(),
+                              isScrollControlled: true,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -168,7 +243,11 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildLabel("Quantity"),
-                              TextField(controller: qtyCtr, keyboardType: TextInputType.number, decoration: _inputDecoration("1")),
+                              TextField(
+                                controller: qtyCtr,
+                                keyboardType: TextInputType.number,
+                                decoration: _inputDecoration("1"),
+                              ),
                             ],
                           ),
                         ),
@@ -178,7 +257,11 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildLabel("Unit Price (\$)"),
-                              TextField(controller: priceCtr, keyboardType: TextInputType.number, decoration: _inputDecoration("0.00")),
+                              TextField(
+                                controller: priceCtr,
+                                keyboardType: TextInputType.number,
+                                decoration: _inputDecoration("0.00"),
+                              ),
                             ],
                           ),
                         ),
@@ -218,7 +301,10 @@ class _PurchaseAddWidgetState extends State<PurchaseAddWidget> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004B87), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF004B87),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
                   onPressed: () async {
                     if (ctr.selectedSupplier.value == null) {
                       Get.snackbar("Error", "Please select supplier");
