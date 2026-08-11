@@ -8,8 +8,6 @@ import 'package:selling_project/screen/stock_adjustment/widget/stock_adjustment_
 
 class StockAdjustmentScreen extends StatelessWidget {
   const StockAdjustmentScreen({super.key});
-
-  // មុខងារសម្រាប់បែងចែកចំណងជើងតាមថ្ងៃខែ
   String _getDateHeader(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -47,15 +45,6 @@ class StockAdjustmentScreen extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Color(0xFFF0F4F8),
-              child: Icon(Icons.person_outline, color: Color(0xFF0F2C59)),
-            ),
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF004C87),
@@ -89,10 +78,8 @@ class StockAdjustmentScreen extends StatelessWidget {
                 );
               }
 
-              // ធ្វើការจัดกลุ่ม (Group) ទិន្នន័យតាមកាលបរិច្ឆេទ
               Map<String, List<StockAdjustmentModel>> groupedMap = {};
               for (var item in controller.stockAdjustments) {
-                // ប្រើ adjustmentDate ឬ createdAt
                 DateTime date = item.adjustmentDate ?? item.createdAt ?? DateTime.now();
                 String headerKey = _getDateHeader(date);
                 if (groupedMap[headerKey] == null) {
@@ -166,7 +153,7 @@ class StockAdjustmentScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Today's Activity",
+            "Activity",
             style: TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 4),

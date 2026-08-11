@@ -18,7 +18,8 @@ class PaymentScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black),
+          icon: const Icon(Icons.arrow_back,
+              size: 25, color: Colors.black),
           onPressed: () => Get.back(),
         ),
         title: const Text(
@@ -29,12 +30,6 @@ class PaymentScreen extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -71,7 +66,8 @@ class PaymentScreen extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: "Search Invoices, Customers...",
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade500),
+                prefixIcon:
+                    Icon(Icons.search_rounded, color: Colors.grey.shade500),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -83,7 +79,8 @@ class PaymentScreen extends StatelessWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF003B6D), width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF003B6D), width: 1.5),
                 ),
                 filled: true,
                 fillColor: Colors.white,
@@ -146,7 +143,8 @@ class PaymentScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey.shade300),
+                        Icon(Icons.receipt_long_outlined,
+                            size: 64, color: Colors.grey.shade300),
                         const SizedBox(height: 12),
                         Text(
                           "No payments found",
@@ -167,7 +165,8 @@ class PaymentScreen extends StatelessWidget {
                     final item = ctr.filteredPayments[index];
                     return PaymentCardWidget(
                       payment: item,
-                      onTap: () => Get.to(() => PaymentEditWidget(payment: item)),
+                      onTap: () =>
+                          Get.to(() => PaymentEditWidget(payment: item)),
                     );
                   },
                 );
@@ -176,15 +175,16 @@ class PaymentScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF003B6D),
         elevation: 3,
-        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
-        label: const Text(
-          "Add Payment",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
         onPressed: () => Get.to(() => const PaymentAddWidget()),
+        child: const Icon(
+          Icons.add_rounded,
+          color: Colors.white,
+          size:
+              24,
+        ),
       ),
     );
   }
@@ -215,7 +215,11 @@ class PaymentScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey.shade600)),
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade600)),
               Icon(icon, size: 18, color: accentColor),
             ],
           ),
@@ -294,7 +298,10 @@ class PaymentScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF111827)),
             ),
             const SizedBox(height: 12),
             const Divider(),
@@ -302,12 +309,17 @@ class PaymentScreen extends StatelessWidget {
                   title: Text(
                     opt,
                     style: TextStyle(
-                      fontWeight: opt == currentValue ? FontWeight.bold : FontWeight.normal,
-                      color: opt == currentValue ? const Color(0xFF003B6D) : Colors.black87,
+                      fontWeight: opt == currentValue
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: opt == currentValue
+                          ? const Color(0xFF003B6D)
+                          : Colors.black87,
                     ),
                   ),
                   trailing: opt == currentValue
-                      ? const Icon(Icons.check_circle_rounded, color: Color(0xFF003B6D))
+                      ? const Icon(Icons.check_circle_rounded,
+                          color: Color(0xFF003B6D))
                       : null,
                   onTap: () {
                     onSelect(opt);

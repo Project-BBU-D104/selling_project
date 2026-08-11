@@ -24,14 +24,30 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
   late String selectedMethod;
   late DateTime selectedDate;
 
+  // បញ្ជី Method ដែលត្រឹមត្រូវ និងគ្រប់ជ្រុងជ្រោយ
+  final List<String> paymentMethods = [
+    "Cash Riel",
+    "Cash USD",
+    "ABA PAY",
+    "Bank Transfer",
+    "Credit Card"
+  ];
+
   @override
   void initState() {
     super.initState();
     amountCtr = TextEditingController(text: widget.payment.amount.toString());
     refCtr = TextEditingController(text: widget.payment.referenceNo ?? '');
     noteCtr = TextEditingController(text: widget.payment.note ?? '');
-    customerCtr = TextEditingController(text: widget.payment.customerName ?? 'Industrial Solutions Ltd.');
-    selectedMethod = widget.payment.paymentMethod;
+    customerCtr = TextEditingController(text: widget.payment.customerName ?? '');
+
+    // ការពារ Crash: បើ selectedMethod គ្មានក្នុង List ឱ្យ Default ទៅ Item ដំបូង
+    if (paymentMethods.contains(widget.payment.paymentMethod)) {
+      selectedMethod = widget.payment.paymentMethod;
+    } else {
+      selectedMethod = paymentMethods.first;
+    }
+
     selectedDate = widget.payment.paymentDate;
   }
 
@@ -68,25 +84,28 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 1. Invoice Number (Read-only ព្រោះការ Edit Payment មិនគួរឱ្យប្តូរ Invoice ID ទេ)
                 _buildLabel("Invoice Number"),
-                DropdownButtonFormField<String>(
-                  value: widget.payment.invoiceNo ?? "#INV-2023-001",
-                  decoration: _inputDecoration(""),
-                  items: ["#INV-2023-001", "#INV-2023-002"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) {},
+                TextFormField(
+                  initialValue: widget.payment.invoiceNo ?? widget.payment.saleId,
+                  readOnly: true,
+                  decoration: _inputDecoration("").copyWith(
+                    fillColor: Colors.grey.shade100,
+                    filled: true,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
+                // 2. Customer Name
                 _buildLabel("Customer Name"),
                 TextFormField(
                   controller: customerCtr,
                   validator: (val) => (val == null || val.isEmpty) ? "Customer name required" : null,
-                  decoration: _inputDecoration(""),
+                  decoration: _inputDecoration("Enter customer name"),
                 ),
                 const SizedBox(height: 16),
 
+                // 3. Amount to Pay
                 _buildLabel("Amount to Pay (\$USD)"),
                 TextFormField(
                   controller: amountCtr,
@@ -102,17 +121,27 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
                 ),
                 const SizedBox(height: 16),
 
+                // 4. Payment Method
                 _buildLabel("Payment Method"),
                 DropdownButtonFormField<String>(
+                  isExpanded: true, // Fix: ការពារ Overflow
                   value: selectedMethod,
-                  decoration: _inputDecoration(""),
-                  items: ["Bank Transfer", "Cash Riel", "ABA PAY", "Credit Card"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  decoration: _inputDecoration("Select Method"),
+                  items: paymentMethods
+                      .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e, overflow: TextOverflow.ellipsis),
+                          ))
                       .toList(),
-                  onChanged: (val) => setState(() => selectedMethod = val!),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => selectedMethod = val);
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
 
+                // 5. Payment Date
                 _buildLabel("Payment Date"),
                 InkWell(
                   borderRadius: BorderRadius.circular(10),
@@ -134,18 +163,20 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
                 ),
                 const SizedBox(height: 16),
 
-                _buildLabel("Reference Number"),
+                // 6. Reference Number
+                _buildLabel("Reference Number (Optional)"),
                 TextFormField(
                   controller: refCtr,
-                  decoration: _inputDecoration(""),
+                  decoration: _inputDecoration("e.g. TXN-987243"),
                 ),
                 const SizedBox(height: 16),
 
-                _buildLabel("Note"),
+                // 7. Note
+                _buildLabel("Note (Optional)"),
                 TextFormField(
                   controller: noteCtr,
                   maxLines: 3,
-                  decoration: _inputDecoration(""),
+                  decoration: _inputDecoration("Optional comments..."),
                 ),
                 const SizedBox(height: 28),
 
@@ -180,10 +211,13 @@ class _PaymentEditWidgetState extends State<PaymentEditWidget> {
                             final updated = PaymentModel(
                               id: widget.payment.id,
                               saleId: widget.payment.saleId,
+                              invoiceNo: widget.payment.invoiceNo,
+                              customerName: customerCtr.text,
                               paymentMethod: selectedMethod,
                               amount: double.tryParse(amountCtr.text) ?? 0.0,
                               referenceNo: refCtr.text,
                               note: noteCtr.text,
+                              status: widget.payment.status,
                               paymentDate: selectedDate,
                             );
                             ctr.updatePayment(updated);

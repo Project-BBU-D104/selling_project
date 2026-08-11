@@ -46,16 +46,6 @@ class SalesCompletionScreen extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none, color: Colors.black87),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.account_circle, color: Colors.black87, size: 28),
-          ),
-        ],
         backgroundColor: Colors.white,
         elevation: 0,
       ),

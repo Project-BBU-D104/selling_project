@@ -45,6 +45,8 @@ class PaymentModel {
   Map<String, dynamic> toJson() {
     return {
       "sale_id": saleId,
+      "invoice_no": invoiceNo,
+      "customer_name": customerName,
       "payment_method": paymentMethod,
       "amount": amount,
       "reference_no": referenceNo,

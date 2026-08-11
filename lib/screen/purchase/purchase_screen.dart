@@ -25,12 +25,6 @@ class PurchaseScreen extends StatelessWidget {
           "Purchase Management",
           style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),

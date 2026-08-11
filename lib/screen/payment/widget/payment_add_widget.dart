@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:selling_project/controller/payment_controller.dart';
+import 'package:selling_project/controller/sale_controller.dart';
 import 'package:selling_project/models/payment_model.dart';
+import 'package:selling_project/models/sale/sale_model.dart';
 
 class PaymentAddWidget extends StatefulWidget {
   const PaymentAddWidget({super.key});
@@ -13,15 +15,17 @@ class PaymentAddWidget extends StatefulWidget {
 
 class _PaymentAddWidgetState extends State<PaymentAddWidget> {
   final _formKey = GlobalKey<FormState>();
-  final ctr = Get.find<PaymentController>();
+
+  final paymentCtr = Get.find<PaymentController>();
+  final saleCtr = Get.find<SaleController>();
 
   final amountCtr = TextEditingController();
   final refCtr = TextEditingController();
   final noteCtr = TextEditingController();
-  final customerCtr = TextEditingController();
+  final customerNameCtr = TextEditingController();
 
-  String? selectedInvoice;
-  String selectedMethod = 'Bank Transfer';
+  SaleModel? selectedSale;
+  String selectedMethod = 'Cash Riel';
   DateTime selectedDate = DateTime.now();
 
   @override
@@ -29,7 +33,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
     amountCtr.dispose();
     refCtr.dispose();
     noteCtr.dispose();
-    customerCtr.dispose();
+    customerNameCtr.dispose();
     super.dispose();
   }
 
@@ -57,38 +61,59 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 1. Invoice Number Dropdown
                 _buildLabel("Invoice Number"),
-                DropdownButtonFormField<String>(
-                  decoration: _inputDecoration("Select active invoice"),
-                  value: selectedInvoice,
-                  validator: (val) => val == null ? "Please select an invoice" : null,
-                  items: ["#INV-2023-001", "#INV-2023-002"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      selectedInvoice = val;
-                      customerCtr.text = "Industrial Solutions Ltd.";
-                    });
-                  },
-                ),
+                Obx(() {
+                  final salesList = saleCtr.sales;
+
+                  return DropdownButtonFormField<SaleModel>(
+                    isExpanded: true, // Fix: ការពារ Overflow ដោយបង្ខំឱ្យអត្ថបទរៀបតាមទំហំដែលមាន
+                    decoration: _inputDecoration("Select Invoice"),
+                    value: selectedSale,
+                    validator: (val) => val == null ? "Please select an invoice" : null,
+                    items: salesList.map((sale) {
+                      return DropdownMenuItem<SaleModel>(
+                        value: sale,
+                        child: Text(
+                          "${sale.invoiceNo ?? sale.id} - ${sale.customerName ?? 'Guest'}",
+                          overflow: TextOverflow.ellipsis, // Fix: កាត់ឈ្មោះវែងៗជារូបរាង (...)
+                          maxLines: 1,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        selectedSale = val;
+                        if (val != null) {
+                          customerNameCtr.text = val.customerName ?? 'Guest';
+                          amountCtr.text = (val.totalAmount ?? 0.0).toStringAsFixed(2);
+                        }
+                      });
+                    },
+                  );
+                }),
                 const SizedBox(height: 16),
 
+                // 2. Customer Name
                 _buildLabel("Customer Name"),
                 TextFormField(
-                  controller: customerCtr,
-                  validator: (val) => (val == null || val.isEmpty) ? "Customer name required" : null,
-                  decoration: _inputDecoration("Industrial Solutions Ltd."),
+                  controller: customerNameCtr,
+                  validator: (val) => (val == null || val.isEmpty) ? "Customer name is required" : null,
+                  decoration: _inputDecoration("Auto-filled from Invoice").copyWith(
+                    fillColor: Colors.grey.shade100,
+                    filled: true,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
-                _buildLabel("Amount to Pay (\$USD)"),
+                // 3. Amount to Pay
+                _buildLabel("Amount (\$USD)"),
                 TextFormField(
                   controller: amountCtr,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (val) {
                     if (val == null || val.isEmpty) return "Amount is required";
-                    if (double.tryParse(val) == null) return "Enter valid number";
+                    if (double.tryParse(val) == null) return "Enter a valid number";
                     return null;
                   },
                   decoration: _inputDecoration("0.00").copyWith(
@@ -97,17 +122,31 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 ),
                 const SizedBox(height: 16),
 
+                // 4. Payment Method Dropdown
                 _buildLabel("Payment Method"),
                 DropdownButtonFormField<String>(
+                  isExpanded: true, // Fix: បន្ថែម isExpanded ដើម្បីសុវត្ថិភាពពី Overflow
                   value: selectedMethod,
                   decoration: _inputDecoration("Select Method"),
-                  items: ["Bank Transfer", "Cash Riel", "ABA PAY", "Credit Card"]
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  items: ["Cash Riel", "Cash USD", "ABA PAY", "Bank Transfer", "Credit Card"]
+                      .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(
+                              e,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ))
                       .toList(),
-                  onChanged: (val) => setState(() => selectedMethod = val!),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => selectedMethod = val);
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
 
+                // 5. Payment Date
                 _buildLabel("Payment Date"),
                 InkWell(
                   borderRadius: BorderRadius.circular(10),
@@ -129,6 +168,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 ),
                 const SizedBox(height: 16),
 
+                // 6. Reference Number
                 _buildLabel("Reference Number"),
                 TextFormField(
                   controller: refCtr,
@@ -136,6 +176,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 ),
                 const SizedBox(height: 16),
 
+                // 7. Note
                 _buildLabel("Note"),
                 TextFormField(
                   controller: noteCtr,
@@ -144,7 +185,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 ),
                 const SizedBox(height: 28),
 
-                // Form Action Buttons
+                // Action Buttons
                 Row(
                   children: [
                     Expanded(
@@ -155,10 +196,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: () => Get.back(),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-                        ),
+                        child: const Text("Cancel", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -173,21 +211,22 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             final newPayment = PaymentModel(
-                              saleId: selectedInvoice ?? 'SALE_001',
+                              saleId: selectedSale?.id ?? '',
+                              invoiceNo: selectedSale?.invoiceNo,
+                              customerName: customerNameCtr.text,
                               paymentMethod: selectedMethod,
                               amount: double.tryParse(amountCtr.text) ?? 0.0,
                               referenceNo: refCtr.text,
                               note: noteCtr.text,
+                              status: 'Paid',
                               paymentDate: selectedDate,
                             );
-                            ctr.addPayment(newPayment);
+
+                            paymentCtr.addPayment(newPayment);
                             Get.back();
                           }
                         },
-                        child: const Text(
-                          "Save Payment",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
+                        child: const Text("Save Payment", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],

@@ -59,15 +59,6 @@ class StockAdjustmentAddWidget extends StatelessWidget {
                     color: Color(0xFF0F2C59),
                   ),
                 ),
-                const CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Color(0xFFF0F4F8),
-                  child: Icon(
-                    Icons.person_outline,
-                    size: 20,
-                    color: Color(0xFF0F2C59),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 20),

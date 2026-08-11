@@ -25,14 +25,16 @@ class SaleScreen extends GetView<SaleController> {
             color: Color(0xFF111827),
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none, color: Colors.black87),
-          )
-        ],
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 25,
+            color: Color(0xFF111827),
+          ),
+          onPressed: () => Get.back(),
+        ),
       ),
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
@@ -42,7 +44,7 @@ class SaleScreen extends GetView<SaleController> {
               children: [
                 const SizedBox(height: 8),
 
-                // Search Input
+                // 1. Search Input
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: TextField(
@@ -68,6 +70,7 @@ class SaleScreen extends GetView<SaleController> {
                 ),
                 const SizedBox(height: 8),
 
+                // 2. Brand / Category Filter List
                 SizedBox(
                   height: 40,
                   child: Obx(() {
@@ -119,7 +122,7 @@ class SaleScreen extends GetView<SaleController> {
                 ),
                 const SizedBox(height: 8),
 
-                // Product Grid View
+                // 3. Product Grid View
                 Expanded(
                   child: Obx(() {
                     if (controller.filteredProducts.isEmpty) {
@@ -136,7 +139,7 @@ class SaleScreen extends GetView<SaleController> {
                         left: 16,
                         right: 16,
                         top: 8,
-                        bottom: 90,
+                        bottom: 90, // ទុកចន្លោះបាតខាងក្រោមសម្រាប់ Cart Bar
                       ),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
@@ -157,6 +160,8 @@ class SaleScreen extends GetView<SaleController> {
                 ),
               ],
             ),
+
+            // 4. Cart Bottom Floating Bar
             Obx(() {
               if (controller.cartItems.isEmpty) return const SizedBox.shrink();
 

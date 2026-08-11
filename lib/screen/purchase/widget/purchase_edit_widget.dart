@@ -74,15 +74,6 @@ class _PurchaseEditWidgetState extends State<PurchaseEditWidget> {
           "Edit Purchase",
           style: TextStyle(color: Color(0xFF003B6D), fontWeight: FontWeight.bold),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.black12,
-              child: Icon(Icons.person, color: Colors.black),
-            ),
-          )
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
