@@ -36,15 +36,24 @@ class PurchaseScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
-            // Top Cards
             Obx(() => Row(
                   children: [
                     Expanded(
-                      child: _statCard("Total Monthly", "\$${ctr.totalMonthly.value.toStringAsFixed(0)}", const Color(0xFF004B87), Colors.white),
+                      child: _statCard(
+                        "Total Monthly", 
+                        "\$${ctr.totalMonthlyAmount.toStringAsFixed(2)}",
+                        const Color(0xFF004B87), 
+                        Colors.white,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _statCard("Pending", "${ctr.pendingOrdersCount.value} Orders", const Color(0xFF71A5C8), Colors.white),
+                      child: _statCard(
+                        "Pending", 
+                        "${ctr.pendingOrdersCount} Orders",
+                        const Color(0xFF71A5C8), 
+                        Colors.white,
+                      ),
                     ),
                   ],
                 )),
@@ -52,7 +61,7 @@ class PurchaseScreen extends StatelessWidget {
 
             // Search Bar
             TextField(
-              onChanged: (val) => ctr.changeSearchQuery(val), // 👈 កែត្រង់នេះ
+              onChanged: (val) => ctr.changeSearchQuery(val),
               decoration: InputDecoration(
                 hintText: "Search Purchase...",
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -132,7 +141,7 @@ class PurchaseScreen extends StatelessWidget {
       child: Obx(() {
         bool isSelected = ctr.selectedFilter.value == title;
         return GestureDetector(
-          onTap: () => ctr.changeFilter(title), // 👈 កែត្រង់នេះ
+          onTap: () => ctr.changeFilter(title),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(

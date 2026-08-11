@@ -31,9 +31,24 @@ class PurchaseController extends GetxController {
   RxBool loading = false.obs;
   RxString selectedFilter = 'All Purchases'.obs;
   RxString searchQuery = ''.obs;
+  double get totalMonthlyAmount {
+    final now = DateTime.now();
 
-  RxDouble totalMonthly = 42500.0.obs;
-  RxInt pendingOrdersCount = 8.obs;
+    return purchases.where((p) {
+      if (p.purchaseDate == null) return false;
+
+      final date = p.purchaseDate!.toLocal();
+
+      return date.month == now.month && date.year == now.year;
+    }).fold(0.0, (sum, item) => sum + (item.totalAmount ?? 0.0));
+  }
+
+  int get pendingOrdersCount {
+    return purchases.where((p) {
+      final status = p.status?.toLowerCase().trim() ?? '';
+      return status == 'pending' || status == 'in transit';
+    }).length;
+  }
 
   Rxn<SupplierModel> selectedSupplier = Rxn<SupplierModel>();
   Rxn<ProductModel> selectedProduct = Rxn<ProductModel>();
@@ -63,7 +78,7 @@ class PurchaseController extends GetxController {
     getPurchases();
   }
 
-  // 3. Fetch Purchases
+  // Fetch Purchases from Service
   void getPurchases() {
     loading.value = true;
     service.getPurchases().listen(
@@ -82,21 +97,23 @@ class PurchaseController extends GetxController {
     var list = purchases.toList();
 
     if (selectedFilter.value == 'Pending') {
-      list = list.where((p) =>
-          p.status.toLowerCase() == 'pending' ||
-          p.status.toLowerCase() == 'in transit').toList();
+      list = list.where((p) {
+        final status = p.status?.toLowerCase().trim() ?? '';
+        return status == 'pending' || status == 'in transit';
+      }).toList();
     } else if (selectedFilter.value == 'Completed') {
-      list = list.where((p) =>
-          p.status.toLowerCase() == 'completed' ||
-          p.status.toLowerCase() == 'received').toList();
+      list = list.where((p) {
+        final status = p.status?.toLowerCase().trim() ?? '';
+        return status == 'completed' || status == 'received';
+      }).toList();
     }
 
     if (searchQuery.value.isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
       list = list.where((p) {
         final supplier = p.supplierName?.toLowerCase() ?? '';
         final inv = p.invoiceNo.toLowerCase();
-        return supplier.contains(searchQuery.value.toLowerCase()) ||
-            inv.contains(searchQuery.value.toLowerCase());
+        return supplier.contains(query) || inv.contains(query);
       }).toList();
     }
 
