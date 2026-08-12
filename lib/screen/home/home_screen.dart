@@ -84,6 +84,7 @@ class HomeScreen extends StatelessWidget {
                     "Stock Adjustment".tr,
                     () => ctr.gotoStockAdjustmentScreen(),
                   ),
+                  
                 ],
               ),
             ),

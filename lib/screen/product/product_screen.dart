@@ -30,12 +30,6 @@ class ProductScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.black, size: 28),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),

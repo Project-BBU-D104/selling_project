@@ -37,6 +37,12 @@ class DrawerWidget extends StatelessWidget {
               Get.until((route) => route.isFirst);
             },
           ),
+
+          _menu(
+            Icons.dashboard,
+            "Dashboard".tr,
+            () => ctr.gotoDashboardScreen(),
+          ),
           _menu(
             Icons.shopping_cart,
             "Sales".tr,
@@ -67,11 +73,7 @@ class DrawerWidget extends StatelessWidget {
             "User".tr,
             () => ctr.gotoUserScreen(),
           ),
-          _menu(
-            Icons.settings,
-            "Setting".tr,
-            () => ctr.gotoSettingScreen(),
-          ),
+
           // _menu(
           //   Icons.payment,
           //   "Payments",
@@ -84,11 +86,16 @@ class DrawerWidget extends StatelessWidget {
           // ),
           const Spacer(),
           const Divider(),
+          // _menu(
+          //   Icons.logout,
+          //   "Logout".tr,
+          //   () => ctr.onLogout(),
+          //   color: Colors.red,
+          // ),
           _menu(
-            Icons.logout,
-            "Logout".tr,
-            () => ctr.onLogout(),
-            color: Colors.red,
+            Icons.settings,
+            "Setting".tr,
+            () => ctr.gotoSettingScreen(),
           ),
         ],
       ),

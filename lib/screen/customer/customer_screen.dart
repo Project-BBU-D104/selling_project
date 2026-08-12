@@ -33,17 +33,17 @@ class CustomerScreen extends StatelessWidget {
             fontSize: 22,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black, size: 26),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.black, size: 30),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.notifications_none, color: Colors.black, size: 26),
+        //     onPressed: () {},
+        //   ),
+        //   IconButton(
+        //     icon: const Icon(Icons.account_circle, color: Colors.black, size: 30),
+        //     onPressed: () {},
+        //   ),
+        //   const SizedBox(width: 8),
+        // ],
       ),
       body: Obx(() {
         if (ctr.loading.value && ctr.customers.isEmpty) {

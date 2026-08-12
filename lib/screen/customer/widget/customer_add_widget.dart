@@ -29,13 +29,13 @@ class CustomerAddWidget extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.black, size: 30),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.account_circle, color: Colors.black, size: 30),
+        //     onPressed: () {},
+        //   ),
+        //   const SizedBox(width: 8),
+        // ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

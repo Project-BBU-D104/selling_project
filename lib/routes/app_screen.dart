@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:selling_project/binding/brand_binding.dart';
 import 'package:selling_project/binding/customer_binding.dart';
+import 'package:selling_project/binding/dashboard_binding.dart';
 import 'package:selling_project/binding/home_binding.dart';
 import 'package:selling_project/binding/payment_binding.dart';
 import 'package:selling_project/binding/product_binding.dart';
@@ -14,6 +15,7 @@ import 'package:selling_project/routes/app_route.dart';
 import 'package:selling_project/screen/auth/login_screen.dart';
 import 'package:selling_project/screen/brand/brand_screen.dart';
 import 'package:selling_project/screen/customer/customer_screen.dart';
+import 'package:selling_project/screen/dashboard/dashboard_screen.dart';
 import 'package:selling_project/screen/home/home_screen.dart';
 import 'package:selling_project/screen/payment/payment_screen.dart';
 import 'package:selling_project/screen/product/product_screen.dart';
@@ -104,6 +106,11 @@ class AppScreen {
       name: AppRoute.setting,
       page: () => SettingScreen(),
       binding: SettingBinding(),
+    ),
+    GetPage(
+      name: AppRoute.dashboard,
+      page: () => DashboardScreen(),
+      binding: DashboardBinding(),
     ),
   ];
 }
