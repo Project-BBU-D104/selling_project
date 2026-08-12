@@ -21,6 +21,20 @@ class SaleItemModel {
     this.imageUrl,
   });
 
+  factory SaleItemModel.fromProduct(Map<String, dynamic> product, int qty) {
+    double price = (product["sale_price"] ?? product["price"] ?? 0).toDouble();
+    return SaleItemModel(
+      productId: product["id"] ?? "",
+      productName: product["product_name"] ?? product["name"] ?? "",
+      brandId: product["brand_id"],
+      brandName: product["brand_name"],
+      quantity: qty,
+      unitPrice: price,
+      totalPrice: price * qty,
+      imageUrl: product["image"] ?? product["image_url"],
+    );
+  }
+
   factory SaleItemModel.fromJson(
     Map<String, dynamic> json,
     String id,
@@ -42,12 +56,12 @@ class SaleItemModel {
     return {
       "product_id": productId,
       "product_name": productName,
-      "brand_id": brandId,
-      "brand_name": brandName,
+      "brand_id": brandId ?? "",
+      "brand_name": brandName ?? "N/A",
       "quantity": quantity,
       "unit_price": unitPrice,
       "total_price": totalPrice,
-      "image_url": imageUrl,
+      "image_url": imageUrl ?? "",
     };
   }
 }

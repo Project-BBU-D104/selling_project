@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:selling_project/controller/sale_controller.dart';
 import 'package:selling_project/models/sale/sale_model.dart';
 import 'package:selling_project/models/sale/sale_items_model.dart';
 import 'package:selling_project/routes/app_route.dart';
@@ -10,21 +11,29 @@ import 'package:selling_project/utils/print_helper.dart';
 class SalesCompletionScreen extends StatelessWidget {
   const SalesCompletionScreen({super.key});
 
+  void _navigateToNewSale() {
+    if (Get.isRegistered<SaleController>()) {
+      Get.find<SaleController>().resetSale();
+    }
+    Get.offNamed(AppRoute.sale);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final SaleModel? sale = Get.arguments is SaleModel ? Get.arguments as SaleModel : null;
+    final SaleModel? sale =
+        Get.arguments is SaleModel ? Get.arguments as SaleModel : null;
 
     final String transactionId = sale?.invoiceNo ?? "#HP-ERP-2023-9942";
     final double subtotal = sale?.subtotal ?? 0.0;
     final double tax = sale?.tax ?? 0.0;
     final double totalAmount = sale?.totalAmount ?? 0.0;
     final List<SaleItemModel> itemList = sale?.items ?? [];
-    
+
     final String formattedDate = sale?.saleDate != null
         ? DateFormat('MMMM dd, yyyy • HH:mm a').format(sale!.saleDate!)
         : DateFormat('MMMM dd, yyyy • HH:mm a').format(DateTime.now());
 
-    final String customerName = sale?.customerName ?? "Jonathan Sterling";
+    final String customerName = sale?.customerName ?? "General Customer";
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -33,9 +42,7 @@ class SalesCompletionScreen extends StatelessWidget {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
-            onPressed: () {
-              Get.offAllNamed(AppRoute.sale);
-            },
+            onPressed: _navigateToNewSale,
           ),
         ),
         title: const Text(
@@ -97,7 +104,6 @@ class SalesCompletionScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
@@ -120,32 +126,30 @@ class SalesCompletionScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     "Transaction ID : $transactionId",
-                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600),
                   ),
                   Text(
                     "Customer : $customerName",
-                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                  ),
-                  const Text(
-                    "Phone Number : 012 455 7897",
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                  ),
-                  const Text(
-                    "Location: California, CA 94025",
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Text(
                       formattedDate,
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   )
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
@@ -177,57 +181,75 @@ class SalesCompletionScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     item.productName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        color: Colors.black87),
                                   ),
                                   Text(
                                     "${item.quantity} unit x \$${item.unitPrice.toStringAsFixed(2)}",
-                                    style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontSize: 12),
                                   ),
                                 ],
                               ),
                               Text(
                                 "\$${item.totalPrice.toStringAsFixed(2)}",
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.black87),
                               ),
                             ],
                           ),
                         ))
                   else
                     const Text("No items recorded."),
-
-                  const Divider(height: 24, thickness: 1, color: Colors.black26),
+                  const Divider(
+                      height: 24, thickness: 1, color: Colors.black26),
 
                   // Totals
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Subtotal", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text("\$${subtotal.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      const Text("Subtotal",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text("\$${subtotal.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13)),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Tax", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text("\$${tax.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      const Text("Tax",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text("\$${tax.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13)),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Total Amount", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text("Total Amount",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14)),
                       Text(
                         "\$${totalAmount.toStringAsFixed(2)}",
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -241,9 +263,7 @@ class SalesCompletionScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  Get.offAllNamed(AppRoute.sale);
-                },
+                onPressed: _navigateToNewSale,
                 icon: const Icon(Icons.point_of_sale_sharp, size: 20),
                 label: const Text(
                   "Begin New Sale",
@@ -251,7 +271,6 @@ class SalesCompletionScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -277,7 +296,6 @@ class SalesCompletionScreen extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
           ],
         ),

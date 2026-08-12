@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/controller/brand_controller.dart';
@@ -35,7 +36,7 @@ class SaleController extends GetxController {
   final RxList<CustomerModel> customerList = <CustomerModel>[].obs;
   final RxBool loadingCustomers = false.obs;
 
-  String get currentUserId => "usr_123";
+  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? "unknown_user";
 
   final RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
   final RxList<SaleItemModel> cartItems = <SaleItemModel>[].obs;
@@ -88,7 +89,7 @@ class SaleController extends GetxController {
   void fetchCustomers() {
     loadingCustomers.value = true;
     _customersSubscription?.cancel();
-    
+
     _customersSubscription = customerService.getCustomers().listen(
       (data) {
         customerList.assignAll(data);
@@ -125,7 +126,7 @@ class SaleController extends GetxController {
   void selectCustomer(CustomerModel selectedCust) {
     customer.value = selectedCust;
     selectedCustomerId.value = selectedCust.id ?? '';
-    
+
     final String name = selectedCust.customerName;
     selectedCustomerName.value =
         name.trim().isNotEmpty ? name : 'General Customer';
@@ -134,7 +135,7 @@ class SaleController extends GetxController {
   void setCustomerByName(String name, String id) {
     selectedCustomerName.value = name.trim().isNotEmpty ? name : 'General Customer';
     selectedCustomerId.value = id;
-    customer.value = null; 
+    customer.value = null;
   }
 
   void openCustomerSelectBottomSheet() {
@@ -219,32 +220,43 @@ class SaleController extends GetxController {
 
   void addToCart(ProductModel product) {
     int index = cartItems.indexWhere((item) => item.productId == product.id);
+
+    // Resolve Brand information safely
     final brandMatch = brandCtr.brands.firstWhereOrNull(
       (b) => b.id == product.brandId,
     );
-    String resolvedBrandName = brandMatch?.name ?? 'General Brand';
+    
+    String resolvedBrandName = brandMatch?.name ?? brandMatch?.name ?? 'General Brand';
+    String resolvedBrandId = product.brandId ?? '';
 
     if (index != -1) {
       var existing = cartItems[index];
       int newQty = existing.quantity + 1;
+      double unitPrice = existing.unitPrice;
 
       cartItems[index] = SaleItemModel(
         id: existing.id,
         productId: existing.productId,
         productName: existing.productName,
+        brandId: existing.brandId ?? resolvedBrandId,
+        brandName: existing.brandName ?? resolvedBrandName,
         quantity: newQty,
-        unitPrice: existing.unitPrice,
-        totalPrice: newQty * existing.unitPrice,
+        unitPrice: unitPrice,
+        totalPrice: unitPrice * newQty,
         imageUrl: existing.imageUrl,
       );
     } else {
+      double unitPrice = product.price;
+
       cartItems.add(
         SaleItemModel(
           productId: product.id ?? '',
           productName: product.productName,
+          brandId: resolvedBrandId,
+          brandName: resolvedBrandName,
           quantity: 1,
-          unitPrice: product.price,
-          totalPrice: product.price,
+          unitPrice: unitPrice,
+          totalPrice: unitPrice * 1,
           imageUrl: product.imageUrl,
         ),
       );
@@ -289,6 +301,7 @@ class SaleController extends GetxController {
       saleToSave.customerId = selectedCustomerId.value.isNotEmpty
           ? selectedCustomerId.value
           : null;
+      saleToSave.userId ??= currentUserId;
     } else {
       if (cartItems.isEmpty) {
         Get.snackbar(
@@ -307,7 +320,7 @@ class SaleController extends GetxController {
             ? selectedCustomerId.value
             : null,
         customerName: selectedCustomerName.value,
-        userId: currentUserId,
+        userId: currentUserId, // 👈 Uses dynamic currentUserId
         subtotal: totalCartAmount,
         totalAmount: totalCartAmount,
         paymentStatus: "paid",
@@ -319,14 +332,14 @@ class SaleController extends GetxController {
     loading.value = true;
     try {
       String saleId = await service.addSale(saleToSave);
-      
+
       if (saleToSave.items != null && saleToSave.items!.isNotEmpty) {
         for (final item in saleToSave.items!) {
           await service.addSaleItem(saleId, item);
           await productCtr.updateProductStock(item.productId, item.quantity);
         }
       }
-      
+
       resetSale();
 
       loading.value = false;

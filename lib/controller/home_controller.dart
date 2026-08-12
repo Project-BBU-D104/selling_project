@@ -1,7 +1,26 @@
 import 'package:get/get.dart';
+import 'package:selling_project/models/user_model.dart';
 import 'package:selling_project/routes/app_route.dart';
+import 'package:selling_project/services/user_services.dart';
 
 class HomeController extends GetxController {
+  var user = Rxn<UserModel>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchUserProfile();
+  }
+
+  void fetchUserProfile() async {
+    try {
+      var fetchedUser = await UserService.getCurrentUser();
+      user.value = fetchedUser;
+    } catch (e) {
+      print("Error fetching user profile: $e");
+    }
+  }
+
   void gotoBrandScreen() {
     Get.toNamed(AppRoute.brand);
   }
@@ -39,7 +58,7 @@ class HomeController extends GetxController {
   }
 
   void onLogout() {
-    Get.toNamed(AppRoute.login);
+    Get.offAllNamed(AppRoute.login);
   }
 
   void gotoSettingScreen() {

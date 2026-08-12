@@ -74,16 +74,16 @@ class HomeScreen extends StatelessWidget {
                     "Purchase".tr,
                     () => ctr.gotoPurchaseScreen(),
                   ),
-                  _card(
-                    Icons.payment,
-                    "Payment".tr,
-                    () => ctr.gotoPaymentScreen(),
-                  ),
-                  _card(
-                    Icons.tune,
-                    "Stock Adjustment".tr,
-                    () => ctr.gotoStockAdjustmentScreen(),
-                  ),
+                  // _card(
+                  //   Icons.payment,
+                  //   "Payment".tr,
+                  //   () => ctr.gotoPaymentScreen(),
+                  // ),
+                  // _card(
+                  //   Icons.tune,
+                  //   "Stock Adjustment".tr,
+                  //   () => ctr.gotoStockAdjustmentScreen(),
+                  // ),
                   
                 ],
               ),
