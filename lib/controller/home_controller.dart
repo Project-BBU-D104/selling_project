@@ -68,4 +68,8 @@ class HomeController extends GetxController {
   void gotoDashboardScreen() {
     Get.toNamed(AppRoute.dashboard);
   }
+
+  void gotoReportScreen() {
+    Get.toNamed(AppRoute.report);
+  }
 }

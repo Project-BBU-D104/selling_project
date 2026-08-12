@@ -19,4 +19,5 @@ class AppRoute {
   static const String setting = '/setting';
   
   static const String dashboard = '/dashboard';
+  static const String report = '/report';
 }

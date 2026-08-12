@@ -6,6 +6,7 @@ import 'package:selling_project/binding/home_binding.dart';
 import 'package:selling_project/binding/payment_binding.dart';
 import 'package:selling_project/binding/product_binding.dart';
 import 'package:selling_project/binding/purchase_binding.dart';
+import 'package:selling_project/binding/report_binding.dart';
 import 'package:selling_project/binding/sale_binding.dart';
 import 'package:selling_project/binding/setting_binding.dart';
 import 'package:selling_project/binding/stock_adjustment_binding.dart';
@@ -20,6 +21,7 @@ import 'package:selling_project/screen/home/home_screen.dart';
 import 'package:selling_project/screen/payment/payment_screen.dart';
 import 'package:selling_project/screen/product/product_screen.dart';
 import 'package:selling_project/screen/purchase/purchase_screen.dart';
+import 'package:selling_project/screen/report/report_screen.dart';
 import 'package:selling_project/screen/sale/review_order_screen.dart';
 import 'package:selling_project/screen/sale/sale_screen.dart';
 import 'package:selling_project/screen/sale/sales_completion_screen.dart';
@@ -111,6 +113,11 @@ class AppScreen {
       name: AppRoute.dashboard,
       page: () => DashboardScreen(),
       binding: DashboardBinding(),
+    ),
+    GetPage(
+      name: AppRoute.report,
+      page: () => ReportScreen(),
+      binding: ReportBinding(),
     ),
   ];
 }

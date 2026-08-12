@@ -90,20 +90,25 @@ class DrawerWidget extends StatelessWidget {
                     "Suppliers".tr,
                     () => ctr.gotoSupplierScreen(),
                   ),
-                  _menu(
-                    Icons.tune_rounded,
-                    "Stock Adjustment".tr,
-                    () => ctr.gotoStockAdjustmentScreen(),
-                  ),
-                  _menu(
-                    Icons.payment_rounded,
-                    "Payments".tr,
-                    () => ctr.gotoPaymentScreen(),
-                  ),
+                  // _menu(
+                  //   Icons.tune_rounded,
+                  //   "Stock Adjustment".tr,
+                  //   () => ctr.gotoStockAdjustmentScreen(),
+                  // ),
+                  // _menu(
+                  //   Icons.payment_rounded,
+                  //   "Payments".tr,
+                  //   () => ctr.gotoPaymentScreen(),
+                  // ),
                   _menu(
                     Icons.person_rounded,
                     "User".tr,
                     () => ctr.gotoUserScreen(),
+                  ),
+                  _menu(
+                    Icons.bar_chart_rounded,
+                    "Report".tr,
+                    () => ctr.gotoReportScreen(),
                   ),
                   _menu(
                     Icons.settings_rounded,
