@@ -79,12 +79,27 @@ class PurchaseController extends GetxController {
     getPurchases();
   }
 
-  // Auto-Select Product ពេល Add រួចចេញពី Dialog
+  String _determineInitialStatus(DateTime? expDeliveryDate) {
+    if (expDeliveryDate == null) return 'Pending';
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final delivery = DateTime(
+      expDeliveryDate.year,
+      expDeliveryDate.month,
+      expDeliveryDate.day,
+    );
+
+    if (today.isAfter(delivery) || today.isAtSameMomentAs(delivery)) {
+      return 'Completed';
+    }
+    return 'Pending';
+  }
+
   void selectProductDirectly(ProductModel product) {
     selectedProduct.value = product;
   }
 
-  // Fetch Purchases from Service
   void getPurchases() {
     loading.value = true;
     service.getPurchases().listen(
@@ -118,7 +133,6 @@ class PurchaseController extends GetxController {
       final query = searchQuery.value.toLowerCase().trim();
       list = list.where((p) {
         final supplier = p.supplierName?.toLowerCase() ?? '';
-        // ✅ Fixed: Added Null-safe checks to avoid void/null method call errors
         final inv = p.invoiceNo?.toLowerCase() ?? '';
         return supplier.contains(query) || inv.contains(query);
       }).toList();
@@ -156,11 +170,9 @@ class PurchaseController extends GetxController {
     }
   }
 
-  // Fetch Items សម្រាប់ដាក់ចូលក្នុង Edit Form
   Future<void> fetchPurchaseItemsForEdit(String purchaseId) async {
     loading.value = true;
     try {
-      // ស្កែនទាញយក Stream ដំបូងមកប្រើ
       final items = await service.getPurchaseItems(purchaseId).first;
       tempItems.assignAll(items);
     } catch (e) {
@@ -179,6 +191,8 @@ class PurchaseController extends GetxController {
 
     double total = tempItems.fold(0.0, (sum, i) => sum + i.totalPrice);
 
+    String calculatedStatus = _determineInitialStatus(expDeliveryDate);
+
     final newPurchase = PurchaseModel(
       supplierId: selectedSupplier.value!.id ?? "",
       supplierName: selectedSupplier.value!.name ?? "",
@@ -186,7 +200,7 @@ class PurchaseController extends GetxController {
       totalAmount: total,
       purchaseDate: refDate,
       expectedDelivery: expDeliveryDate,
-      status: 'Pending',
+      status: calculatedStatus,
     );
 
     try {
@@ -203,11 +217,27 @@ class PurchaseController extends GetxController {
     }
   }
 
-  // Update Purchase Detail & Sync Items
   Future<void> updatePurchase(PurchaseModel purchase) async {
     try {
       loading.value = true;
-      await service.updatePurchase(purchase);
+
+      String updatedStatus = purchase.status ?? 'Pending';
+      if (updatedStatus.toLowerCase() == 'pending') {
+        updatedStatus = _determineInitialStatus(purchase.expectedDelivery);
+      }
+
+      final updatedPurchaseModel = PurchaseModel(
+        id: purchase.id,
+        supplierId: purchase.supplierId,
+        supplierName: purchase.supplierName,
+        invoiceNo: purchase.invoiceNo,
+        totalAmount: purchase.totalAmount,
+        purchaseDate: purchase.purchaseDate,
+        expectedDelivery: purchase.expectedDelivery,
+        status: updatedStatus,
+      );
+
+      await service.updatePurchase(updatedPurchaseModel);
 
       if (purchase.id != null) {
         for (var item in tempItems) {
@@ -216,6 +246,31 @@ class PurchaseController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error updating purchase: $e");
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  Future<void> markAsReceived(PurchaseModel purchase) async {
+    if (purchase.id == null) return;
+
+    try {
+      loading.value = true;
+      final updatedPurchase = PurchaseModel(
+        id: purchase.id,
+        supplierId: purchase.supplierId,
+        supplierName: purchase.supplierName,
+        invoiceNo: purchase.invoiceNo,
+        totalAmount: purchase.totalAmount,
+        purchaseDate: purchase.purchaseDate,
+        expectedDelivery: purchase.expectedDelivery,
+        status: 'Completed',
+      );
+
+      await service.updatePurchase(updatedPurchase);
+      getPurchases(); // Refresh list
+    } catch (e) {
+      debugPrint("Error marking purchase as received: $e");
     } finally {
       loading.value = false;
     }
