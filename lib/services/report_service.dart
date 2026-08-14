@@ -9,7 +9,7 @@ class ReportService {
     try {
       QuerySnapshot snapshot = await _firestore.collection('sale').get();
 
-      print("[Debug] Total Documents fetched from Firestore: ${snapshot.docs.length}");
+      // print("[Debug] Total Documents fetched from Firestore: ${snapshot.docs.length}");
 
       List<SalesTransactionModel> list = [];
 
@@ -23,7 +23,7 @@ class ReportService {
             _extractDateTime(data['date']) ??
             _extractDateTime(data['timestamp']);
 
-        print("📄 Doc ID: ${doc.id} | Parsed Date: $docDate | Keys: ${data.keys.toList()}");
+        // print("Doc ID: ${doc.id} | Parsed Date: $docDate | Keys: ${data.keys.toList()}");
 
         // Filter តាម Date Range
         if (_isDateInFilter(docDate, filter)) {

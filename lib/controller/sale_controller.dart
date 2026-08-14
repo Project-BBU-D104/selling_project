@@ -218,6 +218,9 @@ class SaleController extends GetxController {
     );
   }
 
+  // -------------------------------------------------------------
+  // 🎯 FIX: បន្ថែម costPrice ពេល Add to Cart និង Update Quantity
+  // -------------------------------------------------------------
   void addToCart(ProductModel product) {
     int index = cartItems.indexWhere((item) => item.productId == product.id);
 
@@ -226,13 +229,14 @@ class SaleController extends GetxController {
       (b) => b.id == product.brandId,
     );
     
-    String resolvedBrandName = brandMatch?.name ?? brandMatch?.name ?? 'General Brand';
+    String resolvedBrandName = brandMatch?.name ?? 'General Brand';
     String resolvedBrandId = product.brandId ?? '';
 
     if (index != -1) {
       var existing = cartItems[index];
       int newQty = existing.quantity + 1;
       double unitPrice = existing.unitPrice;
+      double costPrice = existing.costPrice;
 
       cartItems[index] = SaleItemModel(
         id: existing.id,
@@ -242,11 +246,13 @@ class SaleController extends GetxController {
         brandName: existing.brandName ?? resolvedBrandName,
         quantity: newQty,
         unitPrice: unitPrice,
+        costPrice: costPrice,
         totalPrice: unitPrice * newQty,
         imageUrl: existing.imageUrl,
       );
     } else {
       double unitPrice = product.price;
+      double costPrice = product.costPrice;
 
       cartItems.add(
         SaleItemModel(
@@ -256,6 +262,7 @@ class SaleController extends GetxController {
           brandName: resolvedBrandName,
           quantity: 1,
           unitPrice: unitPrice,
+          costPrice: costPrice,
           totalPrice: unitPrice * 1,
           imageUrl: product.imageUrl,
         ),
@@ -320,7 +327,7 @@ class SaleController extends GetxController {
             ? selectedCustomerId.value
             : null,
         customerName: selectedCustomerName.value,
-        userId: currentUserId, // 👈 Uses dynamic currentUserId
+        userId: currentUserId,
         subtotal: totalCartAmount,
         totalAmount: totalCartAmount,
         paymentStatus: "paid",

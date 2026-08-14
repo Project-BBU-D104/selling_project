@@ -61,7 +61,6 @@ class ReportSalesTableWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Row: Invoice No & Total Amount
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -103,8 +102,6 @@ class ReportSalesTableWidget extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Divider(height: 1, thickness: 0.6),
               ),
-
-              // Bottom Row: Date, Qty & Profit Badges
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -126,8 +123,6 @@ class ReportSalesTableWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-
-                  // Qty and Profit Badges
                   Row(
                     children: [
                       // Quantity Badge

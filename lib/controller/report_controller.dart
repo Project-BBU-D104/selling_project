@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:selling_project/models/report/report_detail_model.dart';
 import 'package:selling_project/models/report/report_model.dart';
+import 'package:selling_project/services/pdf_services.dart';
 import 'package:selling_project/services/report_service.dart';
 
 class ReportController extends GetxController {
@@ -22,13 +23,11 @@ class ReportController extends GetxController {
   Future<void> fetchReport() async {
     isLoading.value = true;
     try {
-      // 1. ទាញយក Sales Transactions ដោយផ្អែកលើ Selected Filter
       List<SalesTransactionModel> filteredSales = 
           await _reportService.getSalesData(selectedFilter.value);
 
       transactionsList.value = filteredSales;
 
-      // 2. គណនា Summary (Total Sales, Net Profit, Orders, Items Sold)
       double totalRevenue = 0.0;
       double totalProfit = 0.0;
       int totalQty = 0;
@@ -39,7 +38,6 @@ class ReportController extends GetxController {
         totalQty += item.totalQty;
       }
 
-      // 3. Update Value ទៅកាន់ ReportSummaryModel
       reportSummary.value = ReportSummaryModel(
         totalSales: totalRevenue,
         netProfit: totalProfit,
@@ -47,7 +45,7 @@ class ReportController extends GetxController {
         totalProductsSold: totalQty,
       );
     } catch (e) {
-      print("❌ Error in ReportController: $e");
+      print("Error in ReportController: $e");
       Get.snackbar(
         "Error",
         "Failed to load report data: $e",
@@ -60,7 +58,6 @@ class ReportController extends GetxController {
     }
   }
 
-  // 4. មុខងារផ្លាស់ប្តូរ Filter
   void changeFilter(String newFilter) {
     if (selectedFilter.value != newFilter) {
       selectedFilter.value = newFilter;
@@ -68,8 +65,7 @@ class ReportController extends GetxController {
     }
   }
 
-  // 5. មុខងារ Export PDF
-  void exportPDF() {
+  Future<void> exportPDF() async {
     if (transactionsList.isEmpty) {
       Get.snackbar(
         "Warning",
@@ -81,13 +77,21 @@ class ReportController extends GetxController {
       return;
     }
 
-    Get.snackbar(
-      "Export PDF", 
-      "Generating PDF report for ${selectedFilter.value}...",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue.shade100,
-      colorText: Colors.blue.shade900,
-      icon: const Icon(Icons.picture_as_pdf, color: Colors.blue),
-    );
+    try {
+      await PdfServices.generateAndExportPdf(
+        filterTitle: selectedFilter.value,
+        summary: reportSummary.value,
+        transactions: transactionsList,
+      );
+    } catch (e) {
+      print("Export PDF Error: $e");
+      Get.snackbar(
+        "Export Error",
+        "Failed to generate PDF file: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
   }
 }

@@ -66,7 +66,6 @@ class PrintHelper {
     );
   }
 
-  // ១. បង្កើតទម្រង់ PDF និងព្រីន
   static Future<void> generateAndPrintPdf(SaleModel saleData) async {
     final pdf = pw.Document();
 
@@ -117,7 +116,6 @@ class PrintHelper {
     );
   }
 
-  // ២. ផ្ញើទៅកាន់ Telegram (ຜ່ານ Telegram Bot API)
   static Future<void> shareToTelegram(SaleModel saleData) async {
     try {
       bool success = await TelegramServices.sendSaleInvoice(saleData);
@@ -131,9 +129,7 @@ class PrintHelper {
     }
   }
 
-  // ៣. មុខងារសម្រាប់ Copy ព័ត៌មានវិក្កយបត្រទុកក្នុង Clipboard
   static Future<void> copyInvoiceText(BuildContext context, SaleModel saleData) async {
-    // រៀបចំទម្រង់អត្ថបទវិក្កយបត្រសម្រាប់ Copy
     String invoiceText = "🧾 INVOICE RECEIPT\n"
         "Customer: ${saleData.customerName ?? 'General'}\n"
         "Date: ${DateTime.now().toString().substring(0, 16)}\n"
@@ -148,10 +144,8 @@ class PrintHelper {
     invoiceText += "----------------------------------\n"
         "Total Amount: \$${saleData.totalAmount.toStringAsFixed(2)}";
 
-    // Copy ចូលទៅក្នុង Clipboard
     await Clipboard.setData(ClipboardData(text: invoiceText));
 
-    // បង្ហាញដំណឹង (SnackBar) ថាបាន Copy រួចរាល់
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("បានចម្លង (Copied) វិក្កយបត្រចូល Clipboard រួចរាល់!"),
@@ -159,8 +153,7 @@ class PrintHelper {
       ),
     );
   }
-
-  // ៤. Export ទៅ Excel (CSV)
+  
   static Future<void> exportToExcel(SaleModel saleData) async {
     try {
       String csvData = "Product Name,Quantity,Unit Price,Total\n";
