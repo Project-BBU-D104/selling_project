@@ -1,36 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:selling_project/models/report/report_detail_model.dart';
-import 'package:selling_project/models/report/report_model.dart';
 
 class ReportService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // 1. Fetch Sales Data ជាមួយ Safety Date Parsing & Dynamic Filtering
+  // 1. Fetch Sales Data ពី Collection 'sale'
   Future<List<SalesTransactionModel>> getSalesData(String filter) async {
     try {
-      QuerySnapshot snapshot = await _firestore.collection('sales').get();
+      QuerySnapshot snapshot = await _firestore.collection('sale').get();
+
+      print("[Debug] Total Documents fetched from Firestore: ${snapshot.docs.length}");
 
       List<SalesTransactionModel> list = [];
 
       for (var doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
 
-        // Safe Date Extractor: ឆែកមើលគ្រប់ Field ឈ្មោះ Date ឬ CreatedAt (Timestamp / String / dynamic)
-        DateTime? docDate = _extractDateTime(data['createdAt']) ??
+        DateTime? docDate = _extractDateTime(data['sale_date']) ??
+            _extractDateTime(data['saledate']) ??
+            _extractDateTime(data['createdAt']) ??
+            _extractDateTime(data['created_at']) ??
             _extractDateTime(data['date']) ??
-            _extractDateTime(data['salesDate']) ??
-            _extractDateTime(data['created_at']);
+            _extractDateTime(data['timestamp']);
 
-        // ប្រសិនបើគ្មាន Date សោះ ប្រើ DateTime.now() ជា Fallback
-        docDate ??= DateTime.now();
+        print("📄 Doc ID: ${doc.id} | Parsed Date: $docDate | Keys: ${data.keys.toList()}");
 
-        // Filter តាម Date Range ដែលបានជ្រើសរើស
+        // Filter តាម Date Range
         if (_isDateInFilter(docDate, filter)) {
           list.add(SalesTransactionModel.fromFirestore(doc.id, data));
         }
       }
 
-      // រៀបតាមកាលបរិច្ឆេទថ្មីទៅចាស់ (Descending)
+      print("[Debug] Total items passed filter ('$filter'): ${list.length}");
+
       list.sort((a, b) => b.date.compareTo(a.date));
       return list;
     } catch (e) {
@@ -39,39 +41,7 @@ class ReportService {
     }
   }
 
-  // 2. Fetch Summary Report ដោយផ្ទាល់ (សម្រាប់ Default Fetching)
-  Future<ReportSummaryModel> getSalesReportSummary() async {
-    try {
-      List<SalesTransactionModel> allSales = await getSalesData('This Month');
-
-      double totalSales = 0.0;
-      double totalProfit = 0.0;
-      int totalProducts = 0;
-
-      for (var item in allSales) {
-        totalSales += item.grandTotal;
-        totalProfit += item.profit;
-        totalProducts += item.totalQty;
-      }
-
-      return ReportSummaryModel(
-        totalSales: totalSales,
-        netProfit: totalProfit,
-        totalOrders: allSales.length,
-        totalProductsSold: totalProducts,
-      );
-    } catch (e) {
-      print("Error getting summary: $e");
-      return ReportSummaryModel(
-        totalSales: 0.0,
-        netProfit: 0.0,
-        totalOrders: 0,
-        totalProductsSold: 0,
-      );
-    }
-  }
-
-  // Helper សម្រាប់ទាញយក DateTime សុវត្ថិភាពពី Firestore Field
+  // Helper សម្រាប់ Date Parser
   DateTime? _extractDateTime(dynamic value) {
     if (value == null) return null;
     if (value is Timestamp) {
@@ -84,8 +54,15 @@ class ReportService {
     return null;
   }
 
-  // Helper សម្រាប់ Filter Date
-  bool _isDateInFilter(DateTime date, String filter) {
+  // Helper សម្រាប់ Date Filtering (Safe Filtering Logic)
+  bool _isDateInFilter(DateTime? date, String filter) {
+    // 1. ប្រសិនបើជ្រើសរើស 'All' បង្ហាញ Data ទាំងអស់
+    if (filter == 'All') return true;
+
+    // 2. ប្រសិនបើ Document នោះពុំមាន Field Date/Timestamp ទេ 
+    // ឲ្យវានៅតែលោតបង្ហាញ (ជំនួសឲ្យ return false) ដើម្បីការពារការបាត់បង់ Data
+    if (date == null) return true;
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final checkDate = DateTime(date.year, date.month, date.day);
@@ -93,12 +70,11 @@ class ReportService {
     if (filter == 'Today') {
       return checkDate.isAtSameMomentAs(today);
     } else if (filter == 'This Week') {
-      // គណនាថ្ងៃដើមសប្តាហ៍ (Monday)
-      final mondayOfThisWeek = today.subtract(Duration(days: now.weekday - 1));
-      final sundayOfThisWeek = mondayOfThisWeek.add(const Duration(days: 6));
+      final monday = today.subtract(Duration(days: now.weekday - 1));
+      final sunday = monday.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
       
-      return (checkDate.isAfter(mondayOfThisWeek.subtract(const Duration(days: 1))) &&
-          checkDate.isBefore(sundayOfThisWeek.add(const Duration(days: 1))));
+      return (date.isAfter(monday.subtract(const Duration(seconds: 1))) &&
+          date.isBefore(sunday));
     } else if (filter == 'This Month') {
       return date.year == now.year && date.month == now.month;
     } else if (filter == 'This Year') {

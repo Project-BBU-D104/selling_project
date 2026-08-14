@@ -12,42 +12,171 @@ class ReportSalesTableWidget extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
+    // ១. ករណីគ្មានទិន្នន័យ (Empty State)
     if (transactions.isEmpty) {
-      return const Card(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Center(child: Text("No sales records found")),
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.inbox_rounded, size: 48, color: Colors.grey.shade300),
+            const SizedBox(height: 8),
+            Text(
+              "No sales records found",
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+            ),
+          ],
         ),
       );
     }
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Invoice #', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Qty', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Profit', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Total Amount', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: transactions.map((item) {
-            return DataRow(cells: [
-              DataCell(Text('#${item.invoiceNo}', style: const TextStyle(fontWeight: FontWeight.w600))),
-              DataCell(Text(dateFormat.format(item.date))),
-              DataCell(Text('${item.totalQty}')),
-              DataCell(Text(currencyFormat.format(item.profit), style: const TextStyle(color: Colors.blue))),
-              DataCell(Text(
-                currencyFormat.format(item.grandTotal),
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-              )),
-            ]);
-          }).toList(),
-        ),
-      ),
+    // ២. បង្ហាញ List នៃ Transactions ប្រកបដោយ Clean & Modern UI
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: transactions.length,
+      itemBuilder: (context, index) {
+        final item = transactions[index];
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Row: Invoice No & Total Amount
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.receipt_long_rounded,
+                          size: 18,
+                          color: Color(0xFF003B6D),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "#${item.invoiceNo}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF0F172A),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    currencyFormat.format(item.grandTotal),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Color(0xFF10B981), // Green Color
+                    ),
+                  ),
+                ],
+              ),
+              
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Divider(height: 1, thickness: 0.6),
+              ),
+
+              // Bottom Row: Date, Qty & Profit Badges
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Date Section
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 13,
+                        color: Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        dateFormat.format(item.date),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Qty and Profit Badges
+                  Row(
+                    children: [
+                      // Quantity Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          "Qty: ${item.totalQty}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // Profit Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          "Profit: ${currencyFormat.format(item.profit)}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
