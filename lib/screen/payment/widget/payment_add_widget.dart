@@ -16,17 +16,30 @@ class PaymentAddWidget extends StatefulWidget {
 class _PaymentAddWidgetState extends State<PaymentAddWidget> {
   final _formKey = GlobalKey<FormState>();
 
-  final paymentCtr = Get.find<PaymentController>();
-  final saleCtr = Get.find<SaleController>();
+  late final PaymentController paymentCtr;
+  late final SaleController saleCtr;
 
   final amountCtr = TextEditingController();
   final refCtr = TextEditingController();
   final noteCtr = TextEditingController();
   final customerNameCtr = TextEditingController();
 
+  String? selectedSaleId;
   SaleModel? selectedSale;
   String selectedMethod = 'Cash Riel';
   DateTime selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    paymentCtr = Get.isRegistered<PaymentController>()
+        ? Get.find<PaymentController>()
+        : Get.put(PaymentController());
+
+    saleCtr = Get.isRegistered<SaleController>()
+        ? Get.find<SaleController>()
+        : Get.put(SaleController());
+  }
 
   @override
   void dispose() {
@@ -61,32 +74,38 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Invoice Number Dropdown
                 _buildLabel("Invoice Number"),
                 Obx(() {
                   final salesList = saleCtr.sales;
 
-                  return DropdownButtonFormField<SaleModel>(
-                    isExpanded: true, // Fix: ការពារ Overflow ដោយបង្ខំឱ្យអត្ថបទរៀបតាមទំហំដែលមាន
+                  final currentSaleExists = salesList.any((s) => s.id == selectedSaleId);
+                  final dropdownValue = currentSaleExists ? selectedSaleId : null;
+
+                  return DropdownButtonFormField<String>(
+                    isExpanded: true,
                     decoration: _inputDecoration("Select Invoice"),
-                    value: selectedSale,
+                    value: dropdownValue,
                     validator: (val) => val == null ? "Please select an invoice" : null,
                     items: salesList.map((sale) {
-                      return DropdownMenuItem<SaleModel>(
-                        value: sale,
+                      return DropdownMenuItem<String>(
+                        value: sale.id,
                         child: Text(
                           "${sale.invoiceNo ?? sale.id} - ${sale.customerName ?? 'Guest'}",
-                          overflow: TextOverflow.ellipsis, // Fix: កាត់ឈ្មោះវែងៗជារូបរាង (...)
+                          overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
                       );
                     }).toList(),
-                    onChanged: (val) {
+                    onChanged: (saleId) {
+                      if (saleId == null) return;
+                      final sale = salesList.firstWhereOrNull((s) => s.id == saleId);
+                      
                       setState(() {
-                        selectedSale = val;
-                        if (val != null) {
-                          customerNameCtr.text = val.customerName ?? 'Guest';
-                          amountCtr.text = (val.totalAmount ?? 0.0).toStringAsFixed(2);
+                        selectedSaleId = saleId;
+                        selectedSale = sale;
+                        if (sale != null) {
+                          customerNameCtr.text = sale.customerName ?? 'Guest';
+                          amountCtr.text = (sale.totalAmount ?? 0.0).toStringAsFixed(2);
                         }
                       });
                     },
@@ -94,7 +113,6 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 }),
                 const SizedBox(height: 16),
 
-                // 2. Customer Name
                 _buildLabel("Customer Name"),
                 TextFormField(
                   controller: customerNameCtr,
@@ -106,7 +124,6 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 ),
                 const SizedBox(height: 16),
 
-                // 3. Amount to Pay
                 _buildLabel("Amount (\$USD)"),
                 TextFormField(
                   controller: amountCtr,
@@ -122,10 +139,9 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                 ),
                 const SizedBox(height: 16),
 
-                // 4. Payment Method Dropdown
                 _buildLabel("Payment Method"),
                 DropdownButtonFormField<String>(
-                  isExpanded: true, // Fix: បន្ថែម isExpanded ដើម្បីសុវត្ថិភាពពី Overflow
+                  isExpanded: true,
                   value: selectedMethod,
                   decoration: _inputDecoration("Select Method"),
                   items: ["Cash Riel", "Cash USD", "ABA PAY", "Bank Transfer", "Credit Card"]
@@ -211,7 +227,7 @@ class _PaymentAddWidgetState extends State<PaymentAddWidget> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             final newPayment = PaymentModel(
-                              saleId: selectedSale?.id ?? '',
+                              saleId: selectedSale?.id ?? selectedSaleId ?? '',
                               invoiceNo: selectedSale?.invoiceNo,
                               customerName: customerNameCtr.text,
                               paymentMethod: selectedMethod,
