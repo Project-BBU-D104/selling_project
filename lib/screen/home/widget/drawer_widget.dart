@@ -197,10 +197,7 @@ class DrawerWidget extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      onTap: () {
-        Get.back(); // បិទ Drawer ស្វ័យប្រវត្តិពេលចុច Menu
-        onTap();
-      },
+      onTap: onTap,
     );
   }
 }
