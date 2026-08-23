@@ -4,7 +4,6 @@ import 'package:selling_project/models/report/report_detail_model.dart';
 class ReportService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // 1. Fetch Sales Data ពី Collection 'sale'
   Future<List<SalesTransactionModel>> getSalesData(String filter) async {
     try {
       QuerySnapshot snapshot = await _firestore.collection('sale').get();
@@ -41,7 +40,6 @@ class ReportService {
     }
   }
 
-  // Helper សម្រាប់ Date Parser
   DateTime? _extractDateTime(dynamic value) {
     if (value == null) return null;
     if (value is Timestamp) {
@@ -54,13 +52,9 @@ class ReportService {
     return null;
   }
 
-  // Helper សម្រាប់ Date Filtering (Safe Filtering Logic)
   bool _isDateInFilter(DateTime? date, String filter) {
-    // 1. ប្រសិនបើជ្រើសរើស 'All' បង្ហាញ Data ទាំងអស់
     if (filter == 'All') return true;
 
-    // 2. ប្រសិនបើ Document នោះពុំមាន Field Date/Timestamp ទេ 
-    // ឲ្យវានៅតែលោតបង្ហាញ (ជំនួសឲ្យ return false) ដើម្បីការពារការបាត់បង់ Data
     if (date == null) return true;
 
     final now = DateTime.now();

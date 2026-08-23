@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:selling_project/models/dashboard/dashboard_kpi_model.dart';
 
@@ -6,11 +7,15 @@ class DashboardService {
 
   static const int kDefaultLowStockThreshold = 5;
 
-  // 🔹 Fetch KPI Metrics Data
+  //Fetch KPI Metrics Data
   Future<DashboardKpiModel> fetchDashboardKpi() async {
     try {
-      // 1. Total Active Products
-      final productsSnap = await _firestore.collection('products').get();
+      final GetOptions options = Platform.isWindows 
+          ? const GetOptions(source: Source.serverAndCache) 
+          : const GetOptions();
+
+      //Total Active Products
+      final productsSnap = await _firestore.collection('products').get(options);
       final activeProducts = productsSnap.docs.where((doc) {
         final data = doc.data();
         return data['is_deleted'] != true;
@@ -18,8 +23,8 @@ class DashboardService {
 
       final totalProducts = activeProducts.length;
 
-      // 2. Total Sales (អានពី collection 'sale')
-      final salesSnap = await _firestore.collection('sale').get();
+      //Total Sales
+      final salesSnap = await _firestore.collection('sale').get(options);
       double totalSales = 0.0;
       for (var doc in salesSnap.docs) {
         final data = doc.data();
@@ -27,8 +32,8 @@ class DashboardService {
         totalSales += amount.toDouble();
       }
 
-      // 3. Total Purchases
-      final purchasesSnap = await _firestore.collection('purchases').get();
+      //Total Purchases
+      final purchasesSnap = await _firestore.collection('purchases').get(options);
       double totalPurchases = 0.0;
       for (var doc in purchasesSnap.docs) {
         final data = doc.data();
@@ -36,15 +41,27 @@ class DashboardService {
         totalPurchases += amount.toDouble();
       }
 
-      // 4. Total Customers Count
-      final customersSnap = await _firestore.collection('customers').count().get();
-      final totalCustomers = customersSnap.count ?? 0;
+      //Total Customers Count
+      int totalCustomers = 0;
+      if (Platform.isWindows) {
+        final customersSnap = await _firestore.collection('customers').get(options);
+        totalCustomers = customersSnap.docs.length;
+      } else {
+        final customersSnap = await _firestore.collection('customers').count().get();
+        totalCustomers = customersSnap.count ?? 0;
+      }
 
-      // 5. Total Suppliers Count
-      final suppliersSnap = await _firestore.collection('suppliers').count().get();
-      final totalSuppliers = suppliersSnap.count ?? 0;
+      //Total Suppliers Count
+      int totalSuppliers = 0;
+      if (Platform.isWindows) {
+        final suppliersSnap = await _firestore.collection('suppliers').get(options);
+        totalSuppliers = suppliersSnap.docs.length;
+      } else {
+        final suppliersSnap = await _firestore.collection('suppliers').count().get();
+        totalSuppliers = suppliersSnap.count ?? 0;
+      }
 
-      // 6. Low Stock Alerts
+      //Low Stock Alerts
       int lowStockAlerts = 0;
       for (var doc in activeProducts) {
         final data = doc.data();
@@ -66,14 +83,25 @@ class DashboardService {
       );
     } catch (e) {
       print("Error in fetchDashboardKpi: $e");
-      throw Exception('Failed to load Firestore KPI data: $e');
+      return DashboardKpiModel(
+        totalProducts: 0,
+        totalSales: 0.0,
+        totalPurchases: 0.0,
+        totalCustomers: 0,
+        totalSuppliers: 0,
+        lowStockAlerts: 0,
+      );
     }
   }
 
-  // 🔹 Fetch Monthly Revenue Chart
+  //Fetch Monthly Revenue Chart
   Future<List<double>> fetchMonthlyRevenueChart({required int year}) async {
     try {
-      final salesSnap = await _firestore.collection('sale').get();
+      final GetOptions options = Platform.isWindows 
+          ? const GetOptions(source: Source.serverAndCache) 
+          : const GetOptions();
+
+      final salesSnap = await _firestore.collection('sale').get(options);
       List<double> monthlyTotals = List.filled(12, 0.0);
 
       for (var doc in salesSnap.docs) {
@@ -101,24 +129,42 @@ class DashboardService {
     }
   }
 
-  // 🔹 Fetch Top Selling Products (អាន Subcollection 'sale_items' និង Array 'items')
+  //Fetch Top Selling Products (Filtered by Week, Month, Year)
   Future<List<Map<String, dynamic>>> fetchTopSellingProducts({required String filter}) async {
     try {
-      final salesSnap = await _firestore.collection('sale').get();
+      final GetOptions options = Platform.isWindows 
+          ? const GetOptions(source: Source.serverAndCache) 
+          : const GetOptions();
+
+      final salesSnap = await _firestore.collection('sale').get(options);
 
       if (salesSnap.docs.isEmpty) {
         return [];
       }
 
       Map<String, Map<String, dynamic>> productSummary = {};
+      final DateTime now = DateTime.now();
 
       for (var saleDoc in salesSnap.docs) {
         final saleData = saleDoc.data();
-        final String saleDateStr = (saleData['sale_date'] is Timestamp)
-            ? (saleData['sale_date'] as Timestamp).toDate().toIso8601String().split('T').first
-            : (saleData['sale_date']?.toString() ?? 'N/A');
+        final dynamic rawDate = saleData['sale_date'] ?? saleData['created_at'];
 
-        // ១. ពិនិត្យមើល Array Field 'items' ជាមុនសិន
+        DateTime? saleDate;
+        if (rawDate is Timestamp) {
+          saleDate = rawDate.toDate();
+        } else if (rawDate is String) {
+          saleDate = DateTime.tryParse(rawDate);
+        }
+        if (saleDate != null) {
+          if (!_isDateMatchFilter(saleDate, now, filter)) {
+            continue;
+          }
+        }
+
+        final String saleDateStr = saleDate != null 
+            ? saleDate.toIso8601String().split('T').first 
+            : 'N/A';
+
         final List dynamicItems = saleData['items'] ?? [];
         if (dynamicItems.isNotEmpty) {
           for (var item in dynamicItems) {
@@ -129,8 +175,7 @@ class DashboardService {
             _aggregateProduct(productSummary, productName, qty, totalPrice, saleDateStr);
           }
         } else {
-          // ២. បើគ្មានក្នុង Array ទេ អានចេញពី Subcollection 'sale_items'
-          final itemsSnap = await saleDoc.reference.collection('sale_items').get();
+          final itemsSnap = await saleDoc.reference.collection('sale_items').get(options);
           for (var itemDoc in itemsSnap.docs) {
             final item = itemDoc.data();
             final String productName = item['product_name'] ?? 'Unknown';
@@ -152,7 +197,22 @@ class DashboardService {
     }
   }
 
-  // Helper function សម្រាប់បូកសរុបទិន្នន័យ Product
+  bool _isDateMatchFilter(DateTime saleDate, DateTime now, String filter) {
+    final String cleanFilter = filter.trim().toLowerCase();
+
+    if (cleanFilter == 'week') {
+      final DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      final DateTime beginningOfWeek = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+      return saleDate.isAfter(beginningOfWeek) || saleDate.isAtSameMomentAs(beginningOfWeek);
+    } else if (cleanFilter == 'month') {
+      return saleDate.year == now.year && saleDate.month == now.month;
+    } else if (cleanFilter == 'year') {
+      return saleDate.year == now.year;
+    }
+
+    return true;
+  }
+
   void _aggregateProduct(
     Map<String, Map<String, dynamic>> summary,
     String productName,

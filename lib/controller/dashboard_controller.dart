@@ -6,8 +6,8 @@ class DashboardController extends GetxController {
   final DashboardService _service = DashboardService();
 
   var isLoading = true.obs;
-  var isTopProductsLoading = false.obs; // Loading ដាច់ដោយឡែកសម្រាប់ Filter
-  var selectedFilter = 'Year'.obs;
+  var isTopProductsLoading = false.obs;
+  var selectedFilter = 'Month'.obs;
 
   // Rx Variables សម្រាប់កាន់ Data
   var kpiData = Rxn<DashboardKpiModel>();
@@ -65,7 +65,7 @@ class DashboardController extends GetxController {
 
   // 🔹 ពេលអ្នកប្រើប្រាស់ចុចដូរ Filter (Week / Month / Year)
   Future<void> changeFilter(String filter) async {
-    if (selectedFilter.value == filter) return;
+    if (selectedFilter.value == filter && topProducts.isNotEmpty) return;
 
     try {
       selectedFilter.value = filter;
@@ -74,7 +74,7 @@ class DashboardController extends GetxController {
       final result = await _service.fetchTopSellingProducts(filter: filter);
       
       final productsList = result
-          .map((e) => Map<String, dynamic>.from(e as Map))
+          .map((e) => Map<String, dynamic>.from(e))
           .toList();
           
       topProducts.assignAll(productsList);
@@ -87,5 +87,10 @@ class DashboardController extends GetxController {
     } finally {
       isTopProductsLoading(false);
     }
+  }
+
+  // 🔹 Helper សម្រាប់ Refresh Data ឡើងវិញ (ឧទាហរណ៍៖ Pull to Refresh)
+  Future<void> refreshDashboard() async {
+    await fetchAllDashboardData();
   }
 }

@@ -103,7 +103,7 @@ class StorageService implements IStorageService {
     return {};
   }
 
-  // 🔹 Implementation សម្រាប់ Upload រូបភាពទៅ Supabase
+  // Upload រូបភាពទៅ Supabase
   @override
   Future<String?> uploadImage(File file, {String bucketName = 'user-images'}) async {
     try {
@@ -116,7 +116,7 @@ class StorageService implements IStorageService {
       final String publicUrl = _supabase.storage.from(bucketName).getPublicUrl(fileName);
       return publicUrl;
     } catch (e) {
-      print("❌ Error uploading image to Supabase: $e");
+      print("Error uploading image to Supabase: $e");
       rethrow;
     }
   }

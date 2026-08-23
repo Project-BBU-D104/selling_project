@@ -13,30 +13,36 @@ class ProductDetailScreen extends StatelessWidget {
     if (brandId == null || brandId.trim().isEmpty) {
       return 'N/A';
     }
-    if (Get.isRegistered<BrandController>()) {
-      final brandCtrl = Get.find<BrandController>();
-      final brand = brandCtrl.brands.firstWhereOrNull(
-        (b) => b.id == brandId,
-      );
-      if (brand != null && brand.name.isNotEmpty) {
-        return brand.name;
-      }
-    }
-    return brandId;
+    final brandCtrl = Get.isRegistered<BrandController>()
+        ? Get.find<BrandController>()
+        : Get.put(BrandController());
+
+    final brand = brandCtrl.brands.firstWhereOrNull(
+      (b) => b.id == brandId,
+    );
+    return (brand != null && brand.name.isNotEmpty) ? brand.name : brandId;
   }
+
   String _getSupplierName(String? supplierId) {
     if (supplierId == null || supplierId.trim().isEmpty) {
       return 'N/A';
     }
-    if (Get.isRegistered<SupplierController>()) {
-      final supplierCtrl = Get.find<SupplierController>();
-      final supplier = supplierCtrl.suppliers.firstWhereOrNull(
-        (sup) => sup.id == supplierId,
-      );
-      if (supplier != null && supplier.name.isNotEmpty) {
+    final supplierCtrl = Get.isRegistered<SupplierController>()
+        ? Get.find<SupplierController>()
+        : Get.put(SupplierController());
+
+    final supplier = supplierCtrl.suppliers.firstWhereOrNull(
+      (sup) => sup.id == supplierId,
+    );
+
+    if (supplier != null) {
+      if (supplier.companyName != null && supplier.companyName!.isNotEmpty) {
+        return supplier.companyName!;
+      } else if (supplier.name.isNotEmpty) {
         return supplier.name;
       }
     }
+    
     return supplierId;
   }
 
@@ -45,166 +51,168 @@ class ProductDetailScreen extends StatelessWidget {
     final bool isOutOfStock = product.quantity == 0;
     final bool isLowStock = product.quantity <= 5 && !isOutOfStock;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Product Detail',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+    return Obx(() {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Get.back(),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.black, size: 28),
-            onPressed: () {},
+          title: const Text(
+            'Product Detail',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 280,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-              ),
-              child: product.image != null && product.image!.isNotEmpty
-                  ? Image.network(
-                      product.image!,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Icon(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.account_circle, color: Colors.black, size: 28),
+              onPressed: () {},
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 280,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: product.image != null && product.image!.isNotEmpty
+                    ? Image.network(
+                        product.image!,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.laptop_mac_outlined,
+                          size: 80,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : const Icon(
                         Icons.laptop_mac_outlined,
                         size: 80,
                         color: Colors.grey,
                       ),
-                    )
-                  : const Icon(
-                      Icons.laptop_mac_outlined,
-                      size: 80,
-                      color: Colors.grey,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.productName,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        _buildStockBadge(isOutOfStock, isLowStock),
+                      ],
                     ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          product.productName,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          "\$${product.salePrice.toStringAsFixed(2)}",
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Color(0xFF0284C7),
                           ),
                         ),
-                      ),
-                      _buildStockBadge(isOutOfStock, isLowStock),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(
-                        "\$${product.salePrice.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0284C7),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "Cost Price: \$${product.costPrice!.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade500,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          icon: Icons.category_outlined,
-                          title: 'Brand',
-                          value: _getBrandName(product.brandId),
-                        ),
-                        const Divider(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.inventory_2_outlined,
-                          title: 'Available Quantity',
-                          value: '${product.quantity} Units',
-                        ),
-                        const Divider(height: 24),
-                        _buildDetailRow(
-                          icon: Icons.local_shipping_outlined,
-                          title: 'Supplier',
-                          value: _getSupplierName(product.supplierId),
+                        const SizedBox(width: 12),
+                        Text(
+                          "Cost Price: \$${product.costPrice!.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                            decoration: TextDecoration.lineThrough,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Text(
-                      (product.description != null && product.description!.trim().isNotEmpty)
-                          ? product.description!
-                          : 'No description provided.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                        height: 1.4,
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildDetailRow(
+                            icon: Icons.category_outlined,
+                            title: 'Brand',
+                            value: _getBrandName(product.brandId),
+                          ),
+                          const Divider(height: 24),
+                          _buildDetailRow(
+                            icon: Icons.inventory_2_outlined,
+                            title: 'Available Quantity',
+                            value: '${product.quantity} Units',
+                          ),
+                          const Divider(height: 24),
+                          _buildDetailRow(
+                            icon: Icons.local_shipping_outlined,
+                            title: 'Supplier',
+                            value: _getSupplierName(product.supplierId),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Description',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Text(
+                        (product.description != null &&
+                                product.description!.trim().isNotEmpty)
+                            ? product.description!
+                            : 'No description provided.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildDetailRow({
